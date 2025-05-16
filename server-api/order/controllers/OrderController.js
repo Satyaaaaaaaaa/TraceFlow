@@ -1,4 +1,4 @@
-const { User, Order, Product, OrderItem } = require('../../common/models/associations');
+const { Cart, CartItem, Order, Product, OrderItem } = require('../../common/models/associations');
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -41,6 +41,13 @@ module.exports = {
                 return OrderItem.create({ orderID, productID, quantity });
             }));
 
+            const cart = await Cart.findOne({ where: { userId: userID } });
+            if (cart) {
+                // Delete all cart items that belong to the found cart
+                await CartItem.destroy({ where: { cartID: cart.id } });
+                console.log("Cart cleared successfully");
+            }
+
             return res.status(201).json({
                 message: "Order created successfully",
                 order: order,
@@ -65,7 +72,11 @@ module.exports = {
         
         try {
             const orders = await Order.findAll({
+<<<<<<< HEAD
                 where : {userID},
+=======
+                where:{userID},
+>>>>>>> 94acc1592828dc7409a77cbc67cd65a7eb4cafd1
                 include: [
                     {
                         model: OrderItem,

@@ -13,12 +13,12 @@ const PORT = port || 3000;
 // Route Imports
 const AuthorizationRoutes = require("./authorization/routes");
 const UserRoutes = require("./users/routes");
+const AddressRoutes = require("./address/routes");
 const ProductRoutes = require("./products/routes");
 const UploadImageRoutes = require("./common/images/UploadImage");
 const OrderRoutes = require("./order/routes");
 const CartRoutes = require("./cart/routes");
 const { Cart } = require("./common/models/Cart");
-const AddressRoutes = require("./address/routes");
 // const traceflowRoutes = require("./traceflowRouters/routes");
 
 app.use(morgan("tiny"));
@@ -40,11 +40,11 @@ sequelize
     // Attaching the Authentication and User Routes to the app
     app.use("/", AuthorizationRoutes);
     app.use("/user", UserRoutes);
+    app.use("/address", AddressRoutes)
     app.use("/product", ProductRoutes);
     app.use("/upload/image", UploadImageRoutes);
     app.use("/order", OrderRoutes);
     app.use("/cart", CartRoutes)
-    app.use("/address", AddressRoutes)
     // app.use("/traceflow", traceflowRoutes)
 
     app.listen(PORT, '127.0.0.1', () => {

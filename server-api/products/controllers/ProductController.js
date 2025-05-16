@@ -1,28 +1,40 @@
 const { initialise, createProduct, findProduct, updateProduct, findAllProducts, deleteProduct } = require("../../common/models/Product");
+const { findUser } = require("../../common/models/User");
 const { findAllCategories } = require("../../common/models/Category");
-
+const jwt = require("jsonwebtoken");
+const jwtSecret = process.env.JWT_SECRET;
 
 module.exports = {
     createProduct: async (req, res) => {
         const { name, description, price, image, categoryIds } = req.body;
         const priceUnit = req.body.priceUnit || "inr";
+
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, jwtSecret);
+
+        const { userId } = decoded; // User ID from JWT
         try {
+            // Create the product
             const product = await createProduct({ name, description, image, price, priceUnit });
 
-            if (categoryIds && categoryIds.length > 0) {
-                console.log("ok")
-                const categories = await findAllCategories({ id: categoryIds });
-                console.log(categories)
-                await product.addCategories(categories);
-                const productWithCategories = await findProduct(product.id, { include: categories});
-                console.log(this.Category)
+            // Associate the product with the user via the join table 'UserProduct'
+            const user = await findUser({ id: userId });
+            if (!user) {
+                throw new Error("User not found");
+            }
+            await user.addProduct(product);
 
+            // If category IDs are provided, handle the category associations
+            if (categoryIds && categoryIds.length > 0) {
+                const categories = await findAllCategories({ id: categoryIds });
+                await product.addCategories(categories);
+                const productWithCategories = await findProduct(product.id, { include: categories });
                 return res.status(201).json({
                     status: true,
                     data: productWithCategories.toJSON()
                 });
             } else {
-                console.log("NO Categories");
                 return res.status(201).json({
                     status: true,
                     data: product.toJSON()
