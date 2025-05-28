@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 
-const UpdateProductModal = ({ show, onHide, productId, onProductUpdated }) => {
+const UpdateProductModal = ({ show, onHide, productID, onProductUpdated }) => {
   const [categories, setCategories] = useState([]);
   const [productData, setProductData] = useState({
     name: '',
@@ -29,9 +29,9 @@ const UpdateProductModal = ({ show, onHide, productId, onProductUpdated }) => {
     };
 
     const fetchProductDetails = async () => {
-      if (productId) {
+      if (productID) {
         try {
-          const response = await axios.get(`/product/${productId}`);
+          const response = await axios.get(`/product/${productID}`);
           const product = response.data;
           setProductData({
             name: product.name,
@@ -49,7 +49,7 @@ const UpdateProductModal = ({ show, onHide, productId, onProductUpdated }) => {
 
     fetchCategories();
     fetchProductDetails();
-  }, [productId]);
+  }, [productID]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -113,7 +113,7 @@ const UpdateProductModal = ({ show, onHide, productId, onProductUpdated }) => {
         categoryIds: productData.categoryIds
       };
 
-      await axios.put(`/product/${productId}`, payload, {
+      await axios.put(`/product/${productID}`, payload, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

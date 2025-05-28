@@ -17,7 +17,7 @@ import OrderConfirmation from "./components/Orders/components/OrderConfirmation"
 import MyOrders from "./components/Orders/components/MyOrders";
 import ProductDetails from "./components/Products/ProductDetails";
 import {jwtDecode} from "jwt-decode"; // Fix import
-
+import AddAddress from "./components/Address/AddAddress";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -103,7 +103,8 @@ function App() {
             <Route path="/order" element={<Order />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/my-orders" element={<MyOrders userID={userInfo?.id} />} />
-            <Route path="/product/:productId" element={<ProductDetails />} />
+            <Route path="/product/:productID" element={<ProductDetails />} />
+            <Route path="/add-address" element={<AddAddress />} />
           </Routes>
         </div>
         <ProfileDrawer

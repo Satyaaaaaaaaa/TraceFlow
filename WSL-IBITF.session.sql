@@ -42,3 +42,14 @@ SELECT JSON_ARRAYAGG(
     )
 ) AS json_result
 FROM Products;
+
+SHOW tables;
+Drop Table addresses;
+Drop DATABASE traceflow;
+CREATE DATABASE traceflow;
+DROP TABLE carts;
+DROP TABLE cart_items;
+UPDATE users 
+SET role = 'seller' 
+WHERE role = 'user';
+USE traceflow

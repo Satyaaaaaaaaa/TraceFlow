@@ -37,4 +37,8 @@ router.delete(
     OrderController.deleteOrder
 );
 
+router.get('/seller-orders', 
+    OrderController.getOrdersForSeller
+);
+
 module.exports = router;

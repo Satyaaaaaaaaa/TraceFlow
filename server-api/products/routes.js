@@ -26,6 +26,12 @@ router.get(
     ProductController.getProduct
 )
 
+// New route to get products by the authenticated user
+router.get(
+    "/user/products",
+    isAuthenticatedMiddleware.check,
+    ProductController.getProductsByUserId
+)
 router.post(
     "/",
     isAuthenticatedMiddleware.check,

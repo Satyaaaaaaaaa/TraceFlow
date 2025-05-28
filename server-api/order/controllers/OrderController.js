@@ -1,4 +1,4 @@
-const { Cart, CartItem, Order, Product, OrderItem } = require('../../common/models/associations');
+const { Cart, CartItem, Order, Product, OrderItem ,User } = require('../../common/models/associations');
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -19,47 +19,60 @@ module.exports = {
     //     }
     // },
 
-    createOrder: async (req, res) => {
+createOrder: async (req, res) => {
     const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ message: "Authorization header missing" });
+
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, jwtSecret);
+    let decoded;
+    try {
+        decoded = jwt.verify(token, jwtSecret);
+    } catch (err) {
+        return res.status(401).json({ message: "Invalid or expired token" });
+    }
 
-    const { userId } = decoded; // User ID from JWT
-    const userID = userId;
-    console.log("User ID:", userID)
-        try {
-            console.log("Creating Order!")
-            const {products, totalAmount, status, addressID} = req.body;
-            const order = await Order.create({userID, totalAmount, status, addressID});
-            console.log("Order Created!, Product ID: ", products)
-            const orderID = order.id;
-            console.log(orderID)
+    const userID = decoded.userId;
+    console.log("User ID:", userID);
+    console.log("Request Body:", req.body);
 
-            const orderItems = await Promise.all(products.map(async product => {
-                const { productID, quantity } = product;
-                console.log(productID);
-                return OrderItem.create({ orderID, productID, quantity });
-            }));
+    const { products, totalAmount, status, addressID } = req.body;
 
-            const cart = await Cart.findOne({ where: { userId: userID } });
-            if (cart) {
-                // Delete all cart items that belong to the found cart
-                await CartItem.destroy({ where: { cartID: cart.id } });
-                console.log("Cart cleared successfully");
-            }
+    if (!products || !Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({ message: "Invalid or missing 'products' array" });
+    }
+    if (!totalAmount || !status || !addressID) {
+        return res.status(400).json({ message: "Missing one of: totalAmount, status, addressID" });
+    }
 
-            return res.status(201).json({
-                message: "Order created successfully",
-                order: order,
-                orderItems: orderItems
-            })
-        } catch(error) {
-            return res.status(400).json({
-                message: "An errored occured while creating an order",
-                errorMessage: error
-            })
+    try {
+        const order = await Order.create({ userID, totalAmount, status, addressID });
+        const orderID = order.id;
+
+        const orderItems = await Promise.all(products.map(async (product) => {
+            const { productID, quantity } = product;
+            return OrderItem.create({ orderID, productID, quantity });
+        }));
+
+        const cart = await Cart.findOne({ where: { userId: userID } });
+        if (cart) {
+            await CartItem.destroy({ where: { cartID: cart.id } });
+            console.log("Cart cleared successfully");
         }
-    },
+
+        return res.status(201).json({
+            message: "Order created successfully",
+            order: order,
+            orderItems: orderItems
+        });
+    } catch (error) {
+        console.error("Order creation failed:", error);
+        return res.status(400).json({
+            message: "An error occurred while creating an order",
+            errorMessage: error.message,
+            stack: error.stack
+        });
+    }
+},
 
     getOrders: async (req, res) => {
         const authHeader = req.headers.authorization;
@@ -72,10 +85,11 @@ module.exports = {
         
         try {
             const orders = await Order.findAll({
-                where:{userID},
+                where : {userID},
                 include: [
                     {
                         model: OrderItem,
+                        
                         include: [{
                             model: Product,
                             attributes: ['id', 'name', 'image', 'price']
@@ -168,5 +182,62 @@ module.exports = {
                 error: error.message
             });
         }
+    },
+     getOrdersForSeller: async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ status: false, error: "Authorization header missing" });
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, jwtSecret);
+        const sellerId = decoded.userId;
+
+        // Find products for seller via UserProduct association
+        const sellerProducts = await Product.findAll({
+            include: [{
+                model: User,
+                where: { id: sellerId },
+                attributes: []
+            }],
+            attributes: ['id']
+        });
+
+        const productIds = sellerProducts.map(p => p.id);
+        if (productIds.length === 0) {
+            return res.status(200).json({ status: true, data: [], message: "You haven't added any products yet." });
+        }
+
+        const orderItems = await OrderItem.findAll({
+            where: { productID: productIds },
+            include: [
+                {
+                    model: Order,
+                    include: [{ model: User, attributes: ['id', 'username', 'email'] }]
+                },
+                {
+                    model: Product,
+                    attributes: ['id', 'name', 'price']
+                }
+            ]
+        });
+
+        const groupedOrders = {};
+        orderItems.forEach(item => {
+            const orderId = item.orderID;
+            if (!groupedOrders[orderId]) {
+                groupedOrders[orderId] = {
+                    orderID: orderId,
+                    buyer: item.Order.User,
+                    items: []
+                };
+            }
+            groupedOrders[orderId].items.push({ product: item.Product, quantity: item.quantity });
+        });
+
+        return res.status(200).json({ status: true, data: Object.values(groupedOrders) });
+
+    } catch (error) {
+        return res.status(400).json({ status: false, error: error.message });
     }
+}
+
 };

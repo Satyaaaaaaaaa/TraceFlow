@@ -124,27 +124,34 @@ module.exports = {
     },
     
     getProductsByUserId: async (req, res) => {
-        const authHeader = req.headers.authorization;
-        console.log(authHeader)
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, jwtSecret);  
-        // var userId = decoded.userId
-        // console.log(userId)
-    
-        const { userId } = decoded;
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, jwtSecret);
+    const { userId } = decoded;
 
-        const filters  = {userId: userId}; // TODO : bridge table needed
-        try {
-            const products = await findAllProducts(filters);
-            return res.status(200).json({
-                status: true,
-                data: products.map((product) => product.toJSON())
-            });
-        } catch (error) {
-            return res.status(400).json({
+    try {
+        const user = await findUser({ id: userId });
+        if (!user) {
+            return res.status(404).json({
                 status: false,
-                error: error.message
+                error: "User not found"
             });
-        }   
+        }
+
+        const products = await user.getProducts({
+            include: ['Categories'] // include categories if you want
+        });
+
+        return res.status(200).json({
+            status: true,
+            data: products.map((product) => product.toJSON())
+        });
+    } catch (error) {
+        return res.status(400).json({
+            status: false,
+            error: error.message
+        });
     }
+}
+
 };

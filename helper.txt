@@ -12,11 +12,11 @@
 // create table
 CREATE TABLE ProductCategory (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    productId INT,
+    productID INT,
     categoryId INT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (productID) REFERENCES products(id) ON DELETE CASCADE,
     FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE CASCADE
 );
 

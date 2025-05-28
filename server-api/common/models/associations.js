@@ -63,6 +63,7 @@
 // module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address };
 
 
+// associations.js
 const { User } = require('./User');
 const { Order } = require('./Order');
 const { Address } = require("./Address");
@@ -74,56 +75,32 @@ const { CartItem } = require("./Cart");
 
 const sequelize = require("sequelize");
 
-console.log("User: ", User);       // Should show the User model definition
-console.log("Address: ", Address);
-console.log("Order: ", Order);     // Should show the Order model definition
-console.log("Product: ", Product); // Should show the Product model definition
-console.log("OrderItem: ", OrderItem); // Should show the OrderItem model definition
-
-console.log(User instanceof sequelize.Model);      // Should be true   // Should be true
-console.log(Address instanceof sequelize.Model); 
-console.log(Order instanceof sequelize.Model);       // Should be true
-console.log(Product instanceof sequelize.Model);     // Should be true
-console.log(OrderItem instanceof sequelize.Model);    // Should be true
-
-// User - Order: One-to-Many relationship
+// Associations
 User.hasMany(Order, { foreignKey: 'userID' });
 Order.belongsTo(User, { foreignKey: 'userID' });
 
-// Order - Product: Many-to-Many relationship through OrderItem
 Order.belongsToMany(Product, { through: OrderItem, foreignKey: 'orderID' });
 Product.belongsToMany(Order, { through: OrderItem, foreignKey: 'productID' });
-
-// Additionally, defining the direct associations for the join table
 Order.hasMany(OrderItem, { foreignKey: 'orderID' });
 OrderItem.belongsTo(Order, { foreignKey: 'orderID' });
-
 Product.hasMany(OrderItem, { foreignKey: 'productID' });
 OrderItem.belongsTo(Product, { foreignKey: 'productID' });
 
-// Product - Categories Relationship (Many-to-Many)
 Product.belongsToMany(Category, { through: 'ProductCategory' });
 Category.belongsToMany(Product, { through: 'ProductCategory' });
 
-// User - Product Relationship (Many-to-Many)
 User.belongsToMany(Product, { through: 'UserProduct' });
 Product.belongsToMany(User, { through: 'UserProduct' });
 
-// CART
 User.hasOne(Cart, { foreignKey: 'userID' });
 Cart.belongsTo(User, { foreignKey: 'userID' });
-
 Cart.hasMany(CartItem, { foreignKey: 'cartID' });
 CartItem.belongsTo(Cart, { foreignKey: 'cartID' });
-
 Product.hasMany(CartItem, { foreignKey: 'productID' });
 CartItem.belongsTo(Product, { foreignKey: 'productID' });
 
-// Address Relationships
 User.hasMany(Address, { foreignKey: 'userID' });
 Address.belongsTo(User, { foreignKey: 'userID' });
-
-// Address - Order Relationship
 Order.belongsTo(Address, { foreignKey: 'addressID' });
 Address.hasMany(Order, { foreignKey: 'addressID' });
 

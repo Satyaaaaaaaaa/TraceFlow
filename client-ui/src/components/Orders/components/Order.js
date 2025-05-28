@@ -1,35 +1,60 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { CartContext } from '../../Cart/CartContext';
 import axios from 'axios';
-import { MDBBtn, MDBTypography, MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody , MDBCardImage } from 'mdb-react-ui-kit';
-import {jwtDecode} from 'jwt-decode';
+import { MDBBtn, MDBTypography, MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardImage } from 'mdb-react-ui-kit';
+import { jwtDecode } from 'jwt-decode';
 import '../styles/Order.css';
 import { useNavigate } from 'react-router-dom';
 
 const Order = () => {
   const { cartItems } = useContext(CartContext);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
   const navigate = useNavigate();
 
+  const token = sessionStorage.getItem("authToken");
+
+  useEffect(() => {
+    if (token) {
+      const fetchAddresses = async () => {
+        try {
+          const response = await axios.get('/address', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setAddresses(response.data.data || []);
+        } catch (error) {
+          console.error('Error fetching addresses:', error);
+        }
+      };
+
+      fetchAddresses();
+    }
+  }, [token]);
+
   const handleSubmitOrder = async () => {
-    const token = sessionStorage.getItem("authToken");
     if (!token) {
       alert('User not authenticated');
       return;
     }
-    
+
     const userId = jwtDecode(token).userId;
 
-    // Map cartItems to match the expected structure of orderItem
+    if (!selectedAddressId) {
+      alert('Please select a delivery address before submitting the order.');
+      return;
+    }
+
     const orderData = {
       userID: userId,
-      products: cartItems.map(item => ({  // Map cart items to products format required by backend
+      addressID: selectedAddressId, // ✅ Send selected address
+      products: cartItems.map(item => ({
         productID: item.Product.id,
         quantity: item.quantity,
       })),
-      totalAmount: cartItems.reduce((total, item) => total + item.Product.price * item.quantity, 0),  // Calculate total amount
-      status: 'Success',  // Set default status
-      
-      // createdAt and updatedAt can be omitted here since they are typically set by the backend.
+      totalAmount: cartItems.reduce((total, item) => total + item.Product.price * item.quantity, 0),
+      status: 'Success',
     };
 
     try {
@@ -44,9 +69,9 @@ const Order = () => {
         const message = response.data.message || 'Order submitted successfully!';
         alert(message);
         navigate('/order-confirmation', { state: { orderData } });
-    } else {
+      } else {
         throw new Error('Order submission failed');
-    }
+      }
     } catch (error) {
       console.error('Error submitting order:', error);
       alert('Failed to submit order. Please try again.');
@@ -64,6 +89,7 @@ const Order = () => {
           <MDBCard className="shadow-5">
             <MDBCardBody>
               <MDBTypography tag="h1" className="mb-4 text-center">Order Summary</MDBTypography>
+
               <ul className="list-unstyled">
                 {cartItems.map((item) => (
                   <MDBRow key={item.id} className="align-items-center">
@@ -82,7 +108,9 @@ const Order = () => {
                   </MDBRow>
                 ))}
               </ul>
+
               <hr />
+
               <MDBRow className="mb-4">
                 <MDBCol>
                   <MDBTypography tag="h5">
@@ -90,8 +118,48 @@ const Order = () => {
                   </MDBTypography>
                 </MDBCol>
               </MDBRow>
-              <MDBBtn color="dark" onClick={handleSubmitOrder} className="mt-4 w-100">Submit Order</MDBBtn>
-              <MDBBtn color="dark" onClick={() => { navigate('/cart') }} className="mt-4 w-100">Back To Cart</MDBBtn>
+
+              {addresses.length > 0 ? (
+                <div className="mb-4">
+                  <MDBTypography tag="h5" className="text-success">Select Delivery Address:</MDBTypography>
+                  <select
+                    className="form-select mt-2"
+                    value={selectedAddressId}
+                    onChange={(e) => setSelectedAddressId(e.target.value)}
+                  >
+                    <option value="" disabled>Select an address</option>
+                    {addresses.map((addr) => (
+                      <option key={addr.id} value={addr.id}>
+                        {addr.name}, {addr.locality}, {addr.city} - {addr.pincode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="mb-4">
+                  <MDBTypography tag="h5" className="text-danger">No delivery address found.</MDBTypography>
+                  <MDBBtn color="primary" onClick={() => navigate('/add-address')} className="mt-2">
+                    Add Address
+                  </MDBBtn>
+                </div>
+              )}
+
+              <MDBBtn
+                color="dark"
+                onClick={handleSubmitOrder}
+                className="mt-4 w-100"
+                disabled={!selectedAddressId}
+              >
+                Submit Order
+              </MDBBtn>
+
+              <MDBBtn
+                color="dark"
+                onClick={() => navigate('/cart')}
+                className="mt-3 w-100"
+              >
+                Back To Cart
+              </MDBBtn>
             </MDBCardBody>
           </MDBCard>
         </MDBCol>

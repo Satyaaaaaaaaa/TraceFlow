@@ -6,7 +6,7 @@ import { CartContext } from '../Cart/CartContext'; // Import your CartContext
 import './styles/ProductDetails.css';
 
 const ProductDetails = () => {
-  const { productId } = useParams();
+  const { productID } = useParams();
   const { cartItems, addToCart, updateCartItem } = useContext(CartContext); // Destructure cartItems from CartContext
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const ProductDetails = () => {
     const fetchProductDetails = async () => {
       const token = sessionStorage.getItem('authToken');
       try {
-        const response = await axios.get(`/product/${productId}`, {
+        const response = await axios.get(`/product/${productID}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -34,12 +34,12 @@ const ProductDetails = () => {
       }
     };
     fetchProductDetails();
-  }, [productId]);
+  }, [productID]);
 
   const handleAddReview = async () => {
     const token = sessionStorage.getItem('authToken');
     try {
-      const response = await axios.post(`/product/${productId}/reviews`, {
+      const response = await axios.post(`/product/${productID}/reviews`, {
         review: newReview,
         rating,
       }, {
