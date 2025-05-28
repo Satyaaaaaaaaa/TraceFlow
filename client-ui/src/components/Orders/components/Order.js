@@ -48,7 +48,7 @@ const Order = () => {
 
     const orderData = {
       userID: userId,
-      addressID: selectedAddressId, // ✅ Send selected address
+      addressID: selectedAddressId,
       products: cartItems.map(item => ({
         productID: item.Product.id,
         quantity: item.quantity,
@@ -119,30 +119,29 @@ const Order = () => {
                 </MDBCol>
               </MDBRow>
 
-              {addresses.length > 0 ? (
-                <div className="mb-4">
-                  <MDBTypography tag="h5" className="text-success">Select Delivery Address:</MDBTypography>
-                  <select
-                    className="form-select mt-2"
-                    value={selectedAddressId}
-                    onChange={(e) => setSelectedAddressId(e.target.value)}
-                  >
-                    <option value="" disabled>Select an address</option>
-                    {addresses.map((addr) => (
-                      <option key={addr.id} value={addr.id}>
-                        {addr.name}, {addr.locality}, {addr.city} - {addr.pincode}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <div className="mb-4">
-                  <MDBTypography tag="h5" className="text-danger">No delivery address found.</MDBTypography>
-                  <MDBBtn color="primary" onClick={() => navigate('/add-address')} className="mt-2">
-                    Add Address
-                  </MDBBtn>
-                </div>
-              )}
+              <div className="mb-4">
+                <MDBTypography tag="h5" className="text-success">Select Delivery Address:</MDBTypography>
+                <select
+                  className="form-select mt-2"
+                  value={selectedAddressId}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (selected === 'add-new') {
+                      navigate('/add-address');
+                    } else {
+                      setSelectedAddressId(selected);
+                    }
+                  }}
+                >
+                  <option value="" disabled>Select an address</option>
+                  {addresses.map((addr) => (
+                    <option key={addr.id} value={addr.id}>
+                      {addr.name}, {addr.locality}, {addr.city} - {addr.pincode}
+                    </option>
+                  ))}
+                  <option value="add-new">➕ Add New Address</option>
+                </select>
+              </div>
 
               <MDBBtn
                 color="dark"

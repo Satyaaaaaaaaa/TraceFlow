@@ -18,6 +18,10 @@ import MyOrders from "./components/Orders/components/MyOrders";
 import ProductDetails from "./components/Products/ProductDetails";
 import {jwtDecode} from "jwt-decode"; // Fix import
 import AddAddress from "./components/Address/AddAddress";
+import SellerOrders from "./components/Pages/Dashboards/SellerDashboard/components/SellerOrders";
+import AddProduct from "./components/Pages/Dashboards/SellerDashboard/components/AddProduct";
+import MyProducts from "./components/Pages/Dashboards/SellerDashboard/components/MyProducts";
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -105,6 +109,10 @@ function App() {
             <Route path="/my-orders" element={<MyOrders userID={userInfo?.id} />} />
             <Route path="/product/:productID" element={<ProductDetails />} />
             <Route path="/add-address" element={<AddAddress />} />
+            <Route path="/seller-orders" element={<SellerOrders />} />
+            <Route path="/add-product" element={<AddProduct />} />
+            <Route path="/my-products" element={<MyProducts />} />
+
           </Routes>
         </div>
         <ProfileDrawer

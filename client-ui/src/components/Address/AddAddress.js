@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { MDBContainer, MDBInput, MDBBtn } from 'mdb-react-ui-kit';
+import { MDBContainer, MDBInput, MDBBtn, MDBIcon } from 'mdb-react-ui-kit';
 
 const AddAddress = () => {
   const navigate = useNavigate();
@@ -15,6 +15,8 @@ const AddAddress = () => {
     buildingName: '',
     landmark: ''
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -22,41 +24,74 @@ const AddAddress = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = sessionStorage.getItem("authToken");
+    setSubmitting(true);
+    setMessage('');
+    const token = sessionStorage.getItem('authToken');
 
     try {
       await axios.post('/address', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
-
-      alert('Address added successfully!');
-      navigate('/order'); // Go back to Order page
+      setMessage('Address added successfully!');
+      setTimeout(() => navigate('/order'), 1500);
     } catch (error) {
-      alert('Failed to add address');
       console.error(error);
+      setMessage('Failed to add address. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <MDBContainer className="py-5">
-      <h2 className="mb-4">Add New Address</h2>
+    <MDBContainer className="py-5 px-4 shadow-3 rounded bg-light" style={{ maxWidth: '600px' }}>
+      <h2 className="text-center mb-4" style={{ fontWeight: '700' }}>
+        <MDBIcon icon="map-marker-alt" className="me-2 text-primary" />
+        Add New Address
+      </h2>
+
+      {message && (
+        <div className={`alert ${message.includes('successfully') ? 'alert-success' : 'alert-danger'}`}>
+          {message}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
-        {['name', 'phoneNumber', 'pincode', 'city', 'state', 'locality', 'buildingName', 'landmark'].map(field => (
+        {[
+          ['name', 'Full Name'],
+          ['phoneNumber', 'Phone Number'],
+          ['pincode', 'Pincode'],
+          ['city', 'City'],
+          ['state', 'State'],
+          ['locality', 'Locality'],
+          ['buildingName', 'Building/Flat Name'],
+          ['landmark', 'Landmark (Optional)']
+        ].map(([name, label]) => (
           <MDBInput
-            key={field}
-            label={field.charAt(0).toUpperCase() + field.slice(1)}
-            name={field}
+            key={name}
+            name={name}
+            label={label}
+            required={name !== 'landmark'}
             onChange={handleChange}
             className="mb-3"
-            required
+            disabled={submitting}
           />
         ))}
-        <MDBBtn type="submit" color="dark" className="w-100">Save Address</MDBBtn>
-        <MDBBtn color="secondary" className="w-100 mt-2" onClick={() => navigate('/order')}>
-          Cancel
+
+        <MDBBtn type="submit" color="primary" className="w-100" disabled={submitting}>
+          {submitting ? 'Saving...' : 'Save Address'}
+        </MDBBtn>
+
+        <MDBBtn
+          color="secondary"
+          outline
+          className="w-100 mt-3"
+          onClick={() => navigate('/order')}
+        >
+          <MDBIcon icon="arrow-left" className="me-2" />
+          Back to Orders
         </MDBBtn>
       </form>
     </MDBContainer>
