@@ -54,7 +54,9 @@
 }
 
 /* Cart icon, profile icon, and add-product icon styles */
-.cart-icon, .profile-icon, .add-product-icon {
+.cart-icon,
+.profile-icon,
+.add-product-icon {
   cursor: pointer;
 }
 
@@ -98,7 +100,7 @@
 
 /* Navbar title underline (optional, comment out if not needed) */
 .navbar-title::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -10px; /* Positioning */
   left: 50%;
@@ -128,7 +130,7 @@
 }
 
 .dropdown-content button:hover {
-  background-color: #04AA6D; /* Green */
+  background-color: #04aa6d; /* Green */
   color: white;
 }
 
@@ -144,4 +146,99 @@
   align-items: center;
   background-color: #ffffff; /* Blank white background */
   z-index: 9999; /* Ensure it overlays everything else */
+}
+
+@media (max-width: 1200px) {
+  .navbar-center .form-control {
+    width: 600px;
+  }
+}
+
+@media (max-width: 992px) {
+  .navbar-center .form-control {
+    width: 350px;
+  }
+  .navbar-nav .nav-item .nav-link {
+    padding: 7px 10px;
+    margin-right: 6px;
+    font-size: 1rem;
+  }
+  .navbar-brand.navbar-title {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 2px 0;
+  }
+  .navbar-center {
+    flex-grow: unset;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .navbar-center .form-control {
+    width: 100%;
+    min-width: 120px;
+    font-size: 0.95rem;
+  }
+  .navbar-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .navbar-nav .nav-item .nav-link {
+    margin-bottom: 6px;
+    margin-right: 0;
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 7px 8px;
+  }
+  .navbar-right {
+    gap: 10px;
+  }
+  .cart-icon,
+  .profile-icon,
+  .add-product-icon {
+    font-size: 20px;
+    height: 24px;
+  }
+  .navbar-brand.navbar-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 1px 0;
+  }
+  .navbar-center {
+    justify-content: center;
+    width: 100%;
+  }
+  .navbar-center .form-control {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+  .navbar-nav .nav-item .nav-link {
+    font-size: 0.9rem;
+    padding: 6px 6px;
+    border-radius: 4px;
+  }
+  .navbar-right {
+    gap: 6px;
+  }
+  .cart-icon,
+  .profile-icon,
+  .add-product-icon {
+    font-size: 18px;
+    height: 20px;
+  }
+  .navbar-brand.navbar-title {
+    font-size: 0.9rem;
+  }
+  .profile-modal-content {
+    width: 90vw;
+    padding: 10px;
+  }
 }

@@ -45,3 +45,62 @@
   flex-direction: column;
   gap: 10px;
 }
+
+@media (max-width: 768px) {
+  .drawer {
+    width: 80vw;
+    min-width: 220px;
+  }
+
+  .drawer-content {
+    padding: 15px;
+    height: calc(100% - 50px);
+  }
+
+  .drawer-close {
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+  }
+
+  .drawer-top-content {
+    margin-top: 50px;
+  }
+
+  .drawer-footer {
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .drawer {
+    width: 100vw;
+    min-width: unset;
+    border-radius: 0;
+  }
+
+  .drawer-content {
+    padding: 10px;
+    height: calc(100% - 40px);
+  }
+
+  .drawer-close {
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+  }
+
+  .drawer-top-content {
+    margin-top: 40px;
+  }
+
+  .drawer-footer {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    gap: 6px;
+  }
+}
