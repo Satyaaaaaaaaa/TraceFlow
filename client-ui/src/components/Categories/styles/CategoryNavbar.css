@@ -1,49 +1,87 @@
 .category-navbar {
-    background-color: #f8f9fa; /* Light gray background */
-    padding: 10px 0;
-    border-bottom: 1px solid #dee2e6;
-  }
-  
+  background-color: #f8f9fa; /* Light gray background */
+  padding: 10px 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.category-navbar .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.category-list {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-item {
+  margin: 0 15px;
+}
+
+.category-link {
+  text-decoration: none;
+  color: #098153; /* Bootstrap primary color */
+  font-weight: bold;
+}
+
+.category-link:hover {
+  color: #0056b3; /* Darker shade on hover */
+}
+
+.category-navbar .category-item {
+  font-size: 16px; /* Adjust font size as needed */
+}
+
+.category-navbar .category-item {
+  padding: 5px 10px;
+  text-align: center;
+}
+
+.category-navbar .category-item.no-categories {
+  font-style: italic;
+  color: #6c757d; /* Gray color for placeholder */
+}
+
+@media (max-width: 768px) {
   .category-navbar .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 1rem;
   }
-  
+
   .category-list {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
-  
+
   .category-item {
-    margin: 0 15px;
+    margin: 5px 10px;
+    font-size: 15px;
   }
-  
-  .category-link {
-    text-decoration: none;
-    color: #098153; /* Bootstrap primary color */
-    font-weight: bold;
+}
+
+@media (max-width: 480px) {
+  .category-navbar {
+    padding: 5px 0;
   }
-  
-  .category-link:hover {
-    color: #0056b3; /* Darker shade on hover */
+
+  .category-navbar .container {
+    padding: 0 0.5rem;
   }
-  
-  .category-navbar .category-item {
-    font-size: 16px; /* Adjust font size as needed */
+
+  .category-list {
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  .category-navbar .category-item {
-    padding: 5px 10px;
-    text-align: center;
+
+  .category-item {
+    margin: 4px 0;
+    font-size: 14px;
+    padding: 5px 5px;
   }
-  
-  .category-navbar .category-item.no-categories {
-    font-style: italic;
-    color: #6c757d; /* Gray color for placeholder */
-  }
-  
+}
