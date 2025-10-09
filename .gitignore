@@ -10,3 +10,7 @@ chaincode.zip
 go1.23.0.linux-amd64.tar.gz
 /node_modules
 general-config.json
+fabric-network/wallet
+note_pad.txt
+server-api/migrations/
+tree.txt
