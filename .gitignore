@@ -1,5 +1,6 @@
 server-api/.env
 server-api/storage/
+node_modules/
 server-api/node_modules/
 client-ui/node_modules/
 helper_json.json
