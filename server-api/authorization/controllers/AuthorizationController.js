@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-
+const { enrollUser } = require("../../services/fabricService");
 const {User} = require('../../common/models/associations');
 const { roles, jwtExpirationInSeconds } = require('../../config');
 
@@ -38,7 +38,15 @@ module.exports = {
         // alternative to using Object.assign()?
         // for creating a new object that 
         // combines properties from other objects.
-        .then((user) => {
+        .then(async (user) => {
+            
+            // --- FABRIC INTEGRATION ---
+            // After successfully creating the user in the DB, enroll them in Fabric.
+            const enroll = await enrollUser(user.username, 'client');
+            console.log("Enroll Result:", enroll);
+
+            // --- END FABRIC INTEGRATION ---
+
             const accessToken = generateAccessToken(payload.username, user.id);
             return res.status(201).json({
                 status: true,

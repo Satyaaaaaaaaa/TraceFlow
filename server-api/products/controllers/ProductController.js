@@ -4,6 +4,8 @@ const { findAllCategories } = require("../../common/models/Category");
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
+const { createProductWithTraceability, getFullProductDetails } = require('../../services/productService');
+
 module.exports = {
     createProduct: async (req, res) => {
         const { name, description, price, image, categoryIds } = req.body;
@@ -16,13 +18,19 @@ module.exports = {
         const { userId } = decoded; // User ID from JWT
         try {
             // Create the product
-            const product = await createProduct({ name, description, image, price, priceUnit });
-
-            // Associate the product with the user via the join table 'UserProduct'
             const user = await findUser({ id: userId });
             if (!user) {
                 throw new Error("User not found");
             }
+
+            await createProductWithTraceability({ name, description, image, price, priceUnit }, user.username);
+
+            product = await createProduct({ name, description, image, price, priceUnit });
+            
+
+            // Associate the product with the user via the join table 'UserProduct'
+            // const user = await findUser({ id: userId });
+            
             await user.addProduct(product);
 
             // If category IDs are provided, handle the category associations
