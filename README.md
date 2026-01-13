@@ -1,19 +1,33 @@
-<h1 align="center">Running The Server</h1>
-- cd server-api/ 
+# Fabric Test Network Setup Guide
 
-## BLOCKCHAIN AREA
+This guide walks you through **completely resetting Docker**, installing a fresh Docker + Docker Compose (plugin), and then starting a Hyperledger Fabric test network.
+
+**⚠️ Warning**  
+The steps below **completely remove** all existing Docker containers, images, volumes, and configurations. Use with caution on a development machine only.
+
+## Prerequisites
+
+- Ubuntu (tested on 20.04 / 22.04)
+- `sudo` privileges
+- Internet connection
+
+## 1. Complete Docker Cleanup (Nuclear Option)
+
+```bash
 # Stop all running containers (if any)
-sudo docker stop $(sudo docker ps -aq) 2>/dev/null
+sudo docker stop $(sudo docker ps -aq) 2>/dev/null || true
 
-# Remove all Docker packages
-sudo apt-get purge -y docker-engine docker docker.io docker-ce docker-ce-cli docker-compose-plugin
-sudo apt-get autoremove -y --purge docker-engine docker docker.io docker-ce docker-compose-plugin
+# Remove all Docker-related packages
+sudo apt-get purge -y \
+  docker-engine docker docker.io docker-ce docker-ce-cli \
+  containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Remove old docker-compose (standalone binary)
-sudo rm -f /usr/local/bin/docker-compose
-sudo rm -f /usr/bin/docker-compose
+sudo apt-get autoremove -y --purge
 
-# Remove Docker data directories
+# Remove old standalone docker-compose binary (if exists)
+sudo rm -f /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# Remove Docker data and config directories
 sudo rm -rf /var/lib/docker
 sudo rm -rf /var/lib/containerd
 sudo rm -rf /etc/docker
@@ -22,15 +36,15 @@ sudo rm -rf ~/.docker
 # Update package index
 sudo apt-get update
 
-# Install prerequisites
+# Install required packages
 sudo apt-get install -y ca-certificates curl gnupg lsb-release
 
-# Add Docker's official GPG key
+# Create keyrings directory and add Docker's official GPG key
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-# Set up the repository
+# Add Docker repository
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -38,45 +52,61 @@ echo \
 # Update package index again
 sudo apt-get update
 
-# Install Docker Engine and Docker Compose plugin
+# Install Docker Engine + Compose plugin
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Check Docker version
+# Should show Docker version
 docker --version
 
-# Check Docker Compose version (modern plugin syntax)
+# Should show Docker Compose plugin version (v2.x)
 docker compose version
 
-# Test Docker
-sudo docker run hello-world
+# Quick test
+sudo docker run --rm hello-world
 
-# Stop Docker and containerd
+# Stop services
 sudo systemctl stop docker
 sudo systemctl stop containerd
 
-# Remove containerd's corrupted data
+# Clear corrupted containerd data (common after unclean shutdowns)
 sudo rm -rf /var/lib/containerd
 
 # Start services again
 sudo systemctl start containerd
 sudo systemctl start docker
 
-# Verify services are running
-sudo systemctl status docker
-sudo systemctl status containerd
+# Check status
+sudo systemctl status docker --no-pager
+sudo systemctl status containerd --no-pager
 
-# Test basic Docker functionality
-sudo docker run hello-world
+# Final test
+sudo docker run --rm hello-world
 
-# If that works, go to your test-network
+# Go to fabric-samples test-network (adjust path if different)
 cd ~/NEHU/Temp/fabric-samples/test-network
 
-# Clean up any previous attempts
+# Clean up any previous network
 sudo ./network.sh down
 
 # Start the network
 sudo ./network.sh up
 
-Then create the channel 
+# ────────────────────────────────────────────────
+# Optional: Create a channel (after network is up)
+# ────────────────────────────────────────────────
 
-# sudo ./network.sh down (before creating channel)
+# If you want to (re)create channel:
+sudo ./network.sh down   # only if you want to start completely fresh
+sudo ./network.sh up createChannel
+
+cd ~/NEHU/Temp/fabric-samples/test-network
+sudo ./network.sh down
+sudo ./network.sh up
+# or with channel:
+# sudo ./network.sh up createChannel
+
+# ─────────────────────────────────────
+# If you see permission errors later
+# ─────────────────────────────────────
+sudo usermod -aG docker $USER
+newgrp docker
