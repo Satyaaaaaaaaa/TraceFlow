@@ -110,3 +110,12 @@ sudo ./network.sh up
 # ─────────────────────────────────────
 sudo usermod -aG docker $USER
 newgrp docker
+
+# ─────────────────────────────────────
+# CREATING THE CHANNEL
+# MAKE SURE DOCKER IS IN 28 OR A VERSION LOWER THAN THE LATEST
+# ─────────────────────────────────────
+
+sudo ./network.sh down 
+sudo ./network.sh up createChannel -c mychannel -ca
+sudo ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript -ccl javascript 
