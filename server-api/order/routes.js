@@ -1,4 +1,5 @@
 const OrderController = require('./controllers/OrderController');
+const SellerOrders = require('./controllers/SellerOrders');
 
 const router = require('express').Router();
 
@@ -39,6 +40,10 @@ router.delete(
 
 router.get('/seller-orders', 
     OrderController.getOrdersForSeller
+);
+
+router.put("/seller/orders/:orderId/status",
+    SellerOrders.updateOrderStatus
 );
 
 module.exports = router;
