@@ -15,8 +15,21 @@ class TraceabilityContract extends Contract {
      * This function is typically called once when the chaincode is instantiated.
      * @param {Context} ctx the transaction context
      */
+
+    _getTxTimestampISO(ctx) {
+        const txTime = ctx.stub.getTxTimestamp();
+        const seconds = txTime.seconds.low;
+        const nanos = txTime.nanos;
+
+        const millis =
+            seconds * 1000 + Math.floor(nanos / 1_000_000);
+
+        return new Date(millis).toISOString();
+    }
+
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
+
         const products = [
             {
                 productID: 'product1',
@@ -25,7 +38,7 @@ class TraceabilityContract extends Contract {
                 status: 'Harvested',
                 history: [
                     {
-                        timestamp: new Date().toISOString(),
+                        timestamp: this._getTxTimestampISO(ctx),
                         actor: 'Farmer A',
                         action: 'Harvested at Lakadong, Meghalaya'
                     }
@@ -38,7 +51,7 @@ class TraceabilityContract extends Contract {
                 status: 'Crafted',
                 history: [
                     {
-                        timestamp: new Date().toISOString(),
+                        timestamp: this._getTxTimestampISO(ctx),
                         actor: 'Artisan B',
                         action: 'Crafted in Shillong, Meghalaya'
                     }
@@ -66,12 +79,12 @@ class TraceabilityContract extends Contract {
 
         const productAsset = {
             docType: 'productAsset',
-            productID,
+            productID, // TODO: Should be unique
             name,
             owner,
             status: 'Created',
             history: [{
-                timestamp: new Date().toISOString(),
+                timestamp: this._getTxTimestampISO(ctx),
                 actor: owner,
                 action: 'Product Asset Created'
             }]
@@ -111,7 +124,7 @@ class TraceabilityContract extends Contract {
 
         productAsset.status = newStatus;
         productAsset.history.push({
-            timestamp: new Date().toISOString(),
+            timestamp: this._getTxTimestampISO(ctx),
             actor: actor,
             action: `Status updated to ${newStatus}`
         });
@@ -136,7 +149,7 @@ class TraceabilityContract extends Contract {
         productAsset.owner = newOwner;
 
         productAsset.history.push({
-            timestamp: new Date().toISOString(),
+            timestamp: this._getTxTimestampISO(ctx),
             actor: newOwner, // The new owner is the actor in a transfer
             action: `Ownership transferred from ${oldOwner} to ${newOwner}`
         });

@@ -1,6 +1,11 @@
 const { DataTypes } = require("sequelize")
 const sequelize = require("./SequelizeInstance")
 
+const ORDER_STATUS = {
+    SUCCESS: "Success",
+    SHIPPED: "Shipped",
+    DELIVERED: "Delivered"
+};
 
 const OrderModel = sequelize.define('Order', {
     id: {
@@ -31,7 +36,7 @@ const OrderModel = sequelize.define('Order', {
     status: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: "Pending"
+        defaultValue: ORDER_STATUS.SUCCESS // TODO:  [Success, Shipped, Delivered]
     },
     createdAt: {
         type: DataTypes.DATE,
