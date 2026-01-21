@@ -91,7 +91,7 @@ sudo docker run --rm hello-world
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 # Go to fabric-samples test-network (adjust path if different)
-cd ~/NEHU/Temp/fabric-samples/test-network
+cd ~/NEHU/fabric-samples/test-network
 
 # Clean up any previous network
 sudo ./network.sh down
@@ -135,15 +135,15 @@ peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.exa
 # ────────────────────
 sudo ./network.sh up
 
-# ────────────────────
-# RUNNING THE SERVER
-# ────────────────────
+# ────────────────────────────────────────────────────────────
+# -----------------------RUNNING THE SERVER-------------------
+# ────────────────────────────────────────────────────────────
 cd server-api
 node server.js
 
-# ────────────────────
-# RUNNING CLIENT UI
-# ────────────────────
+# ────────────────────────────────────────────────────────────
+# -----------------------RUNNING CLIENT UI--------------------
+# ────────────────────────────────────────────────────────────
 cd client ui (in NEHU)
 
 npm install --save-dev cross-env (FOR LINUX AND MAC)
