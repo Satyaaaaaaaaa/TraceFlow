@@ -60,7 +60,15 @@ function App() {
       console.error('Error fetching user data:', error);
     }
   };
-  
+
+  //REFRESHES SESSION WHEN ROLE IS CHANGED 
+
+  const refreshUserData = async () => {
+    const token = sessionStorage.getItem("authToken");
+    if (token) {
+      await fetchUserRole(token);
+    }
+  };
 
   const handleLogin = (token, user) => {
     sessionStorage.setItem("authToken", token);
@@ -97,11 +105,11 @@ function App() {
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route
               path="/admin-dashboard"
-              element={userInfo?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />}
+              element={userInfo?.role === "ADMIN" ? <AdminDashboard /> : <Navigate to="/" />}
             />
             <Route
               path="/seller-dashboard"
-              element={userInfo?.role === "seller" ? <SellerDashboard /> : <Navigate to="/" />}
+              element={userInfo?.role === "SELLER" ? <SellerDashboard /> : <Navigate to="/" />}
             />
             <Route path="/cart" element={<Cart />} />
             <Route path="/order" element={<Order />} />
@@ -112,6 +120,29 @@ function App() {
             <Route path="/seller-orders" element={<SellerOrders />} />
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/my-products" element={<MyProducts />} />
+
+            {/*SPECIFIC ROUTES FOR SELLER*/}
+            <Route path="/seller-orders" element={userInfo?.role === "SELLER" ? (<SellerOrders />) : (<Navigate to="/" replace />)} />
+            <Route 
+              path="/add-product" 
+              element={
+                userInfo?.role === "SELLER" ? (
+                  <AddProduct />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/my-products" 
+              element={
+                userInfo?.role === "SELLER" ? (
+                  <MyProducts />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              } 
+            />
 
           </Routes>
         </div>

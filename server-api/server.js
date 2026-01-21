@@ -8,7 +8,7 @@ require('dotenv').config();
 const sequelize= require("./common/models/SequelizeInstance");
 
 const { port } = require("./config");
-const PORT = port || 3000;
+const PORT = port || 3001;
 
 // Route Imports
 const AuthorizationRoutes = require("./authorization/routes");

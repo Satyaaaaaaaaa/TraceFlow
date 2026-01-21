@@ -36,6 +36,21 @@ router.get(
   UserController.getUsers
 );
 
+// ROUTE FOR SELF ROLE CHANGE
+router.patch(
+  "/change-role",
+  [
+    isAuthenticatedMiddleware.check,
+    // COMMENTING FOR NOW AS ANY USER CAN CHANGE ROLE
+    // CheckPermissionMiddleware.has(roles.ADMIN), //ONLY ADMINS CAN CHAGE ROLE BUT NOT ANY USER
+    SchemaValidationMiddleware.verify(changeRolePayload),
+  ],
+  //UserController.changeRole
+  UserController.changeSelfRole  // New controller function
+);
+
+// ROUTE FOR ADMIN
+//FOR ADMIN TO CHANGE ROLE 
 router.patch(
   "/change-role/:userId",
   [

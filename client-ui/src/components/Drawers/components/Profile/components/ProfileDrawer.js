@@ -20,6 +20,10 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
   const [showUpdateProfile, setShowUpdateProfile] = useState(false);
   const navigate = useNavigate();
 
+  //NEW CONSTS FOR CHANGE ROLE
+  const [showChangeRole, setShowChangeRole] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('');
+
   //  Debugging logs to check `userInfo`
   useEffect(() => {
     //console.log("UserInfo received in ProfileDrawer:", userInfo);
@@ -108,6 +112,67 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
     setShowUpdateProfile(false);
   };
 
+  // ================================
+  // CHANGE USER FUNCTIONALITY
+  // ================================
+
+  const handleChangeRole = async () => {
+    if (!selectedRole) {
+      alert('Please select a role');
+      return;
+    }
+
+    const confirmation = window.confirm(`Are you sure you want to change your role to ${selectedRole}?`);
+    if (!confirmation) return;
+
+    try {
+      const response = await fetch(`/user/change-role/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
+        },
+        body: JSON.stringify({ role: selectedRole }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Role changed successfully!');
+        setRole(selectedRole);
+        setShowChangeRole(false);
+        setSelectedRole('');
+
+
+        if (selectedRole === 'SELLER') {
+          navigate('/seller-dashboard');
+        } 
+        else if (selectedRole === 'USER') {
+          navigate('/');  // PATH TO USER DASHBOARD
+        }
+        // RELOAD TO REFLECT CHANGES (NEED TO UPDATE UI AS WELL)
+        window.location.reload();
+      } 
+      
+      else {
+        alert(result.error || 'Failed to change role');
+      }
+    } catch (error) {
+      console.error('Error changing role:', error);
+      alert('There was an error changing your role. Please try again later.');
+    }
+  };
+
+  const handleOpenChangeRole = () => {
+    setSelectedRole(role || 'USER'); // Default to current role or USER
+    setShowChangeRole(true);
+  };
+
+  const handleCancelChangeRole = () => {
+    setShowChangeRole(false);
+    setSelectedRole('');
+  };
+
   return (
     <div className={`drawer ${isOpen ? 'drawer-open' : ''}`}>
       <div className="drawer-content">
@@ -130,6 +195,17 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                 onClose={() => setShowSettings(false)}
                 onUpdateProfileClick={handleUpdateProfileClick}
                 onDeleteAccount={handleDeleteAccount}
+
+                //----------ROLE CHANGE PROPS-----------
+
+                onChangeRole={handleOpenChangeRole} 
+                showChangeRole={showChangeRole}  
+                selectedRole={selectedRole}  
+                setSelectedRole={setSelectedRole}  
+                handleChangeRole={handleChangeRole}  
+                handleCancelChangeRole={handleCancelChangeRole}  
+                currentRole={role}
+
                 onBackClick={onClose}
                 onLogout={onLogout}
               />
@@ -150,6 +226,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                   <p>Email: {email || 'Not Available'}</p> {/* Email displayed here */}
                   <p>Role: {role || 'Not Available'}</p>   {/* Role displayed here */}
                 </div>
+
                 <div className="d-flex flex-column align-items-center">
                   <Button variant="link" onClick={handleSettingsClick} className="mb-2 text-center">
                     <FaCog className="me-2" /> Profile Settings
@@ -157,7 +234,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                   <Button variant="link" onClick={handleOrdersClick} className="text-center mb-2">
                     <FaShoppingCart className="me-2" /> My Orders
                   </Button>
-                  {role === 'admin' && (
+                  {role === 'ADMIN' && (
                     <Button
                       variant="link"
                       onClick={() => navigate('/admin-dashboard')}
@@ -166,12 +243,13 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                       <FaCrown className="me-2" /> Go to Admin Dashboard
                     </Button>
                   )}
-                  {role === 'seller' && (
+
+                  {role === 'SELLER' && (
                     <Button
                       variant="link"
-                      onClick={() => navigate('/')}
+                      onClick={() => navigate(('/seller-dashboard'))} //NAVIGATE TO SELLER DASHBOARD
                       className="text-center"
-                    >
+>
                       <FontAwesomeIcon icon={faBoxes} className="me-2" /> My Products
                     </Button>
                   )}

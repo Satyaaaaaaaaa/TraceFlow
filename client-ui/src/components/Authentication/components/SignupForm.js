@@ -17,7 +17,7 @@ const SignupForm = () => {
     firstName: '',
     lastName: '',
   });
-  const [recaptchaToken, setRecaptchaToken] = useState('');
+  //const [recaptchaToken, setRecaptchaToken] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
 
   const handleChange = (event) => {
@@ -61,7 +61,7 @@ const SignupForm = () => {
         body: JSON.stringify({
           ...formData,
           role: 'user', // Default role set to 'user'
-          recaptchaToken,
+          //recaptchaToken,
         }),
       });
 
@@ -81,7 +81,7 @@ const SignupForm = () => {
         firstName: '',
         lastName: '',
       });
-      setRecaptchaToken('');
+      //setRecaptchaToken('');
 
       navigate('/login', { state: { message: 'Signup successful! Please login.' } });
 
