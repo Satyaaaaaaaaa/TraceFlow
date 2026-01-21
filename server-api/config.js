@@ -1,10 +1,11 @@
 module.exports = {
-    port: 3000,
+    port: 3001,
     jwtExpirationInSeconds: 60 * 60 * 60,
     roles: {
-        USER: 'user',
-        ADMIN: 'admin',
-        SELLER: 'seller'
+        //CONVERTED TO UPPERCASE 
+        USER: 'USER',
+        ADMIN: 'ADMIN',
+        SELLER: 'SELLER'
     },
     productPriceUnits: {
         INR: 'inr'

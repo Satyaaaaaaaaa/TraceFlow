@@ -16,6 +16,8 @@ class TraceabilityContract extends Contract {
      * @param {Context} ctx the transaction context
      */
 
+    //================TIMESTAMP FUNCTION===================//
+
     _getTxTimestampISO(ctx) {
         const txTime = ctx.stub.getTxTimestamp();
         const seconds = txTime.seconds.low;
@@ -32,7 +34,7 @@ class TraceabilityContract extends Contract {
 
         const products = [
             {
-                productID: 'product1',
+                productID: 'product1', //MUST BE UNIQUE
                 name: 'Organic Lakadong Turmeric',
                 owner: 'Megha-Farmers-Coop',
                 status: 'Harvested',

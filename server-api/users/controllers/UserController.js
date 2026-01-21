@@ -86,9 +86,6 @@ module.exports = {
             });
     },
 
-
-    
-
     getUsers: (req, res) => {
         UserModel.findAllUsers(req.query)
             .then((users) => {
@@ -116,6 +113,45 @@ module.exports = {
                 return res.status(200).json({
                     status: true,
                     data: user.toJSON()
+                });
+            })
+            .catch((error) => {
+                return res.status(400).json({
+                    status: false,
+                    error: error.message
+                });
+            });
+    },
+
+    // FUNCTION FOR ANY USER TO CHANGE ROLE THEMSELVES
+    changeSelfRole: (req, res) => {
+        const {
+            user: { userId },
+            body: { role }
+        } = req;
+    
+        // Only allow changing between USER and SELLER
+        const allowedRoles = ['USER', 'SELLER', 'user', 'seller'];
+        
+        if (!allowedRoles.includes(role)) {
+            return res.status(400).json({
+                status: false,
+                error: 'Invalid role. Only USER and SELLER roles are allowed.'
+            });
+        }
+    
+        // CONVERTING TO UPPERCASE
+        const normalizedRole = role.toUpperCase();
+    
+        UserModel.updateUser({ id: userId }, { role: normalizedRole })
+            .then(() => {
+                return UserModel.findUser({ id: userId });
+            })
+            .then((user) => {
+                return res.status(200).json({
+                    status: true,
+                    data: user.toJSON(),
+                    message: 'Role updated successfully'
                 });
             })
             .catch((error) => {

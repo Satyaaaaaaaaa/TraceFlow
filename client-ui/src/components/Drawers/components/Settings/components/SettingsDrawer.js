@@ -3,7 +3,22 @@ import ProfileInfo from '../../Profile/components/ProfileInfo';
 import { Button } from 'react-bootstrap'; // Ensure you have Bootstrap Button for styling
 import { FaArrowLeft } from 'react-icons/fa'; // Import back arrow icon
 
-const SettingsDrawer = ({ onUpdateProfileClick, onDeleteAccount, userInfo, onLogout, onBackClick }) => {
+const SettingsDrawer = ({ 
+  onUpdateProfileClick, 
+  onDeleteAccount, 
+  userInfo,
+  // CHANGE ROLE PROPS
+  onChangeRole,
+  showChangeRole, 
+  selectedRole,
+  setSelectedRole,
+  handleChangeRole,
+  handleCancelChangeRole,
+  currentRole,
+
+  onLogout, 
+  onBackClick 
+}) => {
   return (
     <div className="settings-drawer">
       {/* Back Button */}
@@ -15,8 +30,16 @@ const SettingsDrawer = ({ onUpdateProfileClick, onDeleteAccount, userInfo, onLog
         userInfo={userInfo}
         onUpdateProfileClick={onUpdateProfileClick}
         onDeleteAccount={onDeleteAccount}
+
+        onChangeRole={onChangeRole}
+        showChangeRole={showChangeRole}
+        selectedRole={selectedRole}
+        setSelectedRole={setSelectedRole}
+        handleChangeRole={handleChangeRole}
+        handleCancelChangeRole={handleCancelChangeRole}
+        currentRole={currentRole}
+
         onLogout={onLogout}
-        // Optionally, you can pass onLogout or any other necessary functions
       />
     </div>
   );
