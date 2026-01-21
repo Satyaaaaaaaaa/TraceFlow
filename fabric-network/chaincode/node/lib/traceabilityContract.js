@@ -81,7 +81,7 @@ class TraceabilityContract extends Contract {
 
         const productAsset = {
             docType: 'productAsset',
-            productID,
+            productID, // TODO: Should be unique
             name,
             owner,
             status: 'Created',

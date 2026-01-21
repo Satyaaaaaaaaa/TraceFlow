@@ -101,9 +101,43 @@ async function updateProductStatusWithTraceability(productId, newStatus, actorId
     }
 }
 
+async function transferOwnershipWithTraceability(productId, newOwnerId, actorId) {
+
+    let gateway;
+
+    try {
+        // 1. Connect to Fabric as the ACTOR (current owner)
+        const { gateway: gw, contract } = await getContract(actorId);
+        gateway = gw;
+
+        console.log(
+            `\n--> Submit Transaction: transferOwnership | ProductID: ${productId} | NewOwner: ${newOwnerId} | Actor: ${actorId}`
+        );
+
+        // 2. Submit ownership transfer to ledger
+        const result = await contract.submitTransaction(
+            'transferOwnership',
+            productId.toString(),
+            newOwnerId
+        );
+
+        console.log('*** Ownership transfer committed on ledger');
+
+        return result;
+
+    } catch (error) {
+        console.error(`Failed to transfer ownership: ${error}`);
+        throw new Error(`Ownership transfer failed. ${error.message}`);
+    } finally {
+        if (gateway) {
+            gateway.disconnect();
+        }
+    }
+}
 
 module.exports = {
     createProductWithTraceability,
     getFullProductDetails,
-    updateProductStatusWithTraceability
+    updateProductStatusWithTraceability,
+    transferOwnershipWithTraceability
 };

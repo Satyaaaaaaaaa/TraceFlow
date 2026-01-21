@@ -211,11 +211,12 @@ createOrder: async (req, res) => {
             include: [
                 {
                     model: Order,
+                    required: true,
                     include: [{ model: User, attributes: ['id', 'username', 'email'] }]
                 },
                 {
                     model: Product,
-                    attributes: ['id', 'name', 'price']
+                    attributes: ['id', 'name', 'price', 'image']
                 }
             ]
         });
@@ -226,10 +227,12 @@ createOrder: async (req, res) => {
             if (!groupedOrders[orderId]) {
                 groupedOrders[orderId] = {
                     orderID: orderId,
-                    buyer: item.Order.User,
+                    buyer: item.Order.user,
+                    status: item.Order.status,
                     items: []
                 };
             }
+            console.log("ORDER KEYS:", Object.keys(item.Order.dataValues));
             groupedOrders[orderId].items.push({ product: item.Product, quantity: item.quantity });
         });
 
