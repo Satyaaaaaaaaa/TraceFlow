@@ -55,4 +55,11 @@ router.delete(
     ProductController.deleteProduct
 )
 
+router.post(
+    "/sync-blockchain/:id",
+    [isAuthenticatedMiddleware.check],
+    ProductController.syncProductToBlockchain
+
+)
+
 module.exports = router;

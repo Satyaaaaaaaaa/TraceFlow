@@ -31,6 +31,11 @@ const ProductModel = sequelize.define("Product", {
       allowNull: false,
       defaultValue: productPriceUnits.DOLLAR,
     },
+    blockchainStatus: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
   });
 
 module.exports = {

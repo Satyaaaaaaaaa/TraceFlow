@@ -5,10 +5,12 @@ const cors = require("cors"); // For Cross Origin Resource Sharing
 const morgan = require("morgan"); // For logging
 require('dotenv').config();
 
+//const { getContract } = require('../../fabric-samples');
+
 const sequelize= require("./common/models/SequelizeInstance");
 
-const { port } = require("./config");
-const PORT = port || 3001;
+const { port , ADDRESS } = require("./config");
+const PORT = port || 3000;
 
 // Route Imports
 const AuthorizationRoutes = require("./authorization/routes");
@@ -47,7 +49,7 @@ sequelize
     app.use("/cart", CartRoutes)
     // app.use("/traceflow", traceflowRoutes)
 
-    app.listen(PORT, '127.0.0.1', () => {
+    app.listen(PORT, ADDRESS, () => {
       console.log("Server Listening on PORT:", port);
     });
   })

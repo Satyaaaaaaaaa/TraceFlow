@@ -42,7 +42,12 @@ const UserModel = sequelize.define("user", {
     gstin: {
         type: DataTypes.STRING,
         allowNull: true
-    }     
+    },
+    blockchainStatus: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
 });
 
 // Export the model and CRUD methods

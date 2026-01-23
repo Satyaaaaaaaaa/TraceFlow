@@ -1,6 +1,8 @@
-/node_modules
+/node_modules/
 .env
-/storage
-/uploads
-/chaincode
-/config
+storage/
+uploads/
+chaincode/
+config.js
+services/fabricService.js.temp
+services/productService.js.temp

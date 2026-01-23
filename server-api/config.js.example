@@ -1,5 +1,6 @@
 module.exports = {
-    port: 3001,
+    port: 3000,
+    ADDRESS: '0.0.0.0',
     jwtExpirationInSeconds: 60 * 60 * 60,
     roles: {
         //CONVERTED TO UPPERCASE 
