@@ -22,6 +22,9 @@ const encryptPassword = (password) => {
     return hash.digest('hex');
 }
 
+//Todo : User registers -> saved in database -> enrolled in blockchain(with x509 identity)
+//If by chance blockchain fails user is still registered in database but not in blockchain.
+//So he can login but access denied for doing anything blockchain.
 module.exports = {
     register: (req, res) => {
         const payload = req.body;
@@ -39,24 +42,40 @@ module.exports = {
         // for creating a new object that 
         // combines properties from other objects.
         .then(async (user) => {
-            
-            // --- FABRIC INTEGRATION ---
-            // After successfully creating the user in the DB, enroll them in Fabric.
-            const enroll = await enrollUser(user.username, 'client');
-            console.log("Enroll Result:", enroll);
+            let isSynced = false;
 
-            // --- END FABRIC INTEGRATION ---
+            try {
+                // --- FABRIC INTEGRATION ---
+                // Wrap this in try-catch so failure doesn't stop the registration
+                const enroll = await enrollUser(user.username, 'client');
+                console.log("Enroll Result:", enroll);
+                
+                // If enrollUser returns an object with a success property
+                isSynced = enroll && enroll.success === true;
+            } catch (fabricError) {
+                // Log the error but don't stop the execution
+                console.error("Blockchain enrollment failed, but continuing registration:", fabricError.message);
+                isSynced = false;
+            }
 
-            const accessToken = generateAccessToken(payload.username, user.id);
+            // Update the user record with whatever the result was
+            await user.update({ blockchainStatus: isSynced });
+
+            // Generate token
+            const accessToken = generateAccessToken(user.username, user.id);
+
+            // ALWAYS return status: true here because the database user was created
             return res.status(201).json({
                 status: true,
                 data: {
                     user: user.toJSON(),
                     token: accessToken,
+                    blockchainError: !isSynced
                 }
             });
         })
         .catch((error) => {
+            // This ONLY catches errors from User.create (e.g., duplicate email)
             return res.status(400).json({
                 status: false,
                 error: error.message
@@ -101,5 +120,44 @@ module.exports = {
                 error: error.message
             });
         });
+    },
+
+    syncUserToBlockchain: async (req, res) => {
+        try {
+            // 1. Extract the userId from the authenticated request
+            const userId = req.user.userId;
+
+            // 2. Fetch the user from the database
+            const user = await User.findByPk(userId);
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'User not found'
+                });
+            }
+
+            // 3. --- FABRIC INTEGRATION ---
+            // Attempt to enroll the user in Hyperledger Fabric
+            const enroll = await enrollUser(user.username, 'client');
+            console.log("Enroll Result:", enroll);
+
+            // 4. Update the database status
+            await user.update({ blockchainStatus: true });
+            
+            // 5. Return success to the Android App
+            // We use status: true and 'data' wrapper to match the Android Repository.
+            return res.status(200).json({
+                status: true,
+                data: user.toJSON()
+            });
+
+        } catch (error) {
+            console.error("Blockchain Sync Error:", error);
+            return res.status(500).json({
+                status: false,
+                error: `Blockchain sync failed: ${error.message}`
+            });
+        }
     }
 }

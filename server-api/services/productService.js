@@ -6,22 +6,26 @@ const { getContract } = require('./fabricService');
  * @param {object} productData - Data for the new product (name, description, etc.).
  * @param {string} ownerId - The username of the user creating the product.
  */
-async function createProductWithTraceability(productData, ownerId) {
+async function createProductWithTraceability(productId, productName, ownerId) {
     // 1. Create product in the primary SQL database
-    const newProduct = await createProduct(productData);
+    //const newProduct = await createProduct(productData);
 
     let gateway;
     try {
+
+        //Temporary line to fail blockchain.
+        //throw new Error('Failed blockchain haha');
+
         // 2. Connect to the Fabric network
         const { gateway: gw, contract } = await getContract(ownerId);
         gateway = gw;
 
         // 3. Submit the transaction to the blockchain ledger
-        console.log(`\n--> Submit Transaction: createProductAsset, ID: ${newProduct.id}, Name: ${newProduct.name}, Owner: ${ownerId}`);
+        console.log(`\n--> Submit Transaction: createProductAsset, ID: ${productId}, Name: ${productName}, Owner: ${ownerId}`);
         await contract.submitTransaction(
             'createProductAsset',
-            newProduct.id.toString(),
-            newProduct.name,
+            productId.toString(),
+            productName,
             ownerId
         );
         console.log('*** Result: committed');
@@ -37,7 +41,7 @@ async function createProductWithTraceability(productData, ownerId) {
         }
     }
 
-    return newProduct;
+    return { success : true, body : {productId, productName, ownerId}};
 }
 
 /**

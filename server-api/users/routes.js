@@ -13,6 +13,7 @@ const updateUserPayload = require("./schemas/updateUserPayload");
 const changeRolePayload = require("./schemas/changeRolePayload");
 
 const { roles } = require("../config");
+const AuthorizationController = require("../authorization/controllers/AuthorizationController");
 
 router.get(
     "/", 
@@ -66,6 +67,12 @@ router.delete(
   [isAuthenticatedMiddleware.check, 
     CheckPermissionMiddleware.has(roles.ADMIN)],
   UserController.deleteUser
+);
+
+router.post(
+  "/sync-blockchain", 
+   [isAuthenticatedMiddleware.check],
+    AuthorizationController.syncUserToBlockchain
 );
 
 module.exports = router;

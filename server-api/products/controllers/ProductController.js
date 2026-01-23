@@ -14,40 +14,64 @@ module.exports = {
         const authHeader = req.headers.authorization;
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, jwtSecret);
-
         const { userId } = decoded; // User ID from JWT
+
         try {
-            // Create the product
+            //Check user
             const user = await findUser({ id: userId });
             if (!user) {
-                throw new Error("User not found");
+                console.log('User not found!');
+                throw new Error("User not found!");
+            } 
+
+            if(!user.blockchainStatus){
+                console.log('User not synced with blockchain!');
+                throw new Error("Not sysnced with blockchain! Please sync");
             }
 
-            await createProductWithTraceability({ name, description, image, price, priceUnit }, user.username);
-
-            product = await createProduct({ name, description, image, price, priceUnit });
-            
+            //Create Product in DB first
+            product = await createProduct({ 
+                name, 
+                description, 
+                image, 
+                price, 
+                priceUnit,
+                blockchainStatus: false
+            });
 
             // Associate the product with the user via the join table 'UserProduct'
             // const user = await findUser({ id: userId });
-            
             await user.addProduct(product);
-
-            // If category IDs are provided, handle the category associations
+            
+            //Associate with the product categories
             if (categoryIds && categoryIds.length > 0) {
                 const categories = await findAllCategories({ id: categoryIds });
                 await product.addCategories(categories);
-                const productWithCategories = await findProduct(product.id, { include: categories });
-                return res.status(201).json({
-                    status: true,
-                    data: productWithCategories.toJSON()
-                });
-            } else {
-                return res.status(201).json({
-                    status: true,
-                    data: product.toJSON()
-                });
             }
+
+            //Sync with blockchain.
+            try{
+                const prodInfoBc = await createProductWithTraceability(product.id, name, user.username);
+
+                // If Fabric succeeds, update status to true
+                await product.update({ blockchainStatus: true });
+                console.log(`Product ${prodInfoBc.productId}, ${prodInfoBc.productName} Owner: ${prodInfoBc.ownerId} synced to blockchain.`);
+
+            }catch (fabricError) {
+                // The product remains in DB with blockchainStatus: false
+                console.error("Fabric Error Details:", fabricError.message);
+                console.error(`Blockchain sync failed for product ${product.id}. Will retry later.`);
+            }         
+            
+            // Return the product (Status will be true or false depending on Fabric success)
+            const finalProduct = await findProduct(product.id);
+            
+            return res.status(201).json({
+                status: true,
+                message: finalProduct.blockchainStatus ? "Product created and synced" : "Product created, sync pending",
+                data: finalProduct.toJSON()
+            });
+
         } catch (error) {
             return res.status(400).json({
                 status: false,
@@ -57,6 +81,9 @@ module.exports = {
     },
     getProducts: async (req, res) => {
         const { query: filters } = req;
+
+        filters.blockchainStatus = true;
+
         try {
             const products = await findAllProducts(filters);
             return res.status(200).json({
@@ -132,34 +159,90 @@ module.exports = {
     },
     
     getProductsByUserId: async (req, res) => {
-    const authHeader = req.headers.authorization;
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, jwtSecret);
-    const { userId } = decoded;
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, jwtSecret);
+        const { userId } = decoded;
 
-    try {
-        const user = await findUser({ id: userId });
-        if (!user) {
-            return res.status(404).json({
+        try {
+            const user = await findUser({ id: userId });
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: "User not found"
+                });
+            }
+
+            const products = await user.getProducts({
+                include: ['Categories'] // include categories if you want
+            });
+
+            return res.status(200).json({
+                status: true,
+                data: products.map((product) => product.toJSON())
+            });
+        } catch (error) {
+            return res.status(400).json({
                 status: false,
-                error: "User not found"
+                error: error.message
             });
         }
+    },
 
-        const products = await user.getProducts({
-            include: ['Categories'] // include categories if you want
-        });
+    syncProductToBlockchain: async (req, res) => {
+        try {
+            const { id } = req.params; // Product ID from URL
+            const authHeader = req.headers.authorization;
+            const token = authHeader.split(" ")[1];
+            const decoded = jwt.verify(token, jwtSecret);
+            const { userId } = decoded;
 
-        return res.status(200).json({
-            status: true,
-            data: products.map((product) => product.toJSON())
-        });
-    } catch (error) {
-        return res.status(400).json({
-            status: false,
-            error: error.message
-        });
+            // 1. Fetch User and check Blockchain Status
+            const user = await findUser({ id: userId });
+            if (!user || !user.blockchainStatus) {
+                return res.status(403).json({
+                    status: false,
+                    error: "User identity not verified on blockchain. Please sync profile first."
+                });
+            }
+
+            const product = await findProduct({ id });
+                if (!product) {
+                    return res.status(404).json({
+                        status: false,
+                        error: "Product not found!"
+                    });
+                }
+
+            //  --- FABRIC INTEGRATION ---
+            // Attempt to create the traceability asset on the ledger
+            console.log(`Starting Blockchain Sync for Product: ${product.name}`);
+            const prodInfoBc = await createProductWithTraceability(
+                product.id, 
+                product.name, 
+                user.username
+            );
+
+            //Update status in Database
+            await product.update({ blockchainStatus: true });
+            console.log(`Successfully synced product ${product.id} to ledger.`);
+
+            //Return updated product to Android App
+            const finalProduct = await findProduct({ id });
+            return res.status(200).json({
+                status: true,
+                message: "Product synced to blockchain successfully",
+                data: finalProduct.toJSON(),
+                blockchainData: prodInfoBc
+            });
+
+        } catch (error) {
+            console.error("Product Blockchain Sync Error:", error);
+            return res.status(500).json({
+                status: false,
+                error: `Blockchain sync failed: ${error.message}`
+            });
+        }
     }
-}
 
 };

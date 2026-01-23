@@ -5,12 +5,10 @@ const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const fs = require('fs');
 
-// const { getContract } = require('../../../fabric-dev/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json');
-
 const caTLSCACertsPath = path.resolve(
     __dirname,
     '..', '..', '..',
-    'fabric-dev', 'fabric-samples',
+    'fabric-samples',
     'test-network', 'organizations', 'fabric-ca', 'org1', 'tls-cert.pem'
 );
 
@@ -21,7 +19,10 @@ const caTLSCACertsPath = path.resolve(
  * @returns {object} The parsed connection profile JSON object.
  */
 function getCCP() {
-    const ccpPath = path.resolve(__dirname, '..', '..', '..', 'fabric-dev', 'fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
+    const ccpPath = path.resolve(
+        __dirname, 
+        '..', '..', '..', 
+        'fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
     const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
     return JSON.parse(ccpJSON);
 }
@@ -45,6 +46,9 @@ async function getWallet() {
  */
 async function enrollUser(userId, role) {
     try {
+        //Temporary line to fail blockchain.
+        //throw new Error('Failed blockchain haha');
+
         const ccp = getCCP();
         const caInfo = ccp.certificateAuthorities['ca.org1.example.com'];
         // const caTLSCACerts = caInfo.tlsCACerts.pem;
@@ -57,7 +61,7 @@ async function enrollUser(userId, role) {
         const identity = await wallet.get(userId);
         if (identity) {
             console.log(`An identity for the user "${userId}" already exists in the wallet`);
-            return;
+            throw new Error('Already exists in the wallet with a different x509 identity - Access deniey')
         }
 
         // Enroll the admin user, and import the new identity into the wallet.
@@ -65,7 +69,7 @@ async function enrollUser(userId, role) {
         if (!adminIdentity) {
             console.log('An identity for the admin user "admin" does not exist in the wallet');
             // You should run enrollAdmin.js script from fabric-samples first
-            return;
+            throw new Error('Admin identity not found in wallet. Run enrollAdmin.js first.');
         }
 
         const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
@@ -95,9 +99,12 @@ async function enrollUser(userId, role) {
         await wallet.put(userId, x509Identity);
         console.log(`Successfully registered and enrolled user "${userId}" and imported it into the wallet`);
 
+        return { success : true }
+
     } catch (error) {
         console.error(`Failed to enroll user "${userId}": ${error}`);
         // In a real app, you'd want to handle this error more gracefully
+        throw error;
     }
 }
 
