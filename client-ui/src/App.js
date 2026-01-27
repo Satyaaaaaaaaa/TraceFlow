@@ -22,6 +22,9 @@ import SellerOrders from "./components/Pages/Dashboards/SellerDashboard/componen
 import AddProduct from "./components/Pages/Dashboards/SellerDashboard/components/AddProduct";
 import MyProducts from "./components/Pages/Dashboards/SellerDashboard/components/MyProducts";
 
+import ForgetPasswordForm from "./components/Authentication/components/ForgotPasswordForm"; // ADDED PATH
+
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -102,7 +105,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/login" element={<Login onLogin={handleLogin} />}/>
+
+            <Route path="/forgot-password" element={<ForgetPasswordForm onLogin={handleLogin} />} />
+            
             <Route
               path="/admin-dashboard"
               element={userInfo?.role === "ADMIN" ? <AdminDashboard /> : <Navigate to="/" />}
@@ -143,7 +149,6 @@ function App() {
                 )
               } 
             />
-
           </Routes>
         </div>
         <ProfileDrawer

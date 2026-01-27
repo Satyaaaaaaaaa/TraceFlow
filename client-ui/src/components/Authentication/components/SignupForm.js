@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import '../styles/Signup.css';
 import validator from 'validator';
 import { useNavigate } from 'react-router-dom';
-// import ReCAPTCHA from 'react-google-recaptcha';
 
+// import ReCAPTCHA from 'react-google-recaptcha';
 // const RECAPTCHA_SITE_KEY = '6LdFmiwqAAAAACToIxlwk54wTzQyJ6usbTPZrH7w'; // Replace with your reCAPTCHA site key
 
 const SignupForm = () => {
@@ -16,10 +16,18 @@ const SignupForm = () => {
     age: '',
     firstName: '',
     lastName: '',
+    //-----------NEW FIELDS--------------------
+    phoneNumber: '',
+    role: '',
   });
+
   //const [recaptchaToken, setRecaptchaToken] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
 
+  // PASSWORD VISIBILITY TOGGLE STATES
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const handleChange = (event) => {
     setFormData({
       ...formData,
@@ -31,10 +39,26 @@ const SignupForm = () => {
   //   setRecaptchaToken(token);
   // };
 
+  const handleRoleSelect = (selectedRole) => {
+    setFormData({
+      ...formData,
+      role: selectedRole,
+    });
+  };
+
+  //FUNCTION FOR PASSWORD VISIBILITY TOGGLE
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword || !formData.age || !formData.firstName || !formData.lastName) {
+    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword || !formData.age || !formData.firstName || !formData.lastName || !formData.role || !formData.phoneNumber) {
       setMessage({ text: 'All fields are required!', type: 'error' });
       return;
     }
@@ -43,6 +67,14 @@ const SignupForm = () => {
       setMessage({ text: 'Invalid email format!', type: 'error' });
       return;
     }
+
+    // ADDED PASSWORD LENGTH VALIDATION
+    if (formData.password.length < 6) {
+      setMessage({ text: 'Password must be at least 6 characters long!', type: 'error' });
+      return;
+    }
+
+    // if (formData.age < ) AGE VALIDATION CAN BE ADDED HERE
 
     if (formData.password !== formData.confirmPassword) {
       setMessage({ text: 'Passwords do not match!', type: 'error' });
@@ -58,11 +90,7 @@ const SignupForm = () => {
       const response = await fetch("/signup", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          role: 'user', // Default role set to 'user'
-          //recaptchaToken,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -80,6 +108,8 @@ const SignupForm = () => {
         age: '',
         firstName: '',
         lastName: '',
+        phoneNumber: '',
+        role: ''
       });
       //setRecaptchaToken('');
 
@@ -94,96 +124,205 @@ const SignupForm = () => {
   return (
     <div className="signup-container">
       <form onSubmit={handleSubmit} className="signup-form">
-        <h2>Signup</h2>
+        <h2>Create Account</h2>
+        
         {message.text && (
           <p className={message.type === 'error' ? 'error-message' : 'success-message'}>
             {message.text}
           </p>
         )}
-        
-        <label htmlFor="username">Username:</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          autoComplete="username"
-          aria-label="Enter your username"
-        />
 
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          autoComplete="email"
-          aria-label="Enter your email"
-        />
+        {/*--------------------------------Role Selection-----------------------------*/}
+        <div className="role-selection">
+          <label>I Want To Be A :</label>
+          <div className="role-options">
+            <div 
+              className={`role-card ${formData.role === 'user' ? 'selected' : ''}`}
+              onClick={() => handleRoleSelect('user')}
+            >
+              <input
+                type="radio"
+                name="role"
+                value="user"
+                checked={formData.role === 'user'}
+                onChange={() => {}}
+              />
+              <div className="role-icon">🛒</div>
+              <div className="role-title">Buyer</div>
+              <div className="role-description">Buy products</div>
+            </div>
+            
+            <div 
+              className={`role-card ${formData.role === 'seller' ? 'selected' : ''}`}
+              onClick={() => handleRoleSelect('seller')}
+            >
+              <input
+                type="radio"
+                name="role"
+                value="seller"
+                checked={formData.role === 'seller'}
+                onChange={() => {}}
+              />
+              <div className="role-icon">🏪</div>
+              <div className="role-title">Seller</div>
+              <div className="role-description">Sell products</div>
+            </div>
+          </div>
+        </div>
 
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          autoComplete="new-password"
-          aria-label="Enter your password"
-        />
+        {/*------------------------------------Name Fields-------------------------------- */}
+        <div className="name-row">
+          <div className="form-group">
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              
+              //ONLY ALPHABETS ARE ALLOWED
+              onKeyPress={(e) => {
+                const charCode = e.charCode;
+                if (!((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || charCode === 32)) {
+                  e.preventDefault();
+                }
+              }}
 
-        <label htmlFor="confirmPassword">Confirm Password:</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          autoComplete="new-password"
-          aria-label="Confirm your password"
-        />
+              placeholder=" "
+              aria-label="Enter your first name"
+            />
+            <label htmlFor="firstName">First Name</label>
+          </div>
 
-        <label htmlFor="firstName">First Name:</label>
-        <input
-          type="text"
-          id="firstName"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-          aria-label="Enter your first name"
-        />
+          <div className="form-group">
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
 
-        <label htmlFor="lastName">Last Name:</label>
-        <input
-          type="text"
-          id="lastName"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          aria-label="Enter your last name"
-        />
+              //ONLY ALPHABETS ARE ALLOWED
+              onKeyPress={(e) => {
+                const charCode = e.charCode;
+                if (!((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || charCode === 32)) {
+                  e.preventDefault();
+                }
+              }}
+              placeholder=" "
+              aria-label="Enter your last name"
+            />
+            <label htmlFor="lastName">Last Name</label>
+          </div>
+        </div>
 
-        <label htmlFor="age">Age:</label>
-        <input
-          type="number"
-          id="age"
-          name="age"
-          value={formData.age}
-          onChange={handleChange}
-          aria-label="Enter your age"
-        />
+        <div className="form-group">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            autoComplete="username"
+            placeholder=" "
+            aria-label="Enter your username"
+          />
+          <label htmlFor="username">Username</label>
+        </div>
+
+        <div className="form-group">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            autoComplete="email"
+            placeholder=" "
+            aria-label="Enter your email"
+          />
+          <label htmlFor="email">Email</label>
+        </div>
+
+        <div className="form-group">
+          <input
+            type="tel"
+            id="phoneNumber"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            placeholder=" "
+            aria-label="Enter your phone number"
+          />
+          <label htmlFor="phoneNumber">Phone Number</label>
+        </div>
+
+        <div className="form-group">
+          <input
+            type="number"
+            id="age"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
+            placeholder=" "
+            aria-label="Enter your age"
+          />
+          <label htmlFor="age">Age</label>
+        </div>
+
+        <div className="form-group password-field">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+            placeholder=" "
+            aria-label="Enter your password"
+          />
+          <label htmlFor="password">Password</label>
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={togglePasswordVisibility}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? "👁️" : "👁️‍🗨️"}
+          </button>
+        </div>
+
+        <div className="form-group password-field">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            autoComplete="new-password"
+            placeholder=" "
+            aria-label="Confirm your password"
+          />
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={toggleConfirmPasswordVisibility}
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+          >
+            {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+          </button>
+        </div>
 
         {/* <ReCAPTCHA
           sitekey={RECAPTCHA_SITE_KEY}
           onChange={handleRecaptcha}
         /> */}
 
-        <button type="submit">Signup</button>
+        <button type="submit">Sign Up</button>
 
         <div className="login-link">
-          Already registered? <a href="/login">Login instead</a>
+          Already have an account? <a href="/login">Login here</a>
         </div>
       </form>
     </div>

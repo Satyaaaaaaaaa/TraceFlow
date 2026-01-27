@@ -37,8 +37,15 @@ const UserModel = sequelize.define("user", {
     role: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: roles.USER
+        //defaultValue: roles.USER //REMOVED DEFAULT VALUE
     },
+
+    //ADDED FIELD
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    
     gstin: {
         type: DataTypes.STRING,
         allowNull: true

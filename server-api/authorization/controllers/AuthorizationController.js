@@ -38,7 +38,7 @@ module.exports = {
         // is constructed using the spread operator 
         // (...) to take all properties from the 
         // payload object, and then adding or overriding
-        //  the password and role properties.
+        // the password and role properties.
         // alternative to using Object.assign()?
         // for creating a new object that 
         // combines properties from other objects.
@@ -140,13 +140,6 @@ module.exports = {
             // 2. Fetch the user from the database
             const user = await User.findByPk(userId);
 
-            if (!user) {
-                return res.status(404).json({
-                    status: false,
-                    error: 'User not found'
-                });
-            }
-
             // 3. --- FABRIC INTEGRATION ---
             // Attempt to enroll the user in Hyperledger Fabric
             const enroll = await enrollUser(user.username, 'client');
@@ -175,5 +168,86 @@ module.exports = {
                 error: `Blockchain sync failed: ${error.message}`
             });
         }
+    },
+    //HANDLES USERNAME AVAILABILITY IN THE DATABASE
+    checkUsername: async (req, res) => {
+        try {
+            const { username } = req.body;
+
+            const user = await User.findOne({ where: { username: username } });
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'Username not found'
+                });
+            }
+
+            return res.status(200).json({
+                status: true,
+                message: 'Username found'
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                error: 'Server error'
+            });
+        }
+    },
+    
+    //HANDLES FORGOT PASSWORD REQUEST
+    forgotPassword: async (req, res) => {
+        try {
+            const { username, otp, newPassword, newConfirmPassword } = req.body;
+
+            // Hardcoded OTP verification
+            const HARDCODED_OTP = '123456';
+            
+            if (otp !== HARDCODED_OTP) {
+                return res.status(400).json({
+                    status: false,
+                    error: 'Invalid OTP'
+                });
+            }
+
+            // Check if passwords match
+            if (newPassword !== newConfirmPassword) {
+                return res.status(400).json({
+                    status: false,
+                    error: 'Passwords do not match'
+                });
+            }
+
+            // Find user
+            const user = await User.findOne({ where: { username: username } });
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'User not found'
+                });
+            }
+
+            // Encrypt new password
+            const encryptedPassword = encryptPassword(newPassword);
+
+            // Update password in database
+            await User.update(
+                { password: encryptedPassword },
+                { where: { username: username } }
+            );
+
+            return res.status(200).json({
+                status: true,
+                message: 'Password reset successful'
+            });
+
+        } catch (error) {
+            console.error('Password reset error:', error);
+            return res.status(500).json({
+                status: false,
+                error: 'Server error'
+            });
+        }
     }
-}
+};

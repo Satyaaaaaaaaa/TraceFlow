@@ -25,6 +25,8 @@ const CategoryRoutes  = require("./Categories/routes")
 const SearchRoutes = require("./common/meilisearch/routes")
 // const traceflowRoutes = require("./traceflowRouters/routes");
 
+// const forgotPasswordRoutes = require("./authorization/routes/forgotPasswordRoutes"); (NOT SURE YET)
+
 app.use(morgan("tiny"));
 app.use(cors());
 
@@ -52,6 +54,7 @@ sequelize
     app.use("/category", CategoryRoutes);
     app.use("/search/", SearchRoutes);
     // app.use("/traceflow", traceflowRoutes)
+    // app.use("./authorization/routes/forgotPasswordRoutes", forgotPasswordRoutes); (NOT SURE YET)
 
     app.listen(PORT, ADDRESS, () => {
       console.log("Server Listening on PORT:", port);

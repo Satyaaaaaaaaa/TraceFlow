@@ -4,7 +4,7 @@ module.exports = {
     jwtExpirationInSeconds: 60 * 60 * 60,
     roles: {
         //CONVERTED TO UPPERCASE 
-        USER: 'USER',
+        BUYER: 'BUYER',
         ADMIN: 'ADMIN',
         SELLER: 'SELLER'
     },

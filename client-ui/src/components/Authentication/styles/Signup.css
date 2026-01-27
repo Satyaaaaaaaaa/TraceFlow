@@ -1,126 +1,337 @@
 .signup-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f5f5f5;
+  /*background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);*/
+  background: white;
+  padding: 2rem;
 }
 
 .signup-form {
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  max-width: 400px;
+  border-radius: 20px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+  padding: 3.5rem 3rem;
+  max-width: 600px;
   width: 100%;
-  text-align: center;
 }
 
 .signup-form h2 {
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  color: #333;
+  margin-bottom: 2.5rem;
+  font-size: 2.25rem;
+  color: #1a1a1a;
+  font-weight: 700;
+  text-align: center;
 }
 
-.signup-form label {
+/* Role Selection Card Style */
+.role-selection {
+  margin-bottom: 2rem;
+}
+
+.role-selection label {
   display: block;
-  margin: 0.5rem 0;
-  font-weight: bold;
-  color: #555;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+  text-align: center;
 }
 
-.signup-form input {
-  width: calc(100% - 2rem);
-  padding: 0.75rem;
-  margin: 0.5rem 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.role-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.role-card {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.role-card:hover {
+  border-color: #11998e;
+  background: #e8f8f5;
+  transform: translateY(-2px);
+}
+
+.role-card.selected {
+  border-color: #11998e;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.role-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.role-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.role-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.role-description {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* Form Fields with Floating Labels */
+.form-group {
+  margin-bottom: 1.75rem;
+  text-align: left;
+  position: relative;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 1.25rem 1rem 0.5rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
   font-size: 1rem;
   color: #333;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group label {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  color: #999;
+  font-size: 1rem;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  background: white;
+  padding: 0 0.25rem;
+}
+
+.form-group input:focus ~ label,
+.form-group input:not(:placeholder-shown) ~ label,
+.form-group select:focus ~ label,
+.form-group select:valid ~ label {
+  top: -0.5rem;
+  left: 0.75rem;
+  font-size: 0.8rem;
+  color: #11998e;
+  font-weight: 600;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #11998e;
+  box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+}
+
+.signup-form select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.form-group select option:first-child {
+  color: #999;
+}
+
+/* Password field adjustments */
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 3.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.3rem;
+  top: 10%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.35rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.3s ease;
+  z-index: 10;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.6rem;
+  max-width: 2.6rem;
+  margin: 0;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.password-toggle:hover {
+  color: #0f1910;
+  background: #f0f9f8;
+}
+
+.password-toggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: #11998e;
 }
 
 .signup-form button {
-  width: calc(100% - 2rem);
-  padding: 0.75rem;
-  margin: 1rem 0;
+  width: 100%;
+  padding: 1.1rem;
+  margin-top: 1.5rem;
   border: none;
-  border-radius: 4px;
-  background: #007bff;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.15rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
 }
 
 .signup-form button:hover {
-  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+}
+
+.signup-form button:active {
+  transform: translateY(0);
+}
+
+.error-message,
+.success-message {
+  padding: 0.875rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  border: 1px solid #fcc;
+}
+
+.success-message {
+  background: #efe;
+  color: #3c3;
+  border: 1px solid #cfc;
 }
 
 .signup-form .login-link {
-  margin: 1rem 0;
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #666;
+  font-size: 0.95rem;
 }
 
 .signup-form .login-link a {
-  color: #007bff;
+  color: #11998e;
   text-decoration: none;
+  font-weight: 600;
 }
 
 .signup-form .login-link a:hover {
   text-decoration: underline;
 }
 
-.google-recaptcha {
-  margin-top: 1rem;
+/* Two Column Layout for Name Fields */
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 @media (max-width: 768px) {
   .signup-container {
-    min-height: 80vh;
     padding: 1rem;
   }
 
   .signup-form {
-    max-width: 90vw;
-    padding: 1rem;
+    padding: 2rem 1.5rem;
+    max-width: 100%;
   }
 
   .signup-form h2 {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
   }
 
-  .signup-form input,
-  .signup-form button {
-    width: 100%;
-    font-size: 0.95rem;
-    padding: 0.6rem;
+  .role-options {
+    gap: 0.75rem;
+  }
+
+  .role-card {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .role-icon {
+    font-size: 2rem;
+  }
+
+  .name-row {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .signup-container {
-    min-height: 60vh;
-    padding: 0.5rem;
-  }
-
   .signup-form {
-    max-width: 100vw;
-    padding: 0.5rem;
-    border-radius: 0;
-    box-shadow: none;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
   }
 
   .signup-form h2 {
-    font-size: 1rem;
+    font-size: 1.3rem;
   }
 
-  .signup-form label {
-    font-size: 0.95rem;
+  .role-options {
+    gap: 0.5rem;
   }
 
-  .signup-form input,
-  .signup-form button {
+  .role-card {
+    padding: 1rem 0.5rem;
+  }
+
+  .role-icon {
+    font-size: 1.75rem;
+  }
+
+  .role-title {
     font-size: 0.9rem;
-    padding: 0.5rem;
+  }
+
+  .role-description {
+    font-size: 0.75rem;
   }
 }
