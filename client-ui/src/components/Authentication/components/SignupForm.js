@@ -87,6 +87,7 @@ const SignupForm = () => {
     // }
 
     try {
+
       const response = await fetch("/signup", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,14 +138,14 @@ const SignupForm = () => {
           <label>I Want To Be A :</label>
           <div className="role-options">
             <div 
-              className={`role-card ${formData.role === 'user' ? 'selected' : ''}`}
-              onClick={() => handleRoleSelect('user')}
+              className={`role-card ${formData.role === 'BUYER' ? 'selected' : ''}`}
+              onClick={() => handleRoleSelect('BUYER')}
             >
               <input
                 type="radio"
                 name="role"
-                value="user"
-                checked={formData.role === 'user'}
+                value="BUYER"
+                checked={formData.role === 'BUYER'}
                 onChange={() => {}}
               />
               <div className="role-icon">🛒</div>
@@ -153,14 +154,14 @@ const SignupForm = () => {
             </div>
             
             <div 
-              className={`role-card ${formData.role === 'seller' ? 'selected' : ''}`}
-              onClick={() => handleRoleSelect('seller')}
+              className={`role-card ${formData.role === 'SELLER' ? 'selected' : ''}`}
+              onClick={() => handleRoleSelect('SELLER')}
             >
               <input
                 type="radio"
                 name="role"
-                value="seller"
-                checked={formData.role === 'seller'}
+                value="SELLER"
+                checked={formData.role === 'SELLER'}
                 onChange={() => {}}
               />
               <div className="role-icon">🏪</div>
@@ -181,9 +182,8 @@ const SignupForm = () => {
               onChange={handleChange}
               
               //ONLY ALPHABETS ARE ALLOWED
-              onKeyPress={(e) => {
-                const charCode = e.charCode;
-                if (!((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || charCode === 32)) {
+              onKeyDown={(e) => {
+                if (!/^[a-zA-Z ]$/.test(e.key)) {
                   e.preventDefault();
                 }
               }}
@@ -203,9 +203,8 @@ const SignupForm = () => {
               onChange={handleChange}
 
               //ONLY ALPHABETS ARE ALLOWED
-              onKeyPress={(e) => {
-                const charCode = e.charCode;
-                if (!((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || charCode === 32)) {
+              onKeyDown={(e) => {
+                if (!/^[a-zA-Z ]$/.test(e.key)) {
                   e.preventDefault();
                 }
               }}
@@ -246,11 +245,18 @@ const SignupForm = () => {
 
         <div className="form-group">
           <input
-            type="tel"
+            type="text"
             id="phoneNumber"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
+            //ONLY NUMBERS ARE ALLOWED
+            onKeyDown={(e) => {
+              const charCode = e.charCode;
+                if (!(charCode > 48 && charCode <= 57)) {
+                  e.preventDefault();
+                }
+            }}
             placeholder=" "
             aria-label="Enter your phone number"
           />

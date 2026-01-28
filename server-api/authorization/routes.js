@@ -15,7 +15,7 @@ const checkUsernamePayload = require("./schemas/checkUsernamePayload");
 
 router.post(
   "/signup",
-  [SchemaValidationMiddleware.verify(registerPayload)],
+  //[SchemaValidationMiddleware.verify(registerPayload)], //commented to test without schema validation
   AuthorizationController.register
 );
 

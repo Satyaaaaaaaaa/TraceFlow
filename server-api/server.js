@@ -5,7 +5,9 @@ const cors = require("cors"); // For Cross Origin Resource Sharing
 const morgan = require("morgan"); // For logging
 require('dotenv').config();
 
-//const { getContract } = require('../../fabric-samples');
+//TESTING HEADER SIZE
+const http = require('http');
+http.globalAgent.maxHeaderSize = 16384;
 
 const sequelize= require("./common/models/SequelizeInstance");
 

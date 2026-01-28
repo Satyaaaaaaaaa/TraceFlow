@@ -29,9 +29,6 @@ module.exports = {
                 status: false,
                 error: validate.errors
             });
-
-            
         }
-
     }
 }

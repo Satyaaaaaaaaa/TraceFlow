@@ -132,43 +132,6 @@ module.exports = {
         });
     },
 
-    syncUserToBlockchain: async (req, res) => {
-        try {
-            // 1. Extract the userId from the authenticated request
-            const userId = req.user.userId;
-
-            // 2. Fetch the user from the database
-            const user = await User.findByPk(userId);
-
-            // 3. --- FABRIC INTEGRATION ---
-            // Attempt to enroll the user in Hyperledger Fabric
-            const enroll = await enrollUser(user.username, 'client');
-            console.log("Enroll Result:", enroll);
-
-            // 4. Update the database status
-            await user.update({ blockchainStatus: true });
-
-            // REQUIRED: update blockchain status table (source of truth)
-            await updateUserBCStatus(
-                { userId },
-                { blockchainStatus: true }
-            );
-            
-            // 5. Return success to the Android App
-            // We use status: true and 'data' wrapper to match the Android Repository.
-            return res.status(200).json({
-                status: true,
-                data: user.toJSON()
-            });
-
-        } catch (error) {
-            console.error("Blockchain Sync Error:", error);
-            return res.status(500).json({
-                status: false,
-                error: `Blockchain sync failed: ${error.message}`
-            });
-        }
-    },
     //HANDLES USERNAME AVAILABILITY IN THE DATABASE
     checkUsername: async (req, res) => {
         try {

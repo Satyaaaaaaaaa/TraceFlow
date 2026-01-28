@@ -1,5 +1,6 @@
 import "./App.css";
 import Navbar from "./components/Navbar/components/Navbar";
+import CollapsibleCategorySidebar from "./components/Categories/CollapsibleCategorySidebar";
 import CategoryNavbar from "./components/Categories/CategoryNavbar";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Home from "./components/Navbar/components/Home";
@@ -99,6 +100,7 @@ function App() {
           onLogout={handleLogout}
           onProfileClick={() => setShowProfileDrawer(true)}
         />
+        <CollapsibleCategorySidebar />
         <CategoryNavbar />
         <div className="container">
           <Routes>

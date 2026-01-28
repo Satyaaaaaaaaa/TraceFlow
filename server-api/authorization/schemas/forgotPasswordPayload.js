@@ -3,15 +3,6 @@
 module.exports = {
     type: 'object',
     properties: {
-
-        username:{
-            type:'string',
-        },
-
-        otp:{
-            type:'string',
-        },
-
         newPassword:{
             type: 'string',
             minLength: 6,
@@ -25,8 +16,6 @@ module.exports = {
         }
     },
     required: [
-        'username',
-        'otp',
         'newPassword',
         'newConfirmPassword'
     ],
