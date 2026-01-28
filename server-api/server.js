@@ -20,7 +20,9 @@ const ProductRoutes = require("./products/routes");
 const UploadImageRoutes = require("./common/images/UploadImage");
 const OrderRoutes = require("./order/routes");
 const CartRoutes = require("./cart/routes");
-const { Cart } = require("./common/models/Cart");
+//const { Cart } = require("./common/models/Cart");
+const CategoryRoutes  = require("./Categories/routes")
+const SearchRoutes = require("./common/meilisearch/routes")
 // const traceflowRoutes = require("./traceflowRouters/routes");
 
 app.use(morgan("tiny"));
@@ -47,6 +49,7 @@ sequelize
     app.use("/upload/image", UploadImageRoutes);
     app.use("/order", OrderRoutes);
     app.use("/cart", CartRoutes)
+    app.use("/category", CategoryRoutes);
     // app.use("/traceflow", traceflowRoutes)
 
     app.listen(PORT, ADDRESS, () => {

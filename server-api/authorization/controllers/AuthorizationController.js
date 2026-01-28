@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { enrollUser } = require("../../services/fabricService");
 const {User} = require('../../common/models/associations');
 const { roles, jwtExpirationInSeconds } = require('../../config');
+const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
 
 const jwtSecret = process.env.JWT_SECRET
 
@@ -26,7 +27,7 @@ const encryptPassword = (password) => {
 //If by chance blockchain fails user is still registered in database but not in blockchain.
 //So he can login but access denied for doing anything blockchain.
 module.exports = {
-    register: (req, res) => {
+    register: async (req, res) => {
         const payload = req.body;
         let encryptedPassword = encryptPassword(payload.password);
         let role = payload.role || roles.USER;
@@ -42,6 +43,10 @@ module.exports = {
         // for creating a new object that 
         // combines properties from other objects.
         .then(async (user) => {
+
+            // REQUIRED: create BC status AFTER user exists
+            await createUserBCStatus(user.id);
+
             let isSynced = false;
 
             try {
@@ -55,11 +60,22 @@ module.exports = {
             } catch (fabricError) {
                 // Log the error but don't stop the execution
                 console.error("Blockchain enrollment failed, but continuing registration:", fabricError.message);
-                isSynced = false;
             }
 
             // Update the user record with whatever the result was
             await user.update({ blockchainStatus: isSynced });
+
+            await updateUserBCStatus(
+                { userId: user.id },
+                { blockchainStatus: isSynced }
+            );
+
+
+            // Update ONLY the BC status table
+            await updateUserBCStatus(
+                { userId: user.id },
+                { blockchainStatus: isSynced }
+            );
 
             // Generate token
             const accessToken = generateAccessToken(user.username, user.id);
@@ -144,6 +160,12 @@ module.exports = {
 
             // 4. Update the database status
             await user.update({ blockchainStatus: true });
+
+            // REQUIRED: update blockchain status table (source of truth)
+            await updateUserBCStatus(
+                { userId },
+                { blockchainStatus: true }
+            );
             
             // 5. Return success to the Android App
             // We use status: true and 'data' wrapper to match the Android Repository.

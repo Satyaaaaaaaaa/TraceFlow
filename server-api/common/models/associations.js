@@ -72,6 +72,9 @@ const { Product } = require('./Product');
 const { Category } = require("./Category");
 const { Cart } = require("./Cart");
 const { CartItem } = require("./Cart");
+const { UserBlockchainStatus } = require("./UserBlockchainStatus");
+const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
+
 
 const sequelize = require("sequelize");
 
@@ -86,7 +89,7 @@ OrderItem.belongsTo(Order, { foreignKey: 'orderID' });
 Product.hasMany(OrderItem, { foreignKey: 'productID' });
 OrderItem.belongsTo(Product, { foreignKey: 'productID' });
 
-Product.belongsToMany(Category, { through: 'ProductCategory' });
+Product.belongsToMany(Category, { through: 'ProductCategory'});
 Category.belongsToMany(Product, { through: 'ProductCategory' });
 
 User.belongsToMany(Product, { through: 'UserProduct' });
@@ -103,5 +106,10 @@ User.hasMany(Address, { foreignKey: 'userID' });
 Address.belongsTo(User, { foreignKey: 'userID' });
 Order.belongsTo(Address, { foreignKey: 'addressID' });
 Address.hasMany(Order, { foreignKey: 'addressID' });
+
+User.hasOne(UserBlockchainStatus, { foreignKey: "userId", onDelete: "CASCADE" });
+UserBlockchainStatus.belongsTo(User, { foreignKey: "userId" });
+Product.hasOne(ProductBlockchainStatus, { foreignKey: "productId", onDelete: "CASCADE" });
+ProductBlockchainStatus.belongsTo(Product, { foreignKey: "productId" });
 
 module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address };

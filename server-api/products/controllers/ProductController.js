@@ -1,6 +1,8 @@
 const { initialise, createProduct, findProduct, updateProduct, findAllProducts, deleteProduct } = require("../../common/models/Product");
+const { findProductBCStatus, createProductBCStatus, updateProductBCStatus, ProductBlockchainStatus} = require("../../common/models/ProductBlockchainStatus")
+const { findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
 const { findUser } = require("../../common/models/User");
-const { findAllCategories } = require("../../common/models/Category");
+const { Category, findAllCategories } = require("../../common/models/Category");
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -9,12 +11,18 @@ const { createProductWithTraceability, getFullProductDetails } = require('../../
 module.exports = {
     createProduct: async (req, res) => {
         const { name, description, price, image, categoryIds } = req.body;
+
+        let finalCategoryIds = categoryIds;
+        if (!finalCategoryIds || finalCategoryIds.length === 0) finalCategoryIds = [1];
+        
         const priceUnit = req.body.priceUnit || "inr";
 
         const authHeader = req.headers.authorization;
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, jwtSecret);
         const { userId } = decoded; // User ID from JWT
+
+
 
         try {
             //Check user
@@ -24,13 +32,14 @@ module.exports = {
                 throw new Error("User not found!");
             } 
 
-            if(!user.blockchainStatus){
-                console.log('User not synced with blockchain!');
-                throw new Error("Not sysnced with blockchain! Please sync");
+            const userBC = await findUserBCStatus({ userId });
+
+            if (!userBC || !userBC.blockchainStatus) {
+                throw new Error("User not synced with blockchain! Please sync");
             }
 
             //Create Product in DB first
-            product = await createProduct({ 
+            const product = await createProduct({ 
                 name, 
                 description, 
                 image, 
@@ -39,15 +48,16 @@ module.exports = {
                 blockchainStatus: false
             });
 
+            await createProductBCStatus(product.id);
+
             // Associate the product with the user via the join table 'UserProduct'
             // const user = await findUser({ id: userId });
             await user.addProduct(product);
             
             //Associate with the product categories
-            if (categoryIds && categoryIds.length > 0) {
-                const categories = await findAllCategories({ id: categoryIds });
-                await product.addCategories(categories);
-            }
+            const categories = await findAllCategories({ id: finalCategoryIds });
+            await product.addCategories(categories);
+            
 
             //Sync with blockchain.
             try{
@@ -55,6 +65,11 @@ module.exports = {
 
                 // If Fabric succeeds, update status to true
                 await product.update({ blockchainStatus: true });
+                await updateProductBCStatus(
+                    { productId: product.id },
+                    { blockchainStatus: true }
+                );
+
                 console.log(`Product ${prodInfoBc.productId}, ${prodInfoBc.productName} Owner: ${prodInfoBc.ownerId} synced to blockchain.`);
 
             }catch (fabricError) {
@@ -64,11 +79,13 @@ module.exports = {
             }         
             
             // Return the product (Status will be true or false depending on Fabric success)
-            const finalProduct = await findProduct(product.id);
+            const finalProduct = await findProduct({id : product.id});
+            const productBC = await findProductBCStatus({ productId: product.id });
+
             
             return res.status(201).json({
                 status: true,
-                message: finalProduct.blockchainStatus ? "Product created and synced" : "Product created, sync pending",
+                message: productBC.blockchainStatus ? "Product created and synced" : "Product created, sync pending",
                 data: finalProduct.toJSON()
             });
 
@@ -80,12 +97,36 @@ module.exports = {
         }
     },
     getProducts: async (req, res) => {
-        const { query: filters } = req;
 
-        filters.blockchainStatus = true;
+        const cat = req.query.cat;
+
+        if (cat && isNaN(Number(cat))) {
+            return res.status(200).json({
+                status: true,
+                data: []
+            });
+        }
+        const categoryId = cat ? Number(cat) : null;
+
+        console.log("cat param:", categoryId, typeof cat);
 
         try {
-            const products = await findAllProducts(filters);
+            const products = await findAllProducts({}, {
+                include: [
+                    {
+                        model: Category,
+                        ...(categoryId && { where: { id: categoryId } }),
+                        required: !!categoryId,
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: ProductBlockchainStatus,
+                        where: { blockchainStatus: true }
+                    }
+                ],
+                distinct: true
+            });
+
             return res.status(200).json({
                 status: true,
                 data: products.map((product) => product.toJSON())
@@ -199,10 +240,12 @@ module.exports = {
 
             // 1. Fetch User and check Blockchain Status
             const user = await findUser({ id: userId });
-            if (!user || !user.blockchainStatus) {
+            const userBC = await findUserBCStatus({ userId });
+
+            if (!user || !userBC || !userBC.blockchainStatus) {
                 return res.status(403).json({
                     status: false,
-                    error: "User identity not verified on blockchain. Please sync profile first."
+                    error: "User identity not verified on blockchain."
                 });
             }
 
@@ -225,6 +268,10 @@ module.exports = {
 
             //Update status in Database
             await product.update({ blockchainStatus: true });
+            await updateProductBCStatus(
+                { productId: product.id },
+                { blockchainStatus: true }
+            );
             console.log(`Successfully synced product ${product.id} to ledger.`);
 
             //Return updated product to Android App
@@ -243,6 +290,5 @@ module.exports = {
                 error: `Blockchain sync failed: ${error.message}`
             });
         }
-    }
-
+    },
 };

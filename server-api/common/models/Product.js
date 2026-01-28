@@ -48,8 +48,8 @@ module.exports = {
   updateProduct: (query, updatedValues) => {
       return ProductModel.update(updatedValues, { where: query });
   },
-  findAllProducts: (query) => {
-      return ProductModel.findAll({ where: query });
+  findAllProducts: (where = {}, options = {}) => {
+      return ProductModel.findAll({ where, ...options});
   },
   deleteProduct: (query) => {
       return ProductModel.destroy({ where: query });
