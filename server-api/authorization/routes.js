@@ -10,6 +10,7 @@ const SchemaValidationMiddleware = require("../common/middlewares/SchemaValidati
 const registerPayload = require("./schemas/registerPayload");
 const loginPayload = require("./schemas/loginPayload");
 
+// SCHEMA FOR FORGOT PASSWORD
 const forgotPasswordPayload = require("./schemas/forgotPasswordPayload");
 const checkUsernamePayload = require("./schemas/checkUsernamePayload");
 

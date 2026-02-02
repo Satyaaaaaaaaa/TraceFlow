@@ -1,7 +1,7 @@
 import "./App.css";
 import Navbar from "./components/Navbar/components/Navbar";
+//import CategoryNavbar from "./components/Categories/CategoryNavbar";
 import CollapsibleCategorySidebar from "./components/Categories/CollapsibleCategorySidebar";
-import CategoryNavbar from "./components/Categories/CategoryNavbar";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Home from "./components/Navbar/components/Home";
 import About from "./components/Drawers/components/About/components/About";
@@ -30,6 +30,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // NEW: Sidebar state (starts collapsed)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -91,17 +92,33 @@ function App() {
     navigate("/", { state: { message: "You have been logged out successfully." } });
   };
 
+  const handleMenuToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <CartProvider>
-      <div className="App">
+      <div className={`App ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+
         <Navbar
           isAuthenticated={isAuthenticated}
           userInfo={userInfo}
           onLogout={handleLogout}
           onProfileClick={() => setShowProfileDrawer(true)}
+          onMenuToggle={handleMenuToggle}
+
         />
-        <CollapsibleCategorySidebar />
-        <CategoryNavbar />
+        <CollapsibleCategorySidebar 
+          isOpen={sidebarOpen} 
+          onToggle={(isOpenNow) => setSidebarOpen(isOpenNow)}
+          onCategorySelect={(category) => {
+            // Optional: If you want to handle category selection here too
+            console.log('Selected:', category);
+            // e.g., navigate(`/products?category=${category.id}`);
+          }}
+        />
+
+        {/*<CategoryNavbar />*/}
         <div className="container">
           <Routes>
             <Route path="/" element={<Home />} />

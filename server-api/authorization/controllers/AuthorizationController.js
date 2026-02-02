@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const { enrollUser } = require("../../services/fabricService");
 const {User} = require('../../common/models/associations');
 const { roles, jwtExpirationInSeconds } = require('../../config');
-const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
+const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("../../common/models/UserBlockchainStatus");
+//const { log } = require('console');
 
 const jwtSecret = process.env.JWT_SECRET
 
@@ -27,10 +28,13 @@ const encryptPassword = (password) => {
 //If by chance blockchain fails user is still registered in database but not in blockchain.
 //So he can login but access denied for doing anything blockchain.
 module.exports = {
+
     register: async (req, res) => {
+        console.log("Registration Request Received");
         const payload = req.body;
         let encryptedPassword = encryptPassword(payload.password);
         let role = payload.role || roles.USER;
+        console.log("Register Payload:", payload);
         User.create(
             Object.assign(payload, { password: encryptedPassword, role })
         )
@@ -45,7 +49,9 @@ module.exports = {
         .then(async (user) => {
 
             // REQUIRED: create BC status AFTER user exists
+            console.log("Creating blockchain status record for user ID:", user.id);
             await createUserBCStatus(user.id);
+            console.log("Blockchain status record created.");
 
             let isSynced = false;
 
@@ -65,7 +71,6 @@ module.exports = {
             // Update the user record with whatever the result was
             await user.update({ blockchainStatus: isSynced });
 
-            // Update ONLY the BC status table
             await updateUserBCStatus(
                 { userId: user.id },
                 { blockchainStatus: isSynced }
@@ -130,6 +135,51 @@ module.exports = {
                 error: error.message
             });
         });
+    },
+
+    syncUserToBlockchain: async (req, res) => {
+        try {
+            // 1. Extract the userId from the authenticated request
+            const userId = req.user.userId;
+
+            // 2. Fetch the user from the database
+            const user = await User.findByPk(userId);
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'User not found'
+                });
+            }
+
+            // 3. --- FABRIC INTEGRATION ---
+            // Attempt to enroll the user in Hyperledger Fabric
+            const enroll = await enrollUser(user.username, 'client');
+            console.log("Enroll Result:", enroll);
+
+            // 4. Update the database status
+            await user.update({ blockchainStatus: true });
+
+            // REQUIRED: update blockchain status table (source of truth)
+            await updateUserBCStatus(
+                { userId },
+                { blockchainStatus: true }
+            );
+            
+            // 5. Return success to the Android App
+            // We use status: true and 'data' wrapper to match the Android Repository.
+            return res.status(200).json({
+                status: true,
+                data: user.toJSON()
+            });
+
+        } catch (error) {
+            console.error("Blockchain Sync Error:", error);
+            return res.status(500).json({
+                status: false,
+                error: `Blockchain sync failed: ${error.message}`
+            });
+        }
     },
 
     //HANDLES USERNAME AVAILABILITY IN THE DATABASE

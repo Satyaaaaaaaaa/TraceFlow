@@ -2,12 +2,100 @@
   padding: 20px;
 }
 
+/* ===== FILTER INDICATOR ===== */
+.filter-indicator {
+  background-color: #e8f5e9;
+  border-left: 4px solid #098153;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  color: #555;
+  font-size: 14px;
+}
+
+.filter-indicator strong {
+  color: #098153;
+  font-size: 15px;
+}
+
+.clear-filter-btn {
+  margin-left: auto;
+  background-color: #fff;
+  border: 1px solid #098153;
+  color: #098153;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.clear-filter-btn:hover {
+  background-color: #098153;
+  color: #fff;
+}
+
+/* ===== PRODUCTS GRID ===== */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr); /* 4 columns */
   gap: 20px; /* Space between items */
 }
 
+/* ===== NO PRODUCTS MESSAGE ===== */
+.no-products {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.no-products h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.no-products p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.view-all-btn {
+  background-color: #098153;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.view-all-btn:hover {
+  background-color: #076b43;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  text-align: center;
+  color: #dc3545;
+  padding: 40px;
+  font-size: 16px;
+}
+
+/* ===== BUY NOW BUTTON ===== */
 .buy-now-btn {
   background-color: #28a745;
   color: white;
@@ -16,13 +104,14 @@
   border-radius: 5px;
   cursor: pointer;
   margin-top: auto; /* Ensures the button is at the bottom */
+  transition: background-color 0.2s;
 }
 
 .buy-now-btn:hover {
   background-color: #218838;
 }
 
-/* Style for the Load More button */
+/* ===== LOAD MORE BUTTON ===== */
 .load-more-btn {
   display: block;
   margin: 30px auto; /* Centered with margin */
@@ -45,6 +134,12 @@
 .load-more-btn:focus {
   outline: none;
 }
+
+.load-more-btn:active {
+  transform: translateY(0);
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .products-grid {
     grid-template-columns: repeat(3, 1fr); /* 3 columns for medium screens */
@@ -66,6 +161,24 @@
     font-size: 16px;
     padding: 9px 12px;
   }
+
+  .filter-indicator {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .clear-filter-btn {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+
+  .no-products h3 {
+    font-size: 20px;
+  }
+
+  .no-products p {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -83,5 +196,33 @@
     font-size: 15px;
     padding: 8px 10px;
     border-radius: 6px;
+  }
+
+  .filter-indicator {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .clear-filter-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .no-products {
+    padding: 40px 16px;
+  }
+
+  .no-products h3 {
+    font-size: 18px;
+  }
+
+  .no-products p {
+    font-size: 13px;
+  }
+
+  .view-all-btn {
+    font-size: 14px;
+    padding: 10px 20px;
   }
 }

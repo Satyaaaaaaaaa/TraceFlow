@@ -34,6 +34,18 @@ const SignupForm = () => {
       [event.target.name]: event.target.value,
     });
   };
+  
+  //PRINTING SIZE OF DATA BEING SENT TO THE SERVER
+  /*const payload = JSON.stringify(formData);
+
+  // size in bytes
+  const sizeInBytes = new Blob([payload]).size;
+  
+  // optional: KB
+  const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+  
+  console.log("Signup payload size:", sizeInBytes, "bytes");
+  console.log("Signup payload size:", sizeInKB, "KB");*/
 
   // const handleRecaptcha = (token) => {
   //   setRecaptchaToken(token);
