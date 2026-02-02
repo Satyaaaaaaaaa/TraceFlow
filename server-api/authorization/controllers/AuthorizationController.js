@@ -65,12 +65,6 @@ module.exports = {
             // Update the user record with whatever the result was
             await user.update({ blockchainStatus: isSynced });
 
-            await updateUserBCStatus(
-                { userId: user.id },
-                { blockchainStatus: isSynced }
-            );
-
-
             // Update ONLY the BC status table
             await updateUserBCStatus(
                 { userId: user.id },

@@ -15,3 +15,5 @@ fabric-network/wallet
 note_pad.txt
 server-api/migrations/
 tree.txt
+package-lock.json
+package.json
