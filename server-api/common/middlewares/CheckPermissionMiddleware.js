@@ -3,9 +3,7 @@ const UserModel = require("../models/User");
 module.exports = {
     has: (role) => {
         return (req, res, next) => {
-            const {
-                user: {userId},
-            } = req;
+            const { userId } = jwt.verify(req.headers.authorization.split(" ")[1], jwtSecret);
 
             UserModel.findUser({id: userId})
             .then((user) => {
