@@ -50,6 +50,7 @@ sequelize
     app.use("/order", OrderRoutes);
     app.use("/cart", CartRoutes)
     app.use("/category", CategoryRoutes);
+    app.use("/search/", SearchRoutes);
     // app.use("/traceflow", traceflowRoutes)
 
     app.listen(PORT, ADDRESS, () => {

@@ -6,7 +6,12 @@ const { Category, findAllCategories } = require("../../common/models/Category");
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
+const searchClient = require("../../common/meilisearch/meili");
+const mapProductToSearch = require("../../common/meilisearch/mapper/productSearchMapper");
+
+
 const { createProductWithTraceability, getFullProductDetails } = require('../../services/productService');
+
 
 module.exports = {
     createProduct: async (req, res) => {
@@ -72,6 +77,21 @@ module.exports = {
 
                 console.log(`Product ${prodInfoBc.productId}, ${prodInfoBc.productName} Owner: ${prodInfoBc.ownerId} synced to blockchain.`);
 
+                // Sync product to search index (DO NOT block request)
+                try {
+                    await searchClient
+                        .index("products")
+                        .addDocuments([mapProductToSearch(product)]);
+                    } catch (searchError) {
+                    console.error(
+                        `Search sync failed for product ${product.id}:`,
+                        searchError.message
+                    );
+                }
+
+                console.log(`Product added to search client`)
+                
+                
             }catch (fabricError) {
                 // The product remains in DB with blockchainStatus: false
                 console.error("Fabric Error Details:", fabricError.message);
@@ -273,6 +293,18 @@ module.exports = {
                 { blockchainStatus: true }
             );
             console.log(`Successfully synced product ${product.id} to ledger.`);
+
+            // Sync product to search index (DO NOT block request)
+            try {
+                await searchClient
+                    .index("products")
+                    .addDocuments([mapProductToSearch(product)]);
+                } catch (searchError) {
+                console.error(
+                    `Search sync failed for product ${product.id}:`,
+                    searchError.message
+                );
+            }
 
             //Return updated product to Android App
             const finalProduct = await findProduct({ id });
