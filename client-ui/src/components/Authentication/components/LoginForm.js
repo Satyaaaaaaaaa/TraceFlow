@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import '../styles/login.css';
 import Spinner from '../../Spinner'; // Import Spinner component
 import UserRedirect from '../../Pages/userRedirect';
-import GoogleSignIn from './GoogleSignIn'; // Import GoogleSignIn component
+import GoogleSignIn from './GoogleSignIn';  // Import GoogleSignIn component
+//import ForgotPasswordForm from './ForgotPasswordForm'; // Import ForgotPassword component
 
 const LoginForm = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const LoginForm = ({ onLogin }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [authToken, setAuthToken] = useState('');
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     setFormData({
@@ -23,7 +24,7 @@ const LoginForm = ({ onLogin }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true); // Show spinner when form is submitting
+    setLoading(true);
 
     if (!formData.username || !formData.password) {
       setErrorMessage('Username and Password are required!');
@@ -60,40 +61,62 @@ const LoginForm = ({ onLogin }) => {
       console.error('Login error:', error);
       setErrorMessage('Login failed. Please try again.');
     } finally {
-      setLoading(false); // Hide spinner when submission is done
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      {loading && <Spinner />} {/* Show spinner while loading */}
+      {loading && <Spinner />}
       <form onSubmit={handleSubmit} className="login-form">
-        <h2>Login</h2>
+        <h2>Welcome Back</h2>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
-        <label htmlFor="username">Username:</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          autoComplete="username"
-        />
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          autoComplete="current-password"
-        />
-        <button type="submit">Login</button>
-        <div className="signup-link">
-          Not registered? <a href="/signup">Register now</a>
+        
+        <div className="form-group">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            autoComplete="username"
+            placeholder=" "
+          />
+          <label htmlFor="username">Username</label>
         </div>
+
+        <div className="form-group">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+            placeholder=" "
+          />
+          <label htmlFor="password">Password</label>
+        </div>
+
+        {/* ADD THIS SECTION - Forgot Password Link */}
+        <div className="forgot-password-link">
+          <a href="/forgot-password" className="forgot-password-btn">
+            Forgot Password?
+          </a>
+        </div>
+
+        <button type="submit">Login</button>
+
+        <div className="divider">
+          <span>or</span>
+        </div>
+
         <div className="google-sign-in">
-          <GoogleSignIn onLogin={onLogin} /> {/* Add Google Sign-In button */}
+          <GoogleSignIn onLogin={onLogin} />
+        </div>
+
+        <div className="signup-link">
+          Don't have an account? <a href="/signup">Sign up</a>
         </div>
       </form>
       {isLoggedIn && authToken && <UserRedirect token={authToken} />}

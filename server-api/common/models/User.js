@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { roles } = require("../../config");
+//const { roles } = require("../../config");
 const sequelize = require("./SequelizeInstance");
 
 // Define the User model
@@ -36,9 +36,15 @@ const UserModel = sequelize.define("user", {
     },
     role: {
         type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: roles.USER
+        allowNull: false
     },
+
+    //ADDED FIELD
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    
     gstin: {
         type: DataTypes.STRING,
         allowNull: true
@@ -48,7 +54,8 @@ const UserModel = sequelize.define("user", {
         allowNull: false,
         defaultValue: false
     }
-});
+});     
+
 
 // Export the model and CRUD methods
 module.exports = {

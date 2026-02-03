@@ -1,7 +1,6 @@
 {
   "name": "store-frontend",
   "version": "0.1.0",
-  "proxy": "http://localhost:3000",
   "private": true,
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
@@ -12,23 +11,22 @@
     "bootstrap": "^5.3.3",
     "jwt-decode": "^4.0.0",
     "mdb-react-ui-kit": "^8.0.0",
-    "mdbreact": "^5.2.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
     "react-dom": "^18.3.1",
-    "react-icons": "^5.2.1",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.23.1",
     "react-scripts": "^5.0.1",
     "react-toastify": "^10.0.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "set PORT=3002 && react-app-rewired start",
+    "start": "react-scripts start",
     "dev": "npm run start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "both": "concurrently \"npm start\" \"node store-api/server.js\""
+    "both": "concurrently \"npm start\" \"node ../store-api/server.js\""
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +47,7 @@
     ]
   },
   "devDependencies": {
-    "react-app-rewired": "^2.2.1"
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0"
   }
 }

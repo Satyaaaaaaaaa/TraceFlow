@@ -147,7 +147,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
         if (selectedRole === 'SELLER') {
           navigate('/seller-dashboard');
         } 
-        else if (selectedRole === 'USER') {
+        else if (selectedRole === 'BUYER') {
           navigate('/');  // PATH TO USER DASHBOARD
         }
         // RELOAD TO REFLECT CHANGES (NEED TO UPDATE UI AS WELL)

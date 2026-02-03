@@ -1,5 +1,36 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App .container {
+  padding-top: 70px; /* Space for fixed navbar */
+  margin-left: 60px; /* Space for collapsed sidebar */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: calc(100vh - 70px);
+}
+
+.App.sidebar-open .container {
+  margin-left: 240px; /* Space for expanded sidebar */
+}
+
+/* When sidebar is closed (default), use mini variant width */
+.App.sidebar-closed .container {
+  margin-left: 60px;
+}
+
+.main-content {
+  margin-left: 60px;
+  margin-top: 60px; /* Adjust based on navbar height */
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+  min-height: calc(100vh - 60px);
+}
+
+.App.sidebar-expanded .main-content {
+  margin-left: 280px;
 }
 
 .App-logo {
@@ -37,14 +68,33 @@
   }
 }
 
+/* Mobile responsive */
 @media (max-width: 768px) {
   .App-header {
     min-height: 70vh;
     font-size: calc(8px + 2vmin);
     padding: 20px;
   }
+  
   .App-logo {
     height: 30vmin;
+  }
+  .App .container {
+    margin-left: 60px;
+    padding-top: 60px;
+  }
+  
+  /* When open on mobile, remove margin (sidebar overlays) */
+  .App.sidebar-open .container {
+    margin-left: 60px; /* Keep mini width, sidebar will overlay */
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .App.sidebar-expanded .main-content {
+    margin-left: 0;
   }
 }
 
@@ -54,7 +104,23 @@
     font-size: calc(6px + 2vmin);
     padding: 10px;
   }
+  
   .App-logo {
     height: 20vmin;
+  }
+  .App .container {
+    margin-left: 0; /* No margin on very small screens */
+    padding-top: 60px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .App.sidebar-open .container {
+    margin-left: 0;
+  }
+  
+  .main-content {
+    margin-top: 50px;
+    padding: 10px;
   }
 }

@@ -5,7 +5,9 @@ const cors = require("cors"); // For Cross Origin Resource Sharing
 const morgan = require("morgan"); // For logging
 require('dotenv').config();
 
-//const { getContract } = require('../../fabric-samples');
+//TESTING HEADER SIZE
+//const http = require('http');
+// http.globalAgent.maxHeaderSize = 16384;
 
 const sequelize= require("./common/models/SequelizeInstance");
 
@@ -21,18 +23,15 @@ const UploadImageRoutes = require("./common/images/UploadImage");
 const OrderRoutes = require("./order/routes");
 const CartRoutes = require("./cart/routes");
 //const { Cart } = require("./common/models/Cart");
-const CategoryRoutes  = require("./Categories/routes")
+const CategoryRoutes  = require("./Categories/routes") //server-api/Categories/routes.js
 const SearchRoutes = require("./common/meilisearch/routes")
 // const traceflowRoutes = require("./traceflowRouters/routes");
-const adminRoutes = require("./admin/routes");
 
 app.use(morgan("tiny"));
 app.use(cors());
 
 app.use(express.json({ limit: '25mb' }));
 app.use('/uploads', express.static('uploads'));
-
-
 
 // Syncing the models that are defined on sequelize with the tables that alredy exists
 // in the database. It creates models as tables that do not exist in the DB.
@@ -53,7 +52,6 @@ sequelize
     app.use("/category", CategoryRoutes);
     app.use("/search", SearchRoutes);
     // app.use("/traceflow", traceflowRoutes)
-    app.use("/admin", adminRoutes);
 
     app.listen(PORT, ADDRESS, () => {
       console.log("Server Listening on PORT:", port);

@@ -46,6 +46,14 @@ async function getWallet() {
  */
 async function enrollUser(userId, role) {
     try {
+        //temporary line to skip blockchain 
+        const SKIP_BLOCKCHAIN = true; // 🔥 toggle this later
+
+        if (SKIP_BLOCKCHAIN) {
+            console.log("Successfully skipped blockchain enrollment");
+            return { success: true };
+        }
+
         //Temporary line to fail blockchain.
         //throw new Error('Failed blockchain haha');
 

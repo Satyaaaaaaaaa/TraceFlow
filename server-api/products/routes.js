@@ -54,7 +54,6 @@ router.delete(
     CheckPermissionMiddleware.has(roles.ADMIN),
     ProductController.deleteProduct
 )
-
 router.post(
     "/sync-blockchain/:id",
     [isAuthenticatedMiddleware.check],

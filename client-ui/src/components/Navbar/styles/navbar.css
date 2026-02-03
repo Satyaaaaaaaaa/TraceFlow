@@ -2,6 +2,35 @@
 .navbar-container {
   background-color: #4b4d4367; /* Olive green for a farmer theme */
   padding: 1px 1px; /* Reduce padding to make navbar thinner */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100; 
+}
+
+.hamburger-menu-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+  padding: 8px 12px;
+  margin-right: 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger-menu-btn:hover {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.hamburger-menu-btn:active {
+  transform: scale(0.95);
 }
 
 /* Navbar brand and title */
@@ -172,6 +201,10 @@
   .navbar-container {
     padding: 2px 0;
   }
+  .hamburger-menu-btn {
+    font-size: 20px;
+    padding: 6px 10px;
+  }
   .navbar-center {
     flex-grow: unset;
     width: 100%;
@@ -210,6 +243,11 @@
 @media (max-width: 480px) {
   .navbar-container {
     padding: 1px 0;
+  }
+  .hamburger-menu-btn {
+    font-size: 18px;
+    padding: 6px 8px;
+    margin-right: 8px;
   }
   .navbar-center {
     justify-content: center;
