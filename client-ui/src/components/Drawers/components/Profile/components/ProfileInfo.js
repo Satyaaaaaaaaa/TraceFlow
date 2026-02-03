@@ -68,11 +68,11 @@ const ProfileInfo = ({
               size="lg"
             >
               <option value="">Choose a role...</option>
-              <option value="USER">User</option>
+              <option value="BUYER">Buyer</option>
               <option value="SELLER">Seller</option>
             </Form.Select>
             <Form.Text className="text-muted">
-              Choose whether you want to be a regular user or a seller
+              Choose Whether You Want To Be A Regular Buyer Or A Seller
             </Form.Text>
           </Form.Group>
         </Form>

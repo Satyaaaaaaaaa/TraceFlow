@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const { enrollUser } = require("../../services/fabricService");
 const {User} = require('../../common/models/associations');
 const { roles, jwtExpirationInSeconds } = require('../../config');
-const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
+const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("../../common/models/UserBlockchainStatus");
+//const { log } = require('console');
 
 const jwtSecret = process.env.JWT_SECRET
 
@@ -27,10 +28,13 @@ const encryptPassword = (password) => {
 //If by chance blockchain fails user is still registered in database but not in blockchain.
 //So he can login but access denied for doing anything blockchain.
 module.exports = {
+
     register: async (req, res) => {
+        console.log("Registration Request Received");
         const payload = req.body;
         let encryptedPassword = encryptPassword(payload.password);
         let role = payload.role || roles.USER;
+        console.log("Register Payload:", payload);
         User.create(
             Object.assign(payload, { password: encryptedPassword, role })
         )
@@ -38,14 +42,16 @@ module.exports = {
         // is constructed using the spread operator 
         // (...) to take all properties from the 
         // payload object, and then adding or overriding
-        //  the password and role properties.
+        // the password and role properties.
         // alternative to using Object.assign()?
         // for creating a new object that 
         // combines properties from other objects.
         .then(async (user) => {
 
             // REQUIRED: create BC status AFTER user exists
+            console.log("Creating blockchain status record for user ID:", user.id);
             await createUserBCStatus(user.id);
+            console.log("Blockchain status record created.");
 
             let isSynced = false;
 
@@ -65,7 +71,6 @@ module.exports = {
             // Update the user record with whatever the result was
             await user.update({ blockchainStatus: isSynced });
 
-            // Update ONLY the BC status table
             await updateUserBCStatus(
                 { userId: user.id },
                 { blockchainStatus: isSynced }
@@ -175,5 +180,87 @@ module.exports = {
                 error: `Blockchain sync failed: ${error.message}`
             });
         }
+    },
+
+    //HANDLES USERNAME AVAILABILITY IN THE DATABASE
+    checkUsername: async (req, res) => {
+        try {
+            const { username } = req.body;
+
+            const user = await User.findOne({ where: { username: username } });
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'Username not found'
+                });
+            }
+
+            return res.status(200).json({
+                status: true,
+                message: 'Username found'
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                error: 'Server error'
+            });
+        }
+    },
+    
+    //HANDLES FORGOT PASSWORD REQUEST
+    forgotPassword: async (req, res) => {
+        try {
+            const { username, otp, newPassword, newConfirmPassword } = req.body;
+
+            // Hardcoded OTP verification
+            const HARDCODED_OTP = '123456';
+            
+            if (otp !== HARDCODED_OTP) {
+                return res.status(400).json({
+                    status: false,
+                    error: 'Invalid OTP'
+                });
+            }
+
+            // Check if passwords match
+            if (newPassword !== newConfirmPassword) {
+                return res.status(400).json({
+                    status: false,
+                    error: 'Passwords do not match'
+                });
+            }
+
+            // Find user
+            const user = await User.findOne({ where: { username: username } });
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'User not found'
+                });
+            }
+
+            // Encrypt new password
+            const encryptedPassword = encryptPassword(newPassword);
+
+            // Update password in database
+            await User.update(
+                { password: encryptedPassword },
+                { where: { username: username } }
+            );
+
+            return res.status(200).json({
+                status: true,
+                message: 'Password reset successful'
+            });
+
+        } catch (error) {
+            console.error('Password reset error:', error);
+            return res.status(500).json({
+                status: false,
+                error: 'Server error'
+            });
+        }
     }
-}
+};

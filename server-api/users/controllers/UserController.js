@@ -126,14 +126,15 @@ module.exports = {
             user: { userId },
             body: { role }
         } = req;
-    
-        // Only allow changing between USER and SELLER
-        const allowedRoles = ['USER', 'SELLER', 'user', 'seller'];
+
+        //UPDATED TO BUYER AND SELLER)
+        // Only allow changing between BUYER and SELLER
+        const allowedRoles = ['BUYER', 'SELLER', 'buyer', 'seller'];
         
         if (!allowedRoles.includes(role)) {
             return res.status(400).json({
                 status: false,
-                error: 'Invalid role. Only USER and SELLER roles are allowed.'
+                error: 'Invalid role. Only BUYER and SELLER roles are allowed.'
             });
         }
     
