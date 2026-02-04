@@ -14,6 +14,8 @@ const { createProductWithTraceability, getFullProductDetails } = require('../../
 
 
 module.exports = {
+    
+    //todo: create different function for creating product , bloackchain and different function for handling http
     createProduct: async (req, res) => {
         const { name, description, price, image, categoryIds } = req.body;
 

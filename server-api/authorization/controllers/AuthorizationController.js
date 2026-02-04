@@ -8,6 +8,7 @@ const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("..
 
 const jwtSecret = process.env.JWT_SECRET
 
+//todo jwt sign with username, usrId and role aswell
 const generateAccessToken = (username, userId) => {
     return jwt.sign({ 
         username, userId
@@ -97,7 +98,6 @@ module.exports = {
             });
         });
     },
-
     login: (req, res) => {
         const { username, password } = req.body;
         console.log("Username: " + username)

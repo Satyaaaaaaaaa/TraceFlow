@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
+//todo: modify, such that it attaches userId, username and role ... so jwt verification is not required in controllers
 module.exports = { 
     check: (req, res, next) => {
         const authHeader = req.headers.authorization;
