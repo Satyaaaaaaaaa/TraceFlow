@@ -70,6 +70,7 @@ async function getFullProductDetails(productId, userId) {
         
         const history = JSON.parse(result.toString());
 
+        //QUESTION: SHOULD WE COMBINE SQL PRODUCT DETAILS AND BLOCKCHAIN PRODUCT DETAILS? OR RELY ENTRIERLY ON ONE(EITHER SQL OR BLOCKCHAIN)
         // 3. Combine and return
         return {
             ...productDetails.toJSON(),

@@ -3,6 +3,8 @@ const { findProductBCStatus, createProductBCStatus, updateProductBCStatus, Produ
 const { findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
 const { findUser } = require("../../common/models/User");
 const { Category, findAllCategories } = require("../../common/models/Category");
+const { ProductImages } = require("../../common/models/ProductImages");
+
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -17,20 +19,28 @@ module.exports = {
     
     //todo: create different function for creating product , bloackchain and different function for handling http
     createProduct: async (req, res) => {
-        const { name, description, price, image, categoryIds } = req.body;
+        const { name, description, price, images, categoryIds } = req.body;
 
+        if (!images || !Array.isArray(images) || images.length === 0) {
+            return res.status(400).json({
+                status: false,
+                error: "At least one image is required"
+            });
+        }
+
+        
         let finalCategoryIds = categoryIds;
         if (!finalCategoryIds || finalCategoryIds.length === 0) finalCategoryIds = [1];
         
         const priceUnit = req.body.priceUnit || "inr";
-
+        
         const authHeader = req.headers.authorization;
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, jwtSecret);
         const { userId } = decoded; // User ID from JWT
-
-
-
+        
+        
+        
         try {
             //Check user
             const user = await findUser({ id: userId });
@@ -38,22 +48,30 @@ module.exports = {
                 console.log('User not found!');
                 throw new Error("User not found!");
             } 
-
+            
             const userBC = await findUserBCStatus({ userId });
-
+            
             if (!userBC || !userBC.blockchainStatus) {
                 throw new Error("User not synced with blockchain! Please sync");
             }
-
+            
             //Create Product in DB first
             const product = await createProduct({ 
                 name, 
                 description, 
-                image, 
-                price, 
+                price,
+                image: images[0],
                 priceUnit,
                 blockchainStatus: false
             });
+            
+            await ProductImages.bulkCreate(
+                images.map((imagePath, index) => ({
+                    productId: product.id,
+                    imageUrl: imagePath,
+                    position: index
+                }))
+            );
 
             await createProductBCStatus(product.id);
 

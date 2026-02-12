@@ -26,17 +26,21 @@ const upload = multer({
       cb('Error: Images Only!');
     }
   },
-  limits: { fileSize: 5 * 1024 * 1024 } // 5 MB limit
+  limits: { fileSize: 5 * 1024 * 1024, files : 6 } // 5 MB limit
 });
 
 
 // Image upload endpoint
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', upload.array('image', 6), (req, res) => {
   try {
+    const files = req.files.map(file => ({
+      filename: file.filename,
+      path: file.path
+    }));
+
     res.json({
-      message: 'Image uploaded successfully',
-      filename: req.file.filename,
-      path: req.file.path
+      message: "Images uploaded successfully",
+      files
     });
   } catch (error) {
     res.status(500).send(error.message);
