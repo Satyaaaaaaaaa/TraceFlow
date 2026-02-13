@@ -9,8 +9,12 @@ module.exports = {
     description: {
       type: "string",
     },
-    image: {
-      type: "string",
+    images: {
+      type: "array",
+      minItems: 1,
+      items: {
+        type: "string",
+      }
     },
     price: {
       type: "number",
@@ -26,6 +30,6 @@ module.exports = {
       },
     }
   },
-  required: ["name", "description", "image", "price", "categoryIds"],
+  required: ["name", "description", "images", "price", "categoryIds"],
   additionalProperties: false,
 };

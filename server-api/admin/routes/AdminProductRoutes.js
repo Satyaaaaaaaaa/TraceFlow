@@ -6,11 +6,11 @@ const ProductController = require("../../products/controllers/ProductController"
 const AdminProductController = require("../controllers/AdminProductController")
 
 //Create new product
-router.post(
-  "/",
-  SchemaValidation.verify(createProductPayload),
-  ProductController.createProduct
-);
+// router.post(
+//   "/",
+//   SchemaValidation.verify(createProductPayload),
+//   ProductController.createProduct
+// );
 //Cannot create product because the products only belong to a certain seller not to admin because admin is not seller(blockchain)
 
 //Read products

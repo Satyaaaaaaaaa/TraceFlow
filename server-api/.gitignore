@@ -61,3 +61,8 @@ logs/
 .dockerignore
 
 config.js
+uploads/
+storage/
+chaincode/
+config/
+config.js

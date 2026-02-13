@@ -11,25 +11,46 @@ module.exports = {
                 });
             }
 
-            // You must decide who is calling this
-            // For now, assume it as an admin
-            //since any user can check the product history is they have the qr code
-            const PUBLIC_USER_ID = 'temp';
+            //TODO
+            const PUBLIC_USER_ID = 'admin';
 
             const product = await getFullProductDetails(
                 asset_id,
                 PUBLIC_USER_ID
             );
 
-            const timeline = (product.traceabilityHistory || []).map(h => ({
-                stage: h.action || 'UNKNOWN',
-                location: h.location || product.owner || 'UNKNOWN',
-                timestamp: h.timestamp
-            }));
+            //OUTPUT FROM BLOCKCHAIN
+
+            // Chaincode invoke successful. result: status:200 payload:
+            // "[{\"timestamp\":{\"seconds\":1770707887,\"nanos\":601000000},
+            // \"txId\":\"75c7efdd2ad8e35a9980fd0d618f30a31c32520caaa6cf68f7e424cc105581c6\",
+            // \"value\":{\"docType\":\"productAsset\",
+            // \"productID\":\"1\",\"
+            // name\":\"watch\",
+            // \"owner\":\"abc\",
+            // \"status\":\"Created\",
+            // \"history\":[{\"timestamp\":\"2026-02-10T07:18:07.601Z\",\"actor\":\"abc\",\"action\":\"Product Asset Created\"}]}}]"
+
+
+
+            const timeline = [];
+
+            (product.traceabilityHistory || []).forEach(record => {
+                const historyEntries = record.value?.history || [];
+
+                historyEntries.forEach(h => {
+                    timeline.push({
+                        stage: h.action,
+                        actor: h.actor,
+                        location: record.value.owner,
+                        timestamp: h.timestamp
+                    });
+                });
+            });
 
             return res.status(200).json({
                 assetId: asset_id,
-                isAuthentic: true,
+                isAuthentic: timeline.length > 0,
                 productName: product.name,
                 timeline
             });

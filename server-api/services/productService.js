@@ -62,12 +62,15 @@ async function getFullProductDetails(productId, userId) {
         const { gateway: gw, contract } = await getContract(userId);
         gateway = gw;
 
+        //Todo : userId and contract thing
+
         console.log(`\n--> Evaluate Transaction: getProductHistory, ID: ${productId}`);
         const result = await contract.evaluateTransaction('getProductHistory', productId);
         console.log(`*** Result: ${result.toString()}`);
         
         const history = JSON.parse(result.toString());
 
+        //QUESTION: SHOULD WE COMBINE SQL PRODUCT DETAILS AND BLOCKCHAIN PRODUCT DETAILS? OR RELY ENTRIERLY ON ONE(EITHER SQL OR BLOCKCHAIN)
         // 3. Combine and return
         return {
             ...productDetails.toJSON(),

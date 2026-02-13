@@ -73,6 +73,9 @@ const { Cart,CartItem } = require("./Cart");
 const { UserBlockchainStatus } = require("./UserBlockchainStatus");
 const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
 const { Payment } = require("./Payment");
+const { ProductImages }  = require("./ProductImages")
+
+
 
 const sequelize = require("sequelize");
 
@@ -119,4 +122,10 @@ Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });
 Payment.belongsTo(Order, { foreignKey: 'orderID' });
 
 module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Category,Payment };
+
+
+Product.hasMany(ProductImages, { foreignKey: "productId", as: "images", onDelete: "CASCADE"});
+ProductImages.belongsTo(Product, { foreignKey: "productId" });
+
+module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address };
 
