@@ -17,8 +17,10 @@ export const createProduct = (productData) => {
     return axios.post(API_URL, productData, { headers: getAuthHeaders() });
 };
 
-export const listProducts = () => {
-    return axios.get(API_URL, { headers: getAuthHeaders() });
+export const listProducts = ({ limit, offset }) => {
+  return axios.get('/search', {
+    params: { limit, offset }
+  });
 };
 
 // Add other API calls as needed

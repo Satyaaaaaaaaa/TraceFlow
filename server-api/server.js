@@ -24,17 +24,16 @@ const OrderRoutes = require("./order/routes");
 const CartRoutes = require("./cart/routes");
 //const { Cart } = require("./common/models/Cart");
 const CategoryRoutes  = require("./Categories/routes") //server-api/Categories/routes.js
-//const SearchRoutes = require("./common/meilisearch/routes")
+const SearchRoutes = require("./common/meilisearch/routes")
 // const traceflowRoutes = require("./traceflowRouters/routes");
-// const forgotPasswordRoutes = require("./authorization/routes/forgotPasswordRoutes"); (NOT SURE YET)
 
-
-
-app.use(morgan("tiny"));
-app.use(cors());
+const { Payment } = require('./common/models/Payment');
 
 app.use(express.json({ limit: '25mb' }));
 app.use('/uploads', express.static('uploads'));
+
+app.use(morgan("tiny"));
+app.use(cors());
 
 // Syncing the models that are defined on sequelize with the tables that alredy exists
 // in the database. It creates models as tables that do not exist in the DB.
@@ -57,8 +56,28 @@ sequelize
     // app.use("/traceflow", traceflowRoutes)
     // app.use("./authorization/routes/forgotPasswordRoutes", forgotPasswordRoutes); (NOT SURE YET)
 
-    app.listen(PORT, ADDRESS, () => {
+    app.listen(PORT, ADDRESS, async () => {
       console.log("Server Listening on PORT:", port);
+      
+      // Auto-seed categories if empty (NEW)
+      setTimeout(async () => {
+        try {
+          const { Category } = require("./common/models/Category");
+          const count = await Category.count();
+          
+          if (count === 0) {
+            console.log('🌱 Database empty, auto-seeding categories...');
+            const { seedCategories } = require('./Categories/controllers/CategoriesController');
+            await seedCategories({}, { 
+              status: () => ({ json: (data) => console.log('✅ Auto-seed:', data.message) }) 
+            });
+          } else {
+            console.log(`✅ ${count} categories already in database`);
+          }
+        } catch (err) {
+          console.error('Auto-seed error:', err.message);
+        }
+      }, 1000);
     });
   })
   .catch((err) => {

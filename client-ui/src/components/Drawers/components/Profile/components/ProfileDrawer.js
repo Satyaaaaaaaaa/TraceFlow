@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthOptions from './AuthOptions';
 import SettingsDrawer from '../../Settings/components/SettingsDrawer';
 import UpdateProfileForm from './UpdateProfileForm';
-import { Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBoxes } from '@fortawesome/free-solid-svg-icons';
-import { FaCog, FaShoppingCart, FaUserCircle, FaCrown } from 'react-icons/fa';
+import ProfileInfo from './ProfileInfo';
 import '../styles/ProfileDrawer.css';
 
 const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout }) => {
@@ -14,20 +11,17 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [age, setAge] = useState('');
-  const [email, setEmail] = useState(''); //  Ensure email state is included
-  const [role, setRole] = useState(''); //  Ensure role state is included
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [showUpdateProfile, setShowUpdateProfile] = useState(false);
   const navigate = useNavigate();
 
-  //NEW CONSTS FOR CHANGE ROLE
+  // Change role states
   const [showChangeRole, setShowChangeRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState('');
 
-  //  Debugging logs to check `userInfo`
   useEffect(() => {
-    //console.log("UserInfo received in ProfileDrawer:", userInfo);
-
     if (userInfo) {
       setUserName(userInfo.username || '');
       setFirstName(userInfo.firstName || '');
@@ -38,13 +32,9 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
     }
   }, [userInfo]);
 
-  //  Debugging logs to verify state updates
-  useEffect(() => {
-    //console.log(" Updated State - Email:", email, " Role:", role);
-  }, [email, role]);
-
   const handleOrdersClick = () => {
     navigate('/my-orders');
+    onClose();
   };
 
   const handleSettingsClick = () => {
@@ -57,7 +47,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
 
   const handleUpdateProfile = async () => {
     try {
-      const response = await fetch('/user/', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/user`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +75,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
     if (!confirmation) return;
 
     try {
-      const response = await fetch(`/user/${userInfo.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/${userInfo.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -112,10 +102,6 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
     setShowUpdateProfile(false);
   };
 
-  // ================================
-  // CHANGE USER FUNCTIONALITY
-  // ================================
-
   const handleChangeRole = async () => {
     if (!selectedRole) {
       alert('Please select a role');
@@ -126,7 +112,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
     if (!confirmation) return;
 
     try {
-      const response = await fetch(`/user/change-role/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/change-role/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -143,18 +129,13 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
         setShowChangeRole(false);
         setSelectedRole('');
 
-
         if (selectedRole === 'SELLER') {
           navigate('/seller-dashboard');
-        } 
-        else if (selectedRole === 'BUYER') {
-          navigate('/');  // PATH TO USER DASHBOARD
+        } else if (selectedRole === 'BUYER') {
+          navigate('/');
         }
-        // RELOAD TO REFLECT CHANGES (NEED TO UPDATE UI AS WELL)
         window.location.reload();
-      } 
-      
-      else {
+      } else {
         alert(result.error || 'Failed to change role');
       }
     } catch (error) {
@@ -164,20 +145,31 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
   };
 
   const handleOpenChangeRole = () => {
-    setSelectedRole(role || 'USER'); // Default to current role or USER
+    setSelectedRole(role || 'BUYER');
     setShowChangeRole(true);
   };
 
   const handleCancelChangeRole = () => {
     setShowChangeRole(false);
     setSelectedRole('');
+    onClose();
   };
 
   return (
-    <div className={`drawer ${isOpen ? 'drawer-open' : ''}`}>
-      <div className="drawer-content">
-        <button className="drawer-close" onClick={onClose}>X</button>
-        <div className="drawer-top-content">
+    <>
+      {/* Backdrop */}
+      {isOpen && <div className="drawer-backdrop open" onClick={onClose} />}
+      
+      {/* Drawer */}
+      <div className={`profile-drawer ${isOpen ? 'drawer-open' : ''}`}>
+        {/* Header */}
+        <div className="drawer-header">
+          <h3 className="drawer-title">Account</h3>
+          <button className="drawer-close-btn" onClick={onClose}>×</button>
+        </div>
+
+        {/* Body */}
+        <div className="drawer-body">
           {isAuthenticated ? (
             showUpdateProfile ? (
               <UpdateProfileForm
@@ -195,9 +187,6 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                 onClose={() => setShowSettings(false)}
                 onUpdateProfileClick={handleUpdateProfileClick}
                 onDeleteAccount={handleDeleteAccount}
-
-                //----------ROLE CHANGE PROPS-----------
-
                 onChangeRole={handleOpenChangeRole} 
                 showChangeRole={showChangeRole}  
                 selectedRole={selectedRole}  
@@ -205,56 +194,27 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                 handleChangeRole={handleChangeRole}  
                 handleCancelChangeRole={handleCancelChangeRole}  
                 currentRole={role}
-
                 onBackClick={onClose}
                 onLogout={onLogout}
               />
             ) : (
-              <>
-                <div className="mb-3 text-center">
-                  {userInfo?.profilePic ? (
-                    <img
-                      src={userInfo.profilePic}
-                      alt="Profile"
-                      className="img-fluid rounded-circle"
-                      style={{ width: '150px', height: '150px' }}
-                    />
-                  ) : (
-                    <FaUserCircle size={150} />
-                  )}
-                  <h4>{userName}</h4>
-                  <p>Email: {email || 'Not Available'}</p> {/* Email displayed here */}
-                  <p>Role: {role || 'Not Available'}</p>   {/* Role displayed here */}
-                </div>
-
-                <div className="d-flex flex-column align-items-center">
-                  <Button variant="link" onClick={handleSettingsClick} className="mb-2 text-center">
-                    <FaCog className="me-2" /> Profile Settings
-                  </Button>
-                  <Button variant="link" onClick={handleOrdersClick} className="text-center mb-2">
-                    <FaShoppingCart className="me-2" /> My Orders
-                  </Button>
-                  {role === 'ADMIN' && (
-                    <Button
-                      variant="link"
-                      onClick={() => navigate('/admin-dashboard')}
-                      className="text-center"
-                    >
-                      <FaCrown className="me-2" /> Go to Admin Dashboard
-                    </Button>
-                  )}
-
-                  {role === 'SELLER' && (
-                    <Button
-                      variant="link"
-                      onClick={() => navigate(('/seller-dashboard'))} //NAVIGATE TO SELLER DASHBOARD
-                      className="text-center"
->
-                      <FontAwesomeIcon icon={faBoxes} className="me-2" /> My Products
-                    </Button>
-                  )}
-                </div>
-              </>
+              <ProfileInfo
+                userInfo={userInfo}
+                userName={userName}
+                email={email}
+                role={role}
+                onOrdersClick={handleOrdersClick}
+                onSettingsClick={handleSettingsClick}
+                onChangeRole={handleOpenChangeRole}
+                onDeleteAccount={handleDeleteAccount}
+                onLogout={onLogout}
+                navigate={navigate}
+                showChangeRole={showChangeRole}
+                selectedRole={selectedRole}
+                setSelectedRole={setSelectedRole}
+                handleChangeRole={handleChangeRole}
+                handleCancelChangeRole={handleCancelChangeRole}
+              />
             )
           ) : (
             <AuthOptions
@@ -264,7 +224,7 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

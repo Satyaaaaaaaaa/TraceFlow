@@ -24,6 +24,7 @@ import AddProduct from "./components/Pages/Dashboards/SellerDashboard/components
 import MyProducts from "./components/Pages/Dashboards/SellerDashboard/components/MyProducts";
 
 import ForgetPasswordForm from "./components/Authentication/components/ForgotPasswordForm"; // ADDED PATH
+//import Product from './components/Products/Product';
 
 
 function App() {
@@ -140,6 +141,7 @@ function App() {
             <Route path="/order" element={<Order />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/my-orders" element={<MyOrders userID={userInfo?.id} />} />
+            {/*<Route path="/products" element={<Product />} />*/}
             <Route path="/product/:productID" element={<ProductDetails />} />
             <Route path="/add-address" element={<AddAddress />} />
             <Route path="/seller-orders" element={<SellerOrders />} />

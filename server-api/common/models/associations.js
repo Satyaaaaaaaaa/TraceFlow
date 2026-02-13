@@ -65,16 +65,14 @@
 
 // associations.js
 const { User } = require('./User');
-const { Order } = require('./Order');
+const { Order,OrderItem } = require('./Order');
 const { Address } = require("./Address");
-const { OrderItem } = require("./Order");
 const { Product } = require('./Product');
 const { Category } = require("./Category");
-const { Cart } = require("./Cart");
-const { CartItem } = require("./Cart");
+const { Cart,CartItem } = require("./Cart");
 const { UserBlockchainStatus } = require("./UserBlockchainStatus");
 const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
-
+const { Payment } = require("./Payment");
 
 const sequelize = require("sequelize");
 
@@ -112,4 +110,13 @@ UserBlockchainStatus.belongsTo(User, { foreignKey: "userId" });
 Product.hasOne(ProductBlockchainStatus, { foreignKey: "productId", onDelete: "CASCADE" });
 ProductBlockchainStatus.belongsTo(Product, { foreignKey: "productId" });
 
-module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address };
+// Category self-referencing for hierarchy
+Category.hasMany(Category, { as: 'subcategories', foreignKey: 'parentId' });
+Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
+
+//Payment Associations
+Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });
+Payment.belongsTo(Order, { foreignKey: 'orderID' });
+
+module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Category,Payment };
+

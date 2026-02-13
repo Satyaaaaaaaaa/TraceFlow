@@ -12,6 +12,7 @@ const mapProductToSearch = require("../../common/meilisearch/mapper/productSearc
 
 const { createProductWithTraceability, getFullProductDetails } = require('../../services/productService');
 
+const { Op } = require("sequelize");
 
 module.exports = {
     createProduct: async (req, res) => {
@@ -116,6 +117,7 @@ module.exports = {
             });
         }
     },
+    
     getProducts: async (req, res) => {
 
         const cat = req.query.cat;
@@ -158,6 +160,74 @@ module.exports = {
             });
         }
     },
+
+    /* ========== TEST API VIA http://localhost:3001/product ================
+    ========================= CURSOR PAGINATION =============================
+    getProducts: async (req, res) => {
+        const cat = req.query.cat;
+        const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+        const cursor = req.query.cursor ? Number(req.query.cursor) : null;
+
+        if (cat && isNaN(Number(cat))) {
+            return res.status(200).json({
+                status: true,
+                data: [],
+                pagination: { hasMore: false }
+            });
+        }
+
+        const categoryId = cat ? Number(cat) : null;
+
+        try {
+            const where = {};
+
+            // Cursor logic
+            if (cursor) {
+                where.id = { [Op.gt]: cursor };
+            }
+
+            const products = await findAllProducts(where, {
+                limit: limit + 1, // fetch one extra
+                order: [["id", "ASC"]],
+                include: [
+                    {
+                        model: Category,
+                        ...(categoryId && { where: { id: categoryId } }),
+                        required: !!categoryId,
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: ProductBlockchainStatus,
+                        where: { blockchainStatus: true }
+                    }
+                ],
+                distinct: true
+            });
+
+            const hasMore = products.length > limit;
+            const slicedProducts = hasMore ? products.slice(0, limit) : products;
+
+            const nextCursor = hasMore
+                ? slicedProducts[slicedProducts.length - 1].id
+                : null;
+
+            return res.status(200).json({
+                status: true,
+                data: slicedProducts.map(p => p.toJSON()),
+                pagination: {
+                    nextCursor,
+                    hasMore
+                }
+            });
+
+        } catch (error) {
+            return res.status(400).json({
+                status: false,
+                error: error.message
+            });
+        }
+    },*/
+
     getProduct: async (req, res) => {
         const { id } = req.params;
         try {
@@ -179,6 +249,7 @@ module.exports = {
             });
         }
     },
+
     updateProduct: async (req, res) => {
         const { id } = req.params;
         const payload = req.body;
@@ -203,6 +274,7 @@ module.exports = {
             });
         }
     },
+
     deleteProduct: async (req, res) => {
         const { id } = req.params;
         try {
