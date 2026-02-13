@@ -18,4 +18,4 @@ tree.txt
 package-lock.json
 package.json
 .bin/loose-envify
-
+.history
