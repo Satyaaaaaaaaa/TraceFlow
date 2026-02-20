@@ -18,10 +18,10 @@ const ProductModel = sequelize.define("Product", {
       type: DataTypes.STRING,
       allowNull: false
     },
-    image: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    // image: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    // },
     price: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -31,10 +31,16 @@ const ProductModel = sequelize.define("Product", {
       allowNull: false,
       defaultValue: productPriceUnits.DOLLAR,
     },
-    blockchainStatus: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
+    // blockchainStatus: {
+    //     type: DataTypes.BOOLEAN,
+    //     allowNull: false,
+    //     defaultValue: false
+    // },
+    uuid: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      unique: true,
     }
   });
 
@@ -42,8 +48,8 @@ module.exports = {
   createProduct: (product) => {
     return ProductModel.create(product);
   },
-  findProduct: (query) => {
-      return ProductModel.findOne({ where: query });
+  findProduct: (where = {}, options = {}) => {
+      return ProductModel.findOne({ where, ...options });
   },
   updateProduct: (query, updatedValues) => {
       return ProductModel.update(updatedValues, { where: query });

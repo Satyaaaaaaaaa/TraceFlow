@@ -22,7 +22,7 @@ router.get(
 
 router.get(
     "/:id",
-    isAuthenticatedMiddleware.check,
+    //isAuthenticatedMiddleware.check,
     ProductController.getProduct
 )
 

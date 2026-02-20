@@ -1,6 +1,10 @@
-const { Cart, CartItem, Order, Product, OrderItem ,User } = require('../../common/models/associations');
+const { Cart, CartItem, Order, Product, OrderItem ,User, Image } = require('../../common/models/associations');
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
+
+const { Op } = require("sequelize");
+
+const { formatProductImages } = require("../../products/utils/formatProductImages");
 
 module.exports = {
     // createOrderItem: async (req, res) => {
@@ -20,118 +24,153 @@ module.exports = {
     // },
 
 createOrder: async (req, res) => {
+
     const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: "Authorization header missing" });
+    if (!authHeader)
+        return res.status(401).json({ message: "Authorization header missing" });
 
     const token = authHeader.split(" ")[1];
+
     let decoded;
     try {
         decoded = jwt.verify(token, jwtSecret);
-    } catch (err) {
+    } catch {
         return res.status(401).json({ message: "Invalid or expired token" });
     }
 
     const userID = decoded.userId;
-    console.log("User ID:", userID);
-    console.log("Request Body:", req.body);
-
     const { products, totalAmount, status, addressID } = req.body;
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
-        return res.status(400).json({ message: "Invalid or missing 'products' array" });
-    }
-    if (!totalAmount || !status || !addressID) {
-        return res.status(400).json({ message: "Missing one of: totalAmount, status, addressID" });
-    }
+    if (!products || !Array.isArray(products) || products.length === 0)
+        return res.status(400).json({ message: "Invalid or missing products" });
+
+    if (!totalAmount || !status || !addressID)
+        return res.status(400).json({ message: "Missing required fields" });
 
     try {
-        const order = await Order.create({ userID, totalAmount, status, addressID });
-        const orderID = order.id;
+        const order = await Order.create({
+            userID,
+            totalAmount,
+            status,
+            addressID
+        });
 
-        const orderItems = await Promise.all(products.map(async (product) => {
-            const { productID, quantity } = product;
-            return OrderItem.create({ orderID, productID, quantity });
-        }));
+        await Promise.all(products.map(p =>
+            OrderItem.create({
+                orderID: order.id,
+                productID: p.productID,
+                quantity: p.quantity
+            })
+        ));
 
         const cart = await Cart.findOne({ where: { userId: userID } });
         if (cart) {
             await CartItem.destroy({ where: { cartID: cart.id } });
-            console.log("Cart cleared successfully");
         }
 
         return res.status(201).json({
             message: "Order created successfully",
-            order: order,
-            orderItems: orderItems
+            order
         });
+
     } catch (error) {
-        console.error("Order creation failed:", error);
         return res.status(400).json({
-            message: "An error occurred while creating an order",
-            errorMessage: error.message,
-            stack: error.stack
+            message: "Order creation failed",
+            error: error.message
         });
     }
 },
 
-    getOrders: async (req, res) => {
-        const authHeader = req.headers.authorization;
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, jwtSecret);
+// ================= GET USER ORDERS =================
 
-        const { userId } = decoded; // User ID from JWT
-        const userID = userId;
-        console.log("User ID:", userID)
-        
-        try {
-            const orders = await Order.findAll({
-                where : {userID},
-                include: [
-                    {
-                        model: OrderItem,
-                        
-                        include: [{
-                            model: Product,
-                            attributes: ['id', 'name', 'image', 'price']
-                        }],
-                        attributes: ['quantity']
-                    },
-                ]}
-            );
-            console.log(orders)
-            return res.status(200).json({
-                status: true,
-                data: orders.map((order) => order.toJSON())
-            });
-        } catch (error) {
-            return res.status(400).json({
-                status: false,
-                error: error.message
-            });
-        }
-    },
+getOrders: async (req, res) => {
 
-    getOrder: async (req, res) => {
-        const { id } = req.params;
-        try {
-            const order = await findOrder({ id });
-            if (!order) {
-                return res.status(404).json({
-                    status: false,
-                    error: "Order not found!"
-                });
-            }
-            return res.status(200).json({
-                status: true,    
-                data: order.toJSON()
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, jwtSecret);
+    const userID = decoded.userId;
+
+    try {
+
+        const orders = await Order.findAll({
+            where: { userID },
+            include: [{
+                model: OrderItem,
+                attributes: ['quantity'],
+                include: [{
+                    model: Product,
+                    attributes: ['id', 'name', 'price'],
+                    include: [{
+                        //Todo --> use the associations from associantions.js
+                        association: Product.associations.Images,
+                        where: { position: 0 },
+                        required: false,
+                        attributes: ['id', 'uuid', 'position']
+                    }]
+                }]
+            }]
+        });
+
+        const formattedOrders = orders.map(order => {
+            const o = order.toJSON();
+
+            o.OrderItems = o.OrderItems.map(item => {
+
+                item.Product = formatProductImages(item.Product, req);
+
+                item.Product.image =
+                    item.Product.Images?.[0]?.imageUrl || null;
+
+                delete item.Product.Images;
+
+                return item;
             });
-        } catch (error) {
-            return res.status(400).json({
+
+            return o;
+        });
+
+        return res.status(200).json({
+            status: true,
+            data: formattedOrders
+        });
+
+    } catch (error) {
+        return res.status(400).json({
+            status: false,
+            error: error.message
+        });
+    }
+},
+
+// ================= GET SINGLE ORDER =================
+
+getOrder: async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+
+        const order = await Order.findOne({
+            where: { id }
+        });
+
+        if (!order)
+            return res.status(404).json({
                 status: false,
-                error: error.message
+                error: "Order not found"
             });
-        }
-    },
+
+        return res.status(200).json({
+            status: true,
+            data: order
+        });
+
+    } catch (error) {
+        return res.status(400).json({
+            status: false,
+            error: error.message
+        });
+    }
+},
 
     updateOrder: async (req, res) => {
         const { id } = req.params;
@@ -183,63 +222,102 @@ createOrder: async (req, res) => {
             });
         }
     },
-     getOrdersForSeller: async (req, res) => {
+    getOrdersForSeller: async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader) return res.status(401).json({ status: false, error: "Authorization header missing" });
+        if (!authHeader) {
+            return res.status(401).json({
+                status: false,
+                error: "Authorization header missing"
+            });
+        }
+
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, jwtSecret);
         const sellerId = decoded.userId;
 
-        // Find products for seller via UserProduct association
+        // Get seller products
         const sellerProducts = await Product.findAll({
             include: [{
                 model: User,
                 where: { id: sellerId },
-                attributes: []
+                attributes: [],
+                through: { attributes: [] }
             }],
             attributes: ['id']
         });
 
         const productIds = sellerProducts.map(p => p.id);
+
         if (productIds.length === 0) {
-            return res.status(200).json({ status: true, data: [], message: "You haven't added any products yet." });
+            return res.status(200).json({
+                status: true,
+                data: [],
+                message: "You haven't added any products yet."
+            });
         }
 
+        // Get order items containing seller's products
         const orderItems = await OrderItem.findAll({
-            where: { productID: productIds },
+            where: {
+                productID: { [Op.in]: productIds }
+            },
             include: [
                 {
                     model: Order,
-                    required: true,
-                    include: [{ model: User, attributes: ['id', 'username', 'email'] }]
+                    include: [
+                        {
+                            model: User,
+                        }
+                    ]
                 },
                 {
                     model: Product,
-                    attributes: ['id', 'name', 'price', 'image']
+                    include: [
+                        {
+                            model: Image,
+                            as: "Images",
+                            required: false
+                        }
+                    ]
                 }
             ]
         });
-
+        // 3️⃣ Group by order
         const groupedOrders = {};
+
         orderItems.forEach(item => {
             const orderId = item.orderID;
+
             if (!groupedOrders[orderId]) {
                 groupedOrders[orderId] = {
                     orderID: orderId,
                     buyer: item.Order.user,
                     status: item.Order.status,
+                    createdAt: item.Order.createdAt,
                     items: []
                 };
             }
-            console.log("ORDER KEYS:", Object.keys(item.Order.dataValues));
-            groupedOrders[orderId].items.push({ product: item.Product, quantity: item.quantity });
+
+            groupedOrders[orderId].items.push({
+                product: formatProductImages(item.Product.toJSON(), req),
+                quantity: item.quantity
+            });
+
+            
         });
 
-        return res.status(200).json({ status: true, data: Object.values(groupedOrders) });
+        return res.status(200).json({
+            status: true,
+            data: Object.values(groupedOrders)
+        });
 
     } catch (error) {
-        return res.status(400).json({ status: false, error: error.message });
+        console.error("Error fetching seller orders:", error);
+        return res.status(500).json({
+            status: false,
+            error: error.message
+        });
     }
 }
 

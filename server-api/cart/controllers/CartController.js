@@ -1,7 +1,9 @@
 // controllers/cartController.js
-const { Cart, CartItem, Product } = require('../../common/models/associations');
+const { Cart, CartItem, Product, Image} = require('../../common/models/associations');
 const jwtSecret = process.env.JWT_SECRET;
 const jwt = require("jsonwebtoken");
+
+const { mapCartResponse } = require("../../common/mappers/cartResponseMapper");
 
 exports.addToCart = async (req, res) => {
     const {  productId, quantity } = req.body;
@@ -121,16 +123,24 @@ exports.viewCart = async (req, res) => {
             where: { userID: userId },
             attributes: ['id', 'userID', 'createdAt', 'updatedAt'],
             include: [
-                {
-                    model: CartItem,
-                    attributes: ['id', 'cartID', 'productID', 'quantity', 'createdAt', 'updatedAt'],
-                    include: [
+            {
+                model: CartItem,
+                attributes: ['id', 'cartID', 'productID', 'quantity', 'createdAt', 'updatedAt'],
+                include: [
+                    {
+                        model: Product,
+                        attributes: ['id', 'name', 'price'],
+                        include: [
                         {
-                            model: Product,
-                            attributes: ['id', 'name', 'image', 'price'],
-                        },
-                    ],
-                },
+                            model: Image,
+                            //as: "Images",
+                            attributes: ["id", "uuid", "position"],
+                            required: false
+                        }
+                        ]
+                    },
+                ],
+            },
             ],
         });
         console.log("TEST-----------")
@@ -144,7 +154,7 @@ exports.viewCart = async (req, res) => {
 
         return res.status(200).json({
             status: true,
-            data: cart,
+            data: mapCartResponse(cart, req),
         });
     } catch (error) {
         return res.status(500).json({

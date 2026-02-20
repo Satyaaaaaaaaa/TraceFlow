@@ -1,8 +1,10 @@
 const { getFullProductDetails } = require("../../services/productService");
+const { Product } = require("../../common/models/Product");
 
 module.exports = {
     verifyAsset: async (req, res) => {
         try {
+            //asset_id is uuid
             const { asset_id } = req.body;
 
             if (!asset_id) {
@@ -11,11 +13,32 @@ module.exports = {
                 });
             }
 
+            console.log(`**************product from sql:` ,productRow)
+            //Extract productId from sql, eaach product id has a unique uuid
+            
+            //todo: fix
+            const productRow = await Product.findOne({
+                where: { uuid: asset_id },
+                attributes: ["id", "name"],
+            });
+
+            if (!productRow) {
+                return res.status(404).json({
+                assetId: asset_id,
+                isAuthentic: false,
+                timeline: [],
+                message: "Invalid or unknown asset",
+                });
+            }
+
+            const productId = productRow.id;
+
+
             //TODO
             const PUBLIC_USER_ID = 'admin';
 
             const product = await getFullProductDetails(
-                asset_id,
+                productId,
                 PUBLIC_USER_ID
             );
 
@@ -32,7 +55,7 @@ module.exports = {
             // \"history\":[{\"timestamp\":\"2026-02-10T07:18:07.601Z\",\"actor\":\"abc\",\"action\":\"Product Asset Created\"}]}}]"
 
 
-
+            
             const timeline = [];
 
             (product.traceabilityHistory || []).forEach(record => {
