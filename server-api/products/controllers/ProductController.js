@@ -11,128 +11,29 @@ const jwtSecret = process.env.JWT_SECRET;
 const searchClient = require("../../common/meilisearch/meili");
 const mapProductToSearch = require("../../common/meilisearch/mapper/productSearchMapper");
 
-const { formatProductImages } = require("../utils/formatProductImages")
+const { formatProductImages } = require("../../common/utils/formatProductImages")
 
 
 const { createProductWithTraceability, getFullProductDetails } = require('../../services/productService');
 
 const { Op } = require("sequelize");
 
+const productService = require("../services/ProductService")
+
 module.exports = {
     
-    //todo: create different services function for creating product , bloackchain and different function for handling http
     createProduct: async (req, res) => {
-        //IMAAGES ARE TO BE HANDLED BY UPLOADIMAGEPRODUCTCONTROLLER FROM NOW
-        const { name, description, price, priceUnit, categoryIds, image_uuids } = req.body;
-        
-        let finalCategoryIds = categoryIds;
-        if (!finalCategoryIds || finalCategoryIds.length === 0) finalCategoryIds = [1];
-        
-        const authHeader = req.headers.authorization;
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, jwtSecret);
-        const { userId } = decoded; // User ID from JWT
-        
+
         try {
-            //Check user
-            const user = await findUser({ id: userId });
-            if (!user) {
-                console.log('User not found!');
-                throw new Error("User not found!");
-            } 
-            
-            const userBC = await findUserBCStatus({ userId });
-            
-            if (!userBC || !userBC.blockchainStatus) {
-                throw new Error("User not synced with blockchain! Please sync");
-            }
-            
-            //Create Product in DB first
-            const product = await createProduct({ 
-                name, 
-                description, 
-                price,
-                priceUnit
-            });
+            const result = await productService.createProduct(
+                req.body,
+                req.user
+            );
 
-            // estract product id
-            // extract et img id via image uuids
-            const images = await Image.findAll({
-                where: { uuid: image_uuids }
-            });
-
-            if (images.length !== image_uuids.length) {
-                throw new Error("One or more images not found");
-            }
-
-
-            // map product to image
-            await product.addImages(images);
-
-
-            // Save image URLs in DB
-            // const imageRecords = req.files.map((file, index) => ({ //brifge table
-            //     productId: product.id,
-            //     imageUrl: file.path, // id
-            //     position: index // remove
-            // }));
-
-            //await ProductImages.bulkCreate(imageRecords);
-
-            await createProductBCStatus(product.id);
-
-            // Associate the product with the user via the join table 'UserProduct'
-            // const user = await findUser({ id: userId });
-            await user.addProduct(product);
-            
-            //Associate with the product categories
-            const categories = await findAllCategories({ id: finalCategoryIds });
-            await product.addCategories(categories);
-            
-
-            //Sync with blockchain.
-            try{
-                const prodInfoBc = await createProductWithTraceability(product.id, name, user.username);
-
-                // If Fabric succeeds, update status to true
-                //await product.update({ blockchainStatus: true });
-                await updateProductBCStatus(
-                    { productId: product.id },
-                    { blockchainStatus: true }
-                );
-
-                console.log(`Product ${prodInfoBc.productId}, ${prodInfoBc.productName} Owner: ${prodInfoBc.ownerId} synced to blockchain.`);
-
-                // Sync product to search index (DO NOT block request)
-                try {
-                    await searchClient
-                        .index("products")
-                        .addDocuments([mapProductToSearch(product)]);
-                    } catch (searchError) {
-                    console.error(
-                        `Search sync failed for product ${product.id}:`,
-                        searchError.message
-                    );
-                }
-
-                console.log(`Product added to search client`)
-                
-                
-            }catch (fabricError) {
-                // The product remains in DB with blockchainStatus: false
-                console.error("Fabric Error Details:", fabricError.message);
-                console.error(`Blockchain sync failed for product ${product.id}. Will retry later.`);
-            }         
-            
-            // Return the product (Status will be true or false depending on Fabric success)
-            const finalProduct = await findProduct({id : product.id});
-            const productBC = await findProductBCStatus({ productId: product.id });
-
-            
             return res.status(201).json({
                 status: true,
-                message: productBC.blockchainStatus ? "Product created and synced" : "Product created, sync pending",
-                data: finalProduct.toJSON()
+                message: result.message,
+                data: result.data
             });
 
         } catch (error) {
