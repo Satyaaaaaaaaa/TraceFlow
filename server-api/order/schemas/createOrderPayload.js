@@ -11,7 +11,7 @@ module.exports = {
         },
         status: {
             type: "string",
-            enum: ["Pending", "Delivered", "Cancelled"],
+            enum: ["Pending", "Paid", "Failed", "Success", "Shipped", "Completed", "Cancelled", "Delivered"],
         },
         orderItem: {
             type: "array",

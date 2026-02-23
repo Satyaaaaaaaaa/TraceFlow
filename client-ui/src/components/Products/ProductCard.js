@@ -19,7 +19,7 @@ const ProductCard = ({ product }) => {
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, index) => (
-      <span key={index} className={index < rating ? 'star filled' : 'star'}>★</span>
+      <span key={index} className={index < rating ? 'star filled' : 'star'}> ★</span>
     ));
   };
 

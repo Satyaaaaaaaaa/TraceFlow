@@ -20,28 +20,28 @@ const SettingsDrawer = ({
   onBackClick 
 }) => {
   return (
-    <div className="settings-drawer">
-      {/* Back Button */}
-      <Button variant="link" onClick={onBackClick} className="position-absolute top-0 start-0 m-3">
-        <FaArrowLeft />
-      </Button>
-      <h3>Profile Settings</h3>
-      <ProfileInfo
-        userInfo={userInfo}
-        onUpdateProfileClick={onUpdateProfileClick}
-        onDeleteAccount={onDeleteAccount}
+      <div className="settings-drawer">
+        {/* Back Button */}
+        <Button variant="link" onClick={onBackClick} className="position-absolute top-0 start-0 m-3">
+          <FaArrowLeft />
+        </Button>
+        <h3>Profile Settings</h3>
+        <ProfileInfo
+          userInfo={userInfo}
+          onUpdateProfileClick={onUpdateProfileClick}
+          onDeleteAccount={onDeleteAccount}
 
-        onChangeRole={onChangeRole}
-        showChangeRole={showChangeRole}
-        selectedRole={selectedRole}
-        setSelectedRole={setSelectedRole}
-        handleChangeRole={handleChangeRole}
-        handleCancelChangeRole={handleCancelChangeRole}
-        currentRole={currentRole}
+          onChangeRole={onChangeRole}
+          showChangeRole={showChangeRole}
+          selectedRole={selectedRole}
+          setSelectedRole={setSelectedRole}
+          handleChangeRole={handleChangeRole}
+          handleCancelChangeRole={handleCancelChangeRole}
+          currentRole={currentRole}
 
-        onLogout={onLogout}
-      />
-    </div>
+          onLogout={onLogout}
+        />
+      </div>
   );
 };
 

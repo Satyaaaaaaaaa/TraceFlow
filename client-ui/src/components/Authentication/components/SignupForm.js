@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import '../styles/Signup.css';
 import validator from 'validator';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // import ReCAPTCHA from 'react-google-recaptcha';
 // const RECAPTCHA_SITE_KEY = '6LdFmiwqAAAAACToIxlwk54wTzQyJ6usbTPZrH7w'; // Replace with your reCAPTCHA site key
@@ -27,6 +28,7 @@ const SignupForm = () => {
   // PASSWORD VISIBILITY TOGGLE STATES
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [capsLockOn, setCapsLockOn] = useState(false);
   
   const handleChange = (event) => {
     setFormData({
@@ -100,7 +102,7 @@ const SignupForm = () => {
 
     try {
 
-      const response = await fetch("/signup", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -112,7 +114,7 @@ const SignupForm = () => {
         return;
       }
 
-      setMessage({ text: 'Signup successful! Please login.', type: 'success' });
+      setMessage({ text: 'Signup successful!', type: 'success' });
       setFormData({
         username: '',
         email: '',
@@ -126,8 +128,8 @@ const SignupForm = () => {
       });
       //setRecaptchaToken('');
 
-      navigate('/login', { state: { message: 'Signup successful! Please login.' } });
-
+      //navigate(`/login`, { state: { message: 'Signup successful! Please login.' } });
+      navigate (`/home`, { state: { message: 'Welcome to TraceFlow!' } });
     } catch (error) {
       console.error('Signup error:', error);
       setMessage({ text: 'Signup failed. Please try again.', type: 'error' });
@@ -195,6 +197,15 @@ const SignupForm = () => {
               
               //ONLY ALPHABETS ARE ALLOWED
               onKeyDown={(e) => {
+                if (
+                  e.key === "Backspace" ||
+                  e.key === "Delete" ||
+                  e.key === "ArrowLeft" ||
+                  e.key === "ArrowRight" ||
+                  e.key === "Tab"
+                ) {
+                return;
+                }
                 if (!/^[a-zA-Z ]$/.test(e.key)) {
                   e.preventDefault();
                 }
@@ -216,6 +227,16 @@ const SignupForm = () => {
 
               //ONLY ALPHABETS ARE ALLOWED
               onKeyDown={(e) => {
+                if (
+                  e.key === "Backspace" ||
+                  e.key === "Delete" ||
+                  e.key === "ArrowLeft" ||
+                  e.key === "ArrowRight" ||
+                  e.key === "Tab"
+                ) {
+                return;
+                }
+
                 if (!/^[a-zA-Z ]$/.test(e.key)) {
                   e.preventDefault();
                 }
@@ -234,6 +255,21 @@ const SignupForm = () => {
             name="username"
             value={formData.username}
             onChange={handleChange}
+            onKeyDown={(e) => {
+                if (
+                  e.key === "Backspace" ||
+                  e.key === "Delete" ||
+                  e.key === "ArrowLeft" ||
+                  e.key === "ArrowRight" ||
+                  e.key === "Tab"
+                ) {
+                return;
+                }
+
+                if (!/^[a-zA-Z ]$/.test(e.key)) {
+                  e.preventDefault();
+                }
+            }}
             autoComplete="username"
             placeholder=" "
             aria-label="Enter your username"
@@ -264,10 +300,24 @@ const SignupForm = () => {
             onChange={handleChange}
             //ONLY NUMBERS ARE ALLOWED
             onKeyDown={(e) => {
-              const charCode = e.charCode;
-                if (!(charCode > 48 && charCode <= 57)) {
-                  e.preventDefault();
-                }
+              
+              if (
+                e.key === "Backspace" ||
+                e.key === "Delete" ||
+                e.key === "ArrowLeft" ||
+                e.key === "ArrowRight" ||
+                e.key === "Tab"
+              ) {
+                return;
+              }
+            
+              // allow numbers
+              if (/^[0-9]$/.test(e.key)) {
+                return;
+              }
+            
+              // block everything else
+              e.preventDefault();
             }}
             placeholder=" "
             aria-label="Enter your phone number"
@@ -296,6 +346,7 @@ const SignupForm = () => {
             value={formData.password}
             onChange={handleChange}
             autoComplete="new-password"
+            onKeyUp={(e) => setCapsLockOn(e.getModifierState('CapsLock'))}
             placeholder=" "
             aria-label="Enter your password"
           />
@@ -306,7 +357,7 @@ const SignupForm = () => {
             onClick={togglePasswordVisibility}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? "👁️" : "👁️‍🗨️"}
+            {showPassword ? "👁️" : "⌣"}
           </button>
         </div>
 
@@ -318,6 +369,7 @@ const SignupForm = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             autoComplete="new-password"
+            onKeyUp={(e) => setCapsLockOn(e.getModifierState('CapsLock'))}
             placeholder=" "
             aria-label="Confirm your password"
           />
@@ -328,9 +380,13 @@ const SignupForm = () => {
             onClick={toggleConfirmPasswordVisibility}
             aria-label={showConfirmPassword ? "Hide password" : "Show password"}
           >
-            {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+            {showConfirmPassword ? "👁️" : "⌣"}
           </button>
         </div>
+        
+        {capsLockOn && (
+          <p className="caps-warning">Caps Lock is ON</p>
+        )}
 
         {/* <ReCAPTCHA
           sitekey={RECAPTCHA_SITE_KEY}
@@ -340,7 +396,7 @@ const SignupForm = () => {
         <button type="submit">Sign Up</button>
 
         <div className="login-link">
-          Already have an account? <a href="/login">Login here</a>
+          Already have an account? <Link to="/login">Login here</Link>
         </div>
       </form>
     </div>

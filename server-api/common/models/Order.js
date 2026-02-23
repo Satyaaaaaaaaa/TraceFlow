@@ -1,9 +1,15 @@
 const { DataTypes } = require("sequelize")
-const sequelize = require("./SequelizeInstance")
+const sequelize = require("./SequelizeInstance");
+const { parseDuration } = require("@grpc/grpc-js/build/src/duration");
 
 const ORDER_STATUS = {
+    PENDING: "Pending",
+    PAID: "Paid",
+    FAILED: "Failed",
     SUCCESS: "Success",
     SHIPPED: "Shipped",
+    COMPLETED: "Completed",
+    CANCELLED: "Cancelled",
     DELIVERED: "Delivered"
 };
 
@@ -22,8 +28,11 @@ const OrderModel = sequelize.define('Order', {
         },
     },
     totalAmount: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      validate: {
+        min: 0,
+      },
     },
     addressID: { // Added field for associating orders with addresses
         type: DataTypes.INTEGER,
@@ -33,10 +42,16 @@ const OrderModel = sequelize.define('Order', {
             key: 'id',
         },
     },
+    orderNumber: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false,
+        comment: 'Human-readable order number like ORD-2024-ABC123'
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: ORDER_STATUS.SUCCESS // TODO:  [Success, Shipped, Delivered]
+        defaultValue: ORDER_STATUS.PENDING 
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -73,6 +88,14 @@ const OrderItemModel = sequelize.define('OrderItem', {
     quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        validate: {
+            min: 1,
+        },
+    },
+    priceUnit: {
+        type: DataTypes.STRING,
+        defaultValue: 'INR',
+        allowNull: false
     },
     createdAt: {
         type: DataTypes.DATE,
