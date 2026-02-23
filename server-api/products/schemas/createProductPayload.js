@@ -9,13 +9,13 @@ module.exports = {
     description: {
       type: "string",
     },
-    images: {
-      type: "array",
-      minItems: 1,
-      items: {
-        type: "string",
-      }
-    },
+    // images: {
+    //   type: "array",
+    //   minItems: 1,
+    //   items: {
+    //     type: "string",
+    //   }
+    // },
     price: {
       type: "number",
     },
@@ -28,8 +28,14 @@ module.exports = {
       items: {
         type: "number",
       },
-    }
+    },
+    image_uuids: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
   },
-  required: ["name", "description", "images", "price", "categoryIds"],
+  required: ["name", "description", "price", "categoryIds"],
   additionalProperties: false,
 };

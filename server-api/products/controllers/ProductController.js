@@ -3,13 +3,15 @@ const { findProductBCStatus, createProductBCStatus, updateProductBCStatus, Produ
 const { findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
 const { findUser } = require("../../common/models/User");
 const { Category, findAllCategories } = require("../../common/models/Category");
-const { ProductImages } = require("../../common/models/ProductImages");
+const { Image } = require("../../common/models/associations");
 
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
 const searchClient = require("../../common/meilisearch/meili");
 const mapProductToSearch = require("../../common/meilisearch/mapper/productSearchMapper");
+
+const { formatProductImages } = require("../utils/formatProductImages")
 
 
 const { createProductWithTraceability, getFullProductDetails } = require('../../services/productService');
@@ -18,29 +20,18 @@ const { Op } = require("sequelize");
 
 module.exports = {
     
-    //todo: create different function for creating product , bloackchain and different function for handling http
+    //todo: create different services function for creating product , bloackchain and different function for handling http
     createProduct: async (req, res) => {
-        const { name, description, price, images, categoryIds } = req.body;
-
-        if (!images || !Array.isArray(images) || images.length === 0) {
-            return res.status(400).json({
-                status: false,
-                error: "At least one image is required"
-            });
-        }
-
+        //IMAAGES ARE TO BE HANDLED BY UPLOADIMAGEPRODUCTCONTROLLER FROM NOW
+        const { name, description, price, priceUnit, categoryIds, image_uuids } = req.body;
         
         let finalCategoryIds = categoryIds;
         if (!finalCategoryIds || finalCategoryIds.length === 0) finalCategoryIds = [1];
-        
-        const priceUnit = req.body.priceUnit || "inr";
         
         const authHeader = req.headers.authorization;
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, jwtSecret);
         const { userId } = decoded; // User ID from JWT
-        
-        
         
         try {
             //Check user
@@ -61,18 +52,32 @@ module.exports = {
                 name, 
                 description, 
                 price,
-                image: images[0],
-                priceUnit,
-                blockchainStatus: false
+                priceUnit
             });
-            
-            await ProductImages.bulkCreate(
-                images.map((imagePath, index) => ({
-                    productId: product.id,
-                    imageUrl: imagePath,
-                    position: index
-                }))
-            );
+
+            // estract product id
+            // extract et img id via image uuids
+            const images = await Image.findAll({
+                where: { uuid: image_uuids }
+            });
+
+            if (images.length !== image_uuids.length) {
+                throw new Error("One or more images not found");
+            }
+
+
+            // map product to image
+            await product.addImages(images);
+
+
+            // Save image URLs in DB
+            // const imageRecords = req.files.map((file, index) => ({ //brifge table
+            //     productId: product.id,
+            //     imageUrl: file.path, // id
+            //     position: index // remove
+            // }));
+
+            //await ProductImages.bulkCreate(imageRecords);
 
             await createProductBCStatus(product.id);
 
@@ -90,7 +95,7 @@ module.exports = {
                 const prodInfoBc = await createProductWithTraceability(product.id, name, user.username);
 
                 // If Fabric succeeds, update status to true
-                await product.update({ blockchainStatus: true });
+                //await product.update({ blockchainStatus: true });
                 await updateProductBCStatus(
                     { productId: product.id },
                     { blockchainStatus: true }
@@ -156,22 +161,34 @@ module.exports = {
             const products = await findAllProducts({}, {
                 include: [
                     {
-                        model: Category,
-                        ...(categoryId && { where: { id: categoryId } }),
-                        required: !!categoryId,
-                        through: { attributes: [] }
+                    model: Category,
+                    ...(categoryId && { where: { id: categoryId } }),
+                    required: !!categoryId,
+                    through: { attributes: [] }
                     },
                     {
-                        model: ProductBlockchainStatus,
-                        where: { blockchainStatus: true }
+                    model: ProductBlockchainStatus,
+                    where: { blockchainStatus: true }
+                    },
+                    {
+                    model: Image,
+                    as: "Images",
+                    where: { position: 0 },   // primary image
+                    required: false,
+                    attributes: ["id", "uuid", "position"],
+                    through: { attributes: [] }
                     }
                 ],
                 distinct: true
             });
 
+            const data = products.map(p =>
+                formatProductImages(p.toJSON(), req)
+            );
+
             return res.status(200).json({
                 status: true,
-                data: products.map((product) => product.toJSON())
+                data
             });
         } catch (error) {
             return res.status(400).json({
@@ -250,18 +267,43 @@ module.exports = {
 
     getProduct: async (req, res) => {
         const { id } = req.params;
+
         try {
-            const product = await findProduct({ id });
+            const product = await findProduct(
+                { id },
+                {
+                    include: [
+                        {
+                            model: ProductBlockchainStatus,
+                            where: { blockchainStatus: true }
+                        },
+                        {
+                            model: Image,
+                            as: "Images",
+                            required: false,
+                            attributes: ["id", "uuid", "position"],
+                            through: { attributes: [] }, // hide join table
+                            order: [["position", "ASC"]]
+                        }
+                    ]
+                }
+            );
+
+
             if (!product) {
                 return res.status(404).json({
                     status: false,
                     error: "Product not found!"
                 });
             }
+
+            const data = formatProductImages(product.toJSON(), req);
+
             return res.status(200).json({
                 status: true,
-                data: product.toJSON()
+                data
             });
+
         } catch (error) {
             return res.status(400).json({
                 status: false,
@@ -327,12 +369,25 @@ module.exports = {
             }
 
             const products = await user.getProducts({
-                include: ['Categories'] // include categories if you want
+                include: [
+                    {
+                        model: Image,
+                        as: "Images",
+                        required: false
+                    },
+                    {
+                        model: Category
+                    }
+                ]
             });
+
+            const data = products.map(p =>
+                formatProductImages(p.toJSON(), req)
+            );
 
             return res.status(200).json({
                 status: true,
-                data: products.map((product) => product.toJSON())
+                data
             });
         } catch (error) {
             return res.status(400).json({
