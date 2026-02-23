@@ -30,9 +30,16 @@ const AssetRoutes = require("./asset/routes")
 
 app.use(morgan("tiny"));
 app.use(cors());
+// const traceflowRoutes = require("./traceflowRouters/routes");
+
+const { Payment } = require('./common/models/Payment');
+
 
 app.use(express.json({ limit: '25mb' }));
 app.use('/uploads', express.static('uploads'));
+
+app.use(morgan("tiny"));
+app.use(cors());
 
 // Syncing the models that are defined on sequelize with the tables that alredy exists
 // in the database. It creates models as tables that do not exist in the DB.
@@ -55,8 +62,28 @@ sequelize
     app.use("/asset", AssetRoutes);
     // app.use("/traceflow", traceflowRoutes)
 
-    app.listen(PORT, ADDRESS, () => {
+    app.listen(PORT, ADDRESS, async () => {
       console.log("Server Listening on PORT:", port);
+      
+      // Auto-seed categories if empty (NEW)
+      setTimeout(async () => {
+        try {
+          const { Category } = require("./common/models/Category");
+          const count = await Category.count();
+          
+          if (count === 0) {
+            console.log('🌱 Database empty, auto-seeding categories...');
+            const { seedCategories } = require('./Categories/controllers/CategoriesController');
+            await seedCategories({}, { 
+              status: () => ({ json: (data) => console.log('✅ Auto-seed:', data.message) }) 
+            });
+          } else {
+            console.log(`✅ ${count} categories already in database`);
+          }
+        } catch (err) {
+          console.error('Auto-seed error:', err.message);
+        }
+      }, 1000);
     });
   })
   .catch((err) => {

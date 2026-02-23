@@ -4,8 +4,11 @@ import Spinner from '../../Spinner'; // Import Spinner component
 import UserRedirect from '../../Pages/userRedirect';
 import GoogleSignIn from './GoogleSignIn';  // Import GoogleSignIn component
 //import ForgotPasswordForm from './ForgotPasswordForm'; // Import ForgotPassword component
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -14,12 +17,24 @@ const LoginForm = ({ onLogin }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [authToken, setAuthToken] = useState('');
   const [loading, setLoading] = useState(false);
+  const [capsLockOn, setCapsLockOn] = useState(false);
+  
+  // PASSWORD VISIBILITY TOGGLE STATE
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [message, setMessage] = useState({ text: '', type: '' });
+  
 
   const handleChange = (event) => {
     setFormData({
       ...formData,
       [event.target.name]: event.target.value,
     });
+  };
+
+  // PASSWORD VISIBILITY TOGGLE FUNCTION
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (event) => {
@@ -33,7 +48,7 @@ const LoginForm = ({ onLogin }) => {
     }
 
     try {
-      const response = await fetch('/login', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -54,9 +69,16 @@ const LoginForm = ({ onLogin }) => {
         onLogin(token, userData);
         setAuthToken(token);
         setIsLoggedIn(true);
+        setMessage({ text: 'Login successful!', type: 'success' });
+        setFormData({ 
+          username: '',
+          password: '' 
+        });
+        navigate (`/home`, { state: { message: 'Welcome to TraceFlow!' } });
       } else {
         setErrorMessage('Login failed: Token or user information is missing in the response.');
       }
+
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage('Login failed. Please try again.');
@@ -85,24 +107,38 @@ const LoginForm = ({ onLogin }) => {
           <label htmlFor="username">Username</label>
         </div>
 
-        <div className="form-group">
+        <div className="form-group password-field">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
+            onKeyUp={(e) => setCapsLockOn(e.getModifierState('CapsLock'))}
             autoComplete="current-password"
             placeholder=" "
           />
           <label htmlFor="password">Password</label>
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={togglePasswordVisibility}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? "👁️" : "⌣"}
+          </button>
         </div>
+        
+        {capsLockOn && (
+          <p className="caps-warning">Caps Lock is ON</p>
+        )}
 
-        {/* ADD THIS SECTION - Forgot Password Link */}
+
+        {/* Forgot Password Link */}
         <div className="forgot-password-link">
-          <a href="/forgot-password" className="forgot-password-btn">
+          <Link to="/forgot-password" className="forgot-password-btn">
             Forgot Password?
-          </a>
+          </Link>
         </div>
 
         <button type="submit">Login</button>
@@ -116,7 +152,7 @@ const LoginForm = ({ onLogin }) => {
         </div>
 
         <div className="signup-link">
-          Don't have an account? <a href="/signup">Sign up</a>
+          Don't have an account? <Link to="/signup">Sign up</Link>
         </div>
       </form>
       {isLoggedIn && authToken && <UserRedirect token={authToken} />}

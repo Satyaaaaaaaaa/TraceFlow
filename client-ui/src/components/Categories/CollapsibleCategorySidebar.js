@@ -1,191 +1,212 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  FaLaptop, 
-  FaTshirt, 
-  FaTv, 
-  FaDumbbell, 
-  FaUtensils, 
-  FaBars, 
-  FaChevronDown,
-  FaBox
-} from 'react-icons/fa'; // Static imports - ensure react-icons is installed
+  FaTv, FaMobileAlt, FaLaptop, FaTshirt, FaShoePrints, 
+  FaClock, FaSprayCan, FaHeartbeat, FaShoppingBasket, 
+  FaUtensils, FaCouch, FaPaintRoller, FaBook, FaRunning,
+  FaGamepad, FaCar, FaTools, FaPaw, FaBaby, FaBars, 
+  FaChevronDown, FaPlug, FaBox, FaTabletAlt, FaHeadphones,
+  FaCamera, FaKeyboard, FaMale, FaFemale, FaChild,
+  FaVest, FaMitten, FaGlasses, FaWallet, FaGem, FaHandSparkles,
+  FaAirFreshener, FaMagic, FaCut, FaPumpSoap, FaPills, FaStethoscope,
+  FaDumbbell, FaLeaf, FaHeart, FaSeedling, FaCookie, 
+  FaBoxOpen, FaPepperHot, FaMugHot, FaBed, FaChair,  FaUmbrellaBeach, 
+  FaPaintBrush, FaLightbulb, FaWineBottle, FaGraduationCap, FaBookOpen, 
+  FaFileSignature, FaPen, FaPalette, FaSpa, FaHiking, FaChess, FaBicycle, 
+  FaGhost, FaBrain, FaRobot,FaChessBoard, FaPuzzlePiece, FaMotorcycle, FaCarBattery, 
+  FaHardHat, FaSoap,FaBolt, FaFaucet,  FaDog, FaCat, FaBone, FaFish, FaShapes, FaBabyCarriage
+} from 'react-icons/fa';
 import './styles/CollapsibleCategorySidebar.css';
+
+const iconComponents = {
+  FaTv, FaMobileAlt, FaLaptop, FaTshirt, FaShoePrints, 
+  FaClock, FaSprayCan, FaHeartbeat, FaShoppingBasket, 
+  FaUtensils, FaCouch, FaPaintRoller, FaBook, FaRunning,
+  FaGamepad, FaCar, FaTools, FaPaw, FaBaby, FaBars, 
+  FaChevronDown, FaPlug, FaBox, FaTabletAlt, FaHeadphones,
+  FaCamera, FaKeyboard, FaMale, FaFemale, FaChild,
+  FaVest, FaMitten, FaGlasses, FaWallet, FaGem, FaHandSparkles,
+  FaAirFreshener, FaMagic, FaCut, FaPumpSoap, FaPills, FaStethoscope,
+  FaDumbbell, FaLeaf, FaHeart, FaSeedling, FaCookie,
+  FaBoxOpen, FaPepperHot, FaMugHot, FaBed, FaChair, FaUmbrellaBeach, FaPaintBrush, 
+  FaLightbulb, FaWineBottle, FaGraduationCap, FaBookOpen, FaFileSignature, FaPen,
+  FaPalette, FaSpa, FaHiking, FaChess, FaBicycle, FaGhost, FaBrain, FaRobot,
+  FaChessBoard, FaPuzzlePiece, FaMotorcycle, FaCarBattery, FaHardHat, FaSoap,
+  FaBolt, FaFaucet, FaDog, FaCat, FaBone, FaFish, FaShapes, FaBabyCarriage
+};
 
 const CollapsibleCategorySidebar = ({ isOpen, onToggle, onCategorySelect }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Initialize based on prop if provided, otherwise default collapsed (false for isOpen means true for isCollapsed)
-  const [isCollapsed, setIsCollapsed] = useState(isOpen !== undefined ? !isOpen : false);
-  const [expandedCategories, setExpandedCategories] = useState({});
+  const [isCollapsed, setIsCollapsed] = useState(!isOpen);
+  const [expandedId, setExpandedId] = useState(null);
 
-  // Icon mapping
-  const categoryIcons = {
-    'Computer Accessories': { icon: FaLaptop, fallback: '💻' },
-    'Fashion': { icon: FaTshirt, fallback: '👕' },
-    'Electronics & Appliances': { icon: FaTv, fallback: '📺' },
-    'Sports Equipment': { icon: FaDumbbell, fallback: '🏋️' },
-    'Food Products': { icon: FaUtensils, fallback: '🍽️' },
-  };
-
-  // Sync internal state with parent prop
   useEffect(() => {
-    if (isOpen !== undefined) {
-      setIsCollapsed(!isOpen);
-      // Auto-collapse all categories when sidebar collapses to keep UI clean
-      if (!isOpen) {
-        setExpandedCategories({});
-      }
-    }
+    setIsCollapsed(!isOpen);
+    if (!isOpen) setExpandedId(null);
   }, [isOpen]);
 
-  const renderIcon = (categoryName) => {
-    const iconData = categoryIcons[categoryName] || { icon: FaBox, fallback: '📦' };
-    const IconComponent = iconData.icon;
-    return IconComponent ? <IconComponent /> : <span>{iconData.fallback}</span>;
-  };
-
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await axios.get('/category/fetch-categories'); // Ensure this endpoint is correct
-        const data = response.data.categories || response.data.data || response.data || [];
-        setCategories(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-        setError('Failed to load categories');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCategories();
   }, []);
 
-  // Toggle sidebar width and notify parent
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/category/tree`);
+      setCategories(response.data.categories || []);
+      
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('Failed to load categories');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleSidebar = () => {
     const newCollapsed = !isCollapsed;
     setIsCollapsed(newCollapsed);
-    setExpandedCategories({}); // Close all accordions when toggling sidebar
-    if (onToggle) {
-      onToggle(!newCollapsed); // Parent expects true when OPEN
-    }
+    setExpandedId(null);
+    if (onToggle) onToggle(!newCollapsed);
   };
 
-  // Toggle subcategory dropdown (only when expanded)
-  const toggleCategoryExpand = (e, categoryId) => {
-    e.stopPropagation(); // Prevent triggering the category selection
-    if (!isCollapsed) {
-      setExpandedCategories(prev => ({
-        ...prev,
-        [categoryId]: !prev[categoryId]
-      }));
-    }
+  const toggleExpand = (e, catId) => {
+    e.stopPropagation();
+    if (isCollapsed) return;
+    setExpandedId(expandedId === catId ? null : catId);
   };
 
-  // Handle category/subcategory selection
-  const handleCategoryClick = (category, e) => {
-    if (e) e.preventDefault();
-    
-    // Dispatch event for legacy components listening
-    const event = new CustomEvent('categorySelected', { detail: category });
-    window.dispatchEvent(event);
-    
-    // Call prop callback if provided
+  const handleSelect = (item, type) => {
     if (onCategorySelect) {
-      onCategorySelect(category);
+      onCategorySelect({ ...item, type });
     }
-    
-    // On mobile/small screens, collapse sidebar after selection (optional UX improvement)
-    // if (window.innerWidth < 768) {
-    //   toggleSidebar();
-    // }
+    window.dispatchEvent(new CustomEvent('categorySelected', { 
+      detail: { ...item, type } 
+    }));
   };
+
+    const getIcon = (iconName) => {
+    if (!iconName) return <FaBox />;
+    const IconComponent = iconComponents[iconName] || FaBox;
+    return <IconComponent />;
+  };
+
+  if (loading) {
+    return (
+      <div className={`category-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <button className="toggle-btn" onClick={toggleSidebar}>
+            {isCollapsed ? '☰' : '✕'}
+          </button>
+          {!isCollapsed && <h3 className="sidebar-title">Categories</h3>}
+        </div>
+        <div className="sidebar-loading">
+          <div>Loading categories...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`category-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <button className="toggle-btn" onClick={toggleSidebar}>
+            {isCollapsed ? '☰' : '✕'}
+          </button>
+          {!isCollapsed && <h3 className="sidebar-title">Categories</h3>}
+        </div>
+        <div className="sidebar-error">
+          <div>{error}</div>
+          <button onClick={fetchCategories} className="retry-btn">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`category-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-      {/* Header */}
       <div className="sidebar-header">
-        <button className="toggle-btn" onClick={toggleSidebar} aria-label="Toggle sidebar">
-          {isCollapsed ? <FaBars /> : <span className="close-icon">✕</span>}
+        <button className="toggle-btn" onClick={toggleSidebar}>
+          {isCollapsed ? '☰' : '✕'}
         </button>
-        {!isCollapsed && <h3 className="sidebar-title">CATEGORIES</h3>}
+        {!isCollapsed && <h3 className="sidebar-title">Categories</h3>}
       </div>
 
-      {/* Content */}
       <div className="sidebar-content">
-        {loading ? (
-          <div className="sidebar-message">Loading...</div>
-        ) : error ? (
-          <div className="sidebar-message error">
-            <div>{error}</div>
-            <small>Check console for details</small>
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="sidebar-message">No categories</div>
+        {categories.length === 0 ? (
+          <div className="sidebar-empty">No categories found</div>
         ) : (
           <ul className="category-list">
-            {categories.map((category) => (
-              <li key={category.id} className="category-item">
-                {/* Main Row: Icon + Name (Clickable to filter) */}
-                <div 
-                  className="category-main-row"
-                  onClick={() => handleCategoryClick(category)}
-                  title={category.name}
-                >
-                  <span className="category-icon">
-                    {renderIcon(category.name)}
-                  </span>
-                  
-                  {!isCollapsed && (
-                    <>
-                      <span className="category-name">{category.name}</span>
-                      
-                      {/* Toggle Button - only if subcategories exist */}
-                      {category.subcategories && category.subcategories.length > 0 && (
-                        <button 
-                          className="expand-btn"
-                          onClick={(e) => toggleCategoryExpand(e, category.id)}
-                          aria-label="Toggle subcategories"
-                        >
-                          <FaChevronDown 
-                            className={expandedCategories[category.id] ? 'rotated' : ''} 
-                          />
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
+            {categories.map((category) => {
+              const hasSubs = category.subcategories?.length > 0;
+              const isExpanded = expandedId === category.id;
 
-                {/* Subcategories Dropdown */}
-                {!isCollapsed && expandedCategories[category.id] && (
-                  <div className="subcategory-list">
-                    {/* Optional "View All" link for the main category */}
-                    <a 
-                      href={`#category-${category.id}`}
-                      className="subcategory-item view-all"
-                      onClick={(e) => handleCategoryClick(category, e)}
+              return (
+                <li 
+                  key={category.id} 
+                  className={`category-item ${isExpanded ? 'expanded' : ''}`}
+                >
+                  <div className="category-row">
+                    <button 
+                      className="icon-btn"
+                      onClick={() => handleSelect(category, 'category')}
+                      title={category.name}
                     >
-                      All {category.name}
-                    </a>
-                    
-                    {/* Actual subcategories */}
-                    {category.subcategories?.map((sub) => (
-                      <a
-                        key={sub.id}
-                        href={`#subcategory-${sub.id}`}
-                        className="subcategory-item"
-                        onClick={(e) => handleCategoryClick({...sub, parent: category}, e)}
-                      >
-                        {sub.name}
-                      </a>
-                    ))}
+                      {getIcon(category.icon)}
+                    </button>
+
+                    {!isCollapsed && (
+                      <>
+                        <button 
+                          className="name-btn"
+                          onClick={() => handleSelect(category, 'category')}
+                        >
+                          {category.name}
+                        </button>
+
+                        {hasSubs && (
+                          <button 
+                            className="expand-btn"
+                            onClick={(e) => toggleExpand(e, category.id)}
+                          >
+                            <FaChevronDown className={isExpanded ? 'rotated' : ''} />
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
-                )}
-              </li>
-            ))}
+
+                  {!isCollapsed && isExpanded && hasSubs && (
+                    <div className="submenu">
+                      <button 
+                        className="submenu-item view-all"
+                        onClick={() => handleSelect(category, 'category')}
+                      >
+                        📁 View All {category.name}
+                      </button>
+                      
+                      {category.subcategories.map((sub) => (
+                        <button
+                          key={sub.id}
+                          className="submenu-item"
+                          onClick={() => handleSelect(sub, 'subcategory')}
+                        >
+                          <span className="sub-icon">{getIcon(sub.icon)}</span>
+                          {sub.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

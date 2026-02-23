@@ -14,7 +14,8 @@ const ForgetPasswordForm = ({ onLogin }) => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+    const [capsLockOn, setCapsLockOn] = useState(false);
+    
     const HARDCODED_OTP = '123456';
 
     const handleChange = (e) => {
@@ -45,7 +46,7 @@ const ForgetPasswordForm = ({ onLogin }) => {
         }
 
         try {
-            const response = await fetch('/check-username', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/check-username`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: formData.username }),
@@ -111,7 +112,7 @@ const ForgetPasswordForm = ({ onLogin }) => {
         }
 
         try {
-            const response = await fetch('/forgot-password', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -225,6 +226,8 @@ const ForgetPasswordForm = ({ onLogin }) => {
                             value={formData.newPassword}
                             onChange={handleChange}
                             autoComplete="new-password"
+                            onKeyUp={(e) => setCapsLockOn(e.getModifierState('CapsLock'))}
+
                             placeholder=" "
                             aria-label="Enter your new password"
                         />
@@ -235,7 +238,7 @@ const ForgetPasswordForm = ({ onLogin }) => {
                             onClick={togglePasswordVisibility}
                             aria-label={showPassword ? "Hide password" : "Show password"}
                         >
-                            {showPassword ? "👁️" : "👁️‍🗨️"}
+                            {showPassword ? "👁️" : "⌣"}
                         </button>
                     </div>
 
@@ -247,6 +250,7 @@ const ForgetPasswordForm = ({ onLogin }) => {
                             value={formData.newConfirmPassword}
                             onChange={handleChange}
                             autoComplete="new-password"
+                            onKeyUp={(e) => setCapsLockOn(e.getModifierState('CapsLock'))}
                             placeholder=" "
                             aria-label="Confirm your new password"
                         />
@@ -257,9 +261,13 @@ const ForgetPasswordForm = ({ onLogin }) => {
                             onClick={toggleConfirmPasswordVisibility}
                             aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                         >
-                            {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                            {showConfirmPassword ? "👁️" : "⌣"}
                         </button>
                     </div>
+                    
+                    {capsLockOn && (
+                      <p className="caps-warning">Caps Lock is ON</p>
+                    )}
 
                     <button type="submit" disabled={loading}>
                         {loading ? 'Resetting...' : 'Reset Password'}

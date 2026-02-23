@@ -46,4 +46,16 @@ router.put("/seller/orders/:orderId/status",
     SellerOrders.updateOrderStatus
 );
 
+router.post("/payment/initiate", 
+    OrderController.initiatePayment
+);
+
+router.post("/payment/update",
+    OrderController.updatePaymentStatus
+);
+
+router.get("/:orderID/payments", 
+    OrderController.getOrderPayments
+);
+
 module.exports = router;

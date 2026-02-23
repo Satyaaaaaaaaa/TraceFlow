@@ -24,7 +24,7 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/product/');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/product/`);
         const productData = response.data.data;
         setProducts(Array.isArray(productData) ? productData : []);
         setLoading(false);
