@@ -74,7 +74,6 @@ const { UserBlockchainStatus } = require("./UserBlockchainStatus");
 const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
 const { Image } = require("./Image")
 const { Payment } = require("./Payment");
-const { ProductImages }  = require("./ProductImages")
 
 
 
@@ -117,7 +116,6 @@ ProductBlockchainStatus.belongsTo(Product, { foreignKey: "productId" });
 Product.belongsToMany(Image, {through: "ProductImages", foreignKey: "productId"});
 Image.belongsToMany(Product, {through: "ProductImages", foreignKey: "imageId"});
 
-module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Image };
 // Category self-referencing for hierarchy
 Category.hasMany(Category, { as: 'subcategories', foreignKey: 'parentId' });
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
@@ -126,11 +124,5 @@ Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
 Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });
 Payment.belongsTo(Order, { foreignKey: 'orderID' });
 
-module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Category,Payment };
-
-
-Product.hasMany(ProductImages, { foreignKey: "productId", as: "images", onDelete: "CASCADE"});
-ProductImages.belongsTo(Product, { foreignKey: "productId" });
-
-module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address };
+module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Category,Payment, Image };
 
