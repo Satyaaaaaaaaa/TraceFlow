@@ -6,7 +6,7 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const { Op } = require("sequelize");
 
-const { formatProductImages } = require("../../products/utils/formatProductImages");
+const { formatProductImages } = require("../../common/utils/formatProductImages");
 
 module.exports = {
     // createOrderItem: async (req, res) => {
