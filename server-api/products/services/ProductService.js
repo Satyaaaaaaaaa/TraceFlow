@@ -80,5 +80,5 @@ async function createProductService(body, user) {
 }
 
 module.exports = {
-  createProduct: createProductService
+  createProductService
 };

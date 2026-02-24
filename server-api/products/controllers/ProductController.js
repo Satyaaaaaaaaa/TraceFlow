@@ -18,14 +18,14 @@ const { createProductWithTraceability, getFullProductDetails } = require('../../
 
 const { Op } = require("sequelize");
 
-const productService = require("../services/ProductService")
+const ProductService = require("../services/ProductService")
 
 module.exports = {
     
     createProduct: async (req, res) => {
 
         try {
-            const result = await productService.createProduct(
+            const result = await ProductService.createProductService(
                 req.body,
                 req.user
             );
