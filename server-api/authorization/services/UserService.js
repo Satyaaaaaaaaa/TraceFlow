@@ -1,16 +1,11 @@
 const { User } = require('../../common/models/User');
-const crypto = require('crypto');
+const TokenService = require("../services/TokenService")
 
-const encryptPassword = (password) => {
-  return crypto.createHash('sha256')
-    .update(password)
-    .digest('hex');
-};
 
 module.exports = {
 
   createUserService: async (payload) => {
-    const encryptedPassword = encryptPassword(payload.password);
+    const encryptedPassword = TokenService.encryptPassword(payload.password);
 
     const user = await User.create({
       ...payload,
