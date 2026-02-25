@@ -5,6 +5,7 @@ const {User} = require('../../common/models/associations');
 const { roles, jwtExpirationInSeconds } = require('../../config');
 const { createUserBCStatus, updateUserBCStatus, findUserBCStatus } = require("../../common/models/UserBlockchainStatus");
 //const { log } = require('console');
+const TokenService = require("../services/TokenService")
 
 const AuthService = require("../services/AuthService")
 
@@ -119,7 +120,7 @@ module.exports = {
     login: (req, res) => {
         const { username, password } = req.body;
         console.log("Username: " + username)
-        const encryptedPassword = encryptPassword(password);
+        const encryptedPassword = TokenService.encryptPassword(password);
 
         User.findOne({ where: { username: username } })
         .then((user) => {
@@ -138,7 +139,7 @@ module.exports = {
             }
             console.log(user.username)
             console.log(encryptedPassword)
-            const accessToken = generateAccessToken(username, user.id);
+            const accessToken = TokenService.generateAccessToken(username, user.id);
             return res.status(200).json({
                 status: true,
                 data: {
