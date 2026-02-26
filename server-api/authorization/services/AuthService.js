@@ -8,15 +8,20 @@ module.exports = {
     const user = await UserService.createUserService(payload);
 
     let isSynced = false;
+    let blockchainError = null;
 
     try {
       const enroll = await BlockchainService.enrollUser(user.username);
       isSynced = enroll?.success === true;
     } catch (err) {
-      console.error("Blockchain failed:", err.message);
+      blockchainError = err.message;
     }
 
-    await UserService.updateBlockchainStatus(user.id, isSynced);
+    try {
+      await UserService.updateBlockchainStatus(user.id, isSynced);
+    } catch (err) {
+      console.error("Blockchain status update failed:", err.message);
+    }
 
     const token = TokenService.generateAccessToken(
       user.username,
@@ -26,7 +31,8 @@ module.exports = {
     return {
       user,
       token,
-      blockchainError: !isSynced
+      blockchainSynced: isSynced,
+      blockchainError
     };
   }
 };

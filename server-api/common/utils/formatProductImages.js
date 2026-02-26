@@ -7,7 +7,7 @@ function formatProductImages(productJson, req) {
 
     productJson.Images = productJson.Images.map((img) => ({
         ...img,
-        imageUrl: `uploads/products/img_${img.uuid}.jpg`
+        imageUrl: `uploads/products/product_${img.uuid}.png`//todo -> to create correct extension [.png, .jpg, etc]
     }));
 
     return productJson;

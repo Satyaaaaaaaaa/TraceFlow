@@ -1,6 +1,6 @@
 const { User } = require('../../common/models/User');
 const TokenService = require("../services/TokenService")
-
+const { UserBlockchainStatus } = require('../../common/models/UserBlockchainStatus');
 
 module.exports = {
 
@@ -17,9 +17,19 @@ module.exports = {
   },
 
   updateBlockchainStatus: async (userId, status) => {
-    return User.update(
-      { blockchainStatus: status },
-      { where: { id: userId } }
-    );
+    const record = await UserBlockchainStatus.findOne({
+      where: { userId }
+    });
+
+    if (!record) {
+      return await UserBlockchainStatus.create({
+        userId,
+        blockchainStatus: status
+      });
+    }
+
+    return await record.update({
+      blockchainStatus: status
+    });
   }
 };

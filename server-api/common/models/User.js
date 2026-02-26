@@ -49,11 +49,11 @@ const UserModel = sequelize.define("user", {
         type: DataTypes.STRING,
         allowNull: true
     },
-    blockchainStatus: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    }
+    // blockchainStatus: {
+    //     type: DataTypes.BOOLEAN,
+    //     allowNull: false,
+    //     defaultValue: false
+    // }
 });     
 
 

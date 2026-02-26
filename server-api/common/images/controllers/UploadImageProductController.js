@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     file.imageUUID = imageUUID; // for later
 
     const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `img_${imageUUID}`);
+    cb(null, `product_${imageUUID}${ext}`);
   }
 });
 
