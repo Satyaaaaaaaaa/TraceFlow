@@ -18,6 +18,10 @@ const ImageModel = sequelize.define("Image", {
     allowNull: false,
     defaultValue: 0,
   },
+  extension: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  }
 //   productId: {
 //     type: DataTypes.INTEGER,
 //     allowNull: false,

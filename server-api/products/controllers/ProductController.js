@@ -72,11 +72,12 @@ module.exports = {
                     where: { blockchainStatus: true }
                     },
                     {
+                    //Possible to modularize
                     model: Image,
                     as: "Images",
                     where: { position: 0 },   // primary image
                     required: false,
-                    attributes: ["id", "uuid", "position"],
+                    attributes: ["id", "uuid", "position", "extension"],
                     through: { attributes: [] }
                     }
                 ],
@@ -182,7 +183,7 @@ module.exports = {
                             model: Image,
                             as: "Images",
                             required: false,
-                            attributes: ["id", "uuid", "position"],
+                            attributes: ["id", "uuid", "position", "extension"],
                             through: { attributes: [] }, // hide join table
                             order: [["position", "ASC"]]
                         }

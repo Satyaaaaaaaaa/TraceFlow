@@ -12,10 +12,12 @@ const storage = multer.diskStorage({
 
   filename(req, file, cb) {
     const imageUUID = crypto.randomUUID();
-    file.imageUUID = imageUUID; // for later
 
     const ext = path.extname(file.originalname).toLowerCase();
     cb(null, `product_${imageUUID}${ext}`);
+
+    file.imageUUID = imageUUID; // for later
+    file.extension = ext;
   }
 });
 
@@ -57,7 +59,8 @@ module.exports = (req, res) => {
       // Insert images into DB with position
       const imageRecords = req.files.map((file, index) => ({
         uuid: file.imageUUID,
-        position: index
+        position: index,
+        extension: file.extension,
       }));
 
       await Image.bulkCreate(imageRecords);

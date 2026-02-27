@@ -1,5 +1,4 @@
 function extractPrimaryImage(product, req) {
-    const BASE_URL = `${req.protocol}://${req.get("host")}`;
 
     if (!product.Images || product.Images.length === 0) {
         return null;
@@ -8,9 +7,10 @@ function extractPrimaryImage(product, req) {
     const primary = product.Images.find(img => img.position === 0) 
                     || product.Images[0];
 
-    return `uploads/products/img_${primary.uuid}.jpg`;
+    return `uploads/products/product_${primary.uuid}${primary.extension}`;
 }
 
+//todo -> reuse /common/utils/formatImageMapper.js instead of doing it again here.
 function mapCartResponse(cart, req) {
     const cartJson = cart.toJSON();
 
