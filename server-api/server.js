@@ -28,6 +28,10 @@ const SearchRoutes = require("./common/meilisearch/routes")
 const AssetRoutes = require("./asset/routes")
 // const traceflowRoutes = require("./traceflowRouters/routes");
 
+const PincodeRoutes = require("./pincode/routes")
+
+require("./common/models/associations"); // Ensure associations are set up before syncing
+
 app.use(morgan("tiny"));
 app.use(cors());
 // const traceflowRoutes = require("./traceflowRouters/routes");
@@ -60,6 +64,8 @@ sequelize
     app.use("/category", CategoryRoutes);
     app.use("/search", SearchRoutes);
     app.use("/asset", AssetRoutes);
+    app.use("/pincode", PincodeRoutes)
+
     // app.use("/traceflow", traceflowRoutes)
 
     app.listen(PORT, ADDRESS, async () => {

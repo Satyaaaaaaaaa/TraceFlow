@@ -74,9 +74,7 @@ const { UserBlockchainStatus } = require("./UserBlockchainStatus");
 const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
 const { Image } = require("./Image")
 const { Payment } = require("./Payment");
-
-
-
+const { CategoryAttribute } = require("./CategoryAttribute")
 const sequelize = require("sequelize");
 
 // Associations

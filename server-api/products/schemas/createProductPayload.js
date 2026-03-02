@@ -36,6 +36,6 @@ module.exports = {
       },
     },
   },
-  required: ["name", "description", "price", "categoryIds"],
-  additionalProperties: false,
+  required: ["name", "description", "price", "categoryIds", "image_uuids", "priceUnit", ],
+  additionalProperties: false
 };
