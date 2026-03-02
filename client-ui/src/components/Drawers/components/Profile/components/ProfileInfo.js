@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import React from 'react';
+import { Modal, Form, Button } from 'react-bootstrap';
 import { 
   FaUserCircle, FaShoppingCart, FaBoxes, FaCrown, FaSignOutAlt, 
-  FaExchangeAlt, FaCog, FaQuestionCircle, FaUser, FaLink, FaCheckCircle
+  FaExchangeAlt, FaCog, FaQuestionCircle, FaUser
 } from 'react-icons/fa';
-import { getUserBlockchainStatus, syncUserToBlockchain } from '../../../../../services/userServices';
 
 const ProfileInfo = ({ 
   userInfo,
@@ -13,7 +12,6 @@ const ProfileInfo = ({
   role,
   onOrdersClick,
   onSettingsClick,
-  onSellerDashboardClick,
   onChangeRole,
   onDeleteAccount,
   onLogout,
@@ -24,47 +22,6 @@ const ProfileInfo = ({
   handleChangeRole,
   handleCancelChangeRole
 }) => {
-  const [blockchainStatus, setBlockchainStatus] = useState(null);
-  const [syncLoading, setSyncLoading] = useState(false);
-  const [syncError, setSyncError] = useState('');
-  const [syncSuccess, setSyncSuccess] = useState('');
-
-  useEffect(() => {
-    fetchBlockchainStatus();
-  }, []);
-
-  const fetchBlockchainStatus = async () => {
-    try {
-      const response = await getUserBlockchainStatus();
-      if (response.status) {
-        setBlockchainStatus(response.data.blockchainStatus);
-      }
-    } catch (error) {
-      console.error('Error fetching blockchain status:', error);
-    }
-  };
-
-  const handleSyncBlockchain = async () => {
-    setSyncLoading(true);
-    setSyncError('');
-    setSyncSuccess('');
-
-    try {
-      const response = await syncUserToBlockchain();
-      if (response.status) {
-        setBlockchainStatus(true);
-        setSyncSuccess('Successfully synced to blockchain!');
-        setTimeout(() => setSyncSuccess(''), 3000);
-      } else {
-        setSyncError(response.error || 'Sync failed');
-      }
-    } catch (error) {
-      setSyncError(error.response?.data?.error || 'Failed to sync to blockchain');
-    } finally {
-      setSyncLoading(false);
-    }
-  };
-
   return (
     <>
       {/* User Info Section */}
@@ -81,73 +38,27 @@ const ProfileInfo = ({
         <div className="user-role-badge">
           {role || 'Not Available'}
         </div>
-
-        {/* Blockchain Status Section */}
-        <div className="mt-3">
-          {blockchainStatus === null ? (
-            <div className="text-muted small">Loading blockchain status...</div>
-          ) : blockchainStatus ? (
-            <div className="d-flex align-items-center justify-content-center text-success">
-              <FaCheckCircle className="me-2" />
-              <span className="small">Verified on Blockchain</span>
-            </div>
-          ) : (
-            <div>
-              <Alert variant="warning" className="small mb-2">
-                Not synced to blockchain
-              </Alert>
-              <Button 
-                variant="outline-primary" 
-                size="sm" 
-                onClick={handleSyncBlockchain}
-                disabled={syncLoading}
-                className="w-100"
-              >
-                {syncLoading ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    Syncing...
-                  </>
-                ) : (
-                  <>
-                    <FaLink className="me-2" />
-                    Sync to Blockchain
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-
-          {syncError && (
-            <Alert variant="danger" className="small mt-2 mb-0">
-              {syncError}
-            </Alert>
-          )}
-
-          {syncSuccess && (
-            <Alert variant="success" className="small mt-2 mb-0">
-              {syncSuccess}
-            </Alert>
-          )}
-        </div>
       </div>
 
       {/* Menu Items */}
       <div className="drawer-menu">
+        {/* My Profile - Goes to profile view/edit */}
         <button className="menu-item" onClick={() => navigate('/profile')}>
           <FaUser className="menu-icon" />
           <span>My Profile</span>
         </button>
 
+        {/* My Orders */}
         <button className="menu-item" onClick={onOrdersClick}>
           <FaShoppingCart className="menu-icon" />
           <span>My Orders</span>
         </button>
 
+        {/* Role-specific items */}
         {role === 'SELLER' && (
-          <button className="menu-item" onClick={onSellerDashboardClick}>
+          <button className="menu-item" onClick={() => navigate('/seller-dashboard')}>
             <FaBoxes className="menu-icon" />
-            <span>Seller Dashboard</span>
+            <span>My Products</span>
           </button>
         )}
 
@@ -160,16 +71,19 @@ const ProfileInfo = ({
 
         <div className="menu-divider" />
 
+        {/* Settings - Opens settings drawer with Update Profile & Delete Account */}
         <button className="menu-item" onClick={onSettingsClick}>
           <FaCog className="menu-icon" />
           <span>Settings</span>
         </button>
 
+        {/* Change Role */}
         <button className="menu-item" onClick={onChangeRole}>
           <FaExchangeAlt className="menu-icon" />
           <span>Change Role</span>
         </button>
 
+        {/* Help & Support - Placeholder for now */}
         <button className="menu-item" onClick={() => navigate('/help-support')}>
           <FaQuestionCircle className="menu-icon" />
           <span>Help & Support</span>
@@ -177,6 +91,7 @@ const ProfileInfo = ({
 
         <div className="menu-divider" />
 
+        {/* Sign Out */}
         <button className="menu-item logout" onClick={onLogout}>
           <FaSignOutAlt className="menu-icon" />
           <span>Sign Out</span>

@@ -42,12 +42,16 @@ router.patch(
   "/change-role",
   [
     isAuthenticatedMiddleware.check,
+    // COMMENTING FOR NOW AS ANY USER CAN CHANGE ROLE
+    // CheckPermissionMiddleware.has(roles.ADMIN), //ONLY ADMINS CAN CHAGE ROLE BUT NOT ANY USER
     SchemaValidationMiddleware.verify(changeRolePayload),
   ],
-  UserController.changeSelfRole
+  //UserController.changeRole
+  UserController.changeSelfRole  // New controller function
 );
 
-// ROUTE FOR ADMIN TO CHANGE ROLE 
+// ROUTE FOR ADMIN
+//FOR ADMIN TO CHANGE ROLE 
 router.patch(
   "/change-role/:userId",
   [
@@ -65,18 +69,10 @@ router.delete(
   UserController.deleteUser
 );
 
-// USER BLOCKCHAIN SYNC ROUTE
 router.post(
   "/sync-blockchain", 
-  [isAuthenticatedMiddleware.check],
-  AuthorizationController.syncUserToBlockchain
-);
-
-// GET USER BLOCKCHAIN STATUS
-router.get(
-  "/blockchain-status",
-  [isAuthenticatedMiddleware.check],
-  UserController.getUserBlockchainStatus
+   [isAuthenticatedMiddleware.check],
+    AuthorizationController.syncUserToBlockchain
 );
 
 module.exports = router;

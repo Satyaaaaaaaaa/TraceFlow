@@ -88,8 +88,8 @@ OrderItem.belongsTo(Order, { foreignKey: 'orderID' });
 Product.hasMany(OrderItem, { foreignKey: 'productID' });
 OrderItem.belongsTo(Product, { foreignKey: 'productID' });
 
-Product.belongsToMany(Category, { through: 'ProductCategory', foreignKey: 'ProductId'});
-Category.belongsToMany(Product, { through: 'ProductCategory', foreignKey: 'CategoryId'});
+Product.belongsToMany(Category, { through: 'ProductCategory'});
+Category.belongsToMany(Product, { through: 'ProductCategory' });
 
 User.belongsToMany(Product, { through: 'UserProduct' });
 Product.belongsToMany(User, { through: 'UserProduct' });
@@ -117,9 +117,6 @@ Image.belongsToMany(Product, {through: "ProductImages", foreignKey: "imageId"});
 // Category self-referencing for hierarchy
 Category.hasMany(Category, { as: 'subcategories', foreignKey: 'parentId' });
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
-
-Category.hasMany(CategoryAttribute, { foreignKey: 'categoryId' });
-CategoryAttribute.belongsTo(Category, { foreignKey: 'categoryId' });
 
 //Payment Associations
 Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });

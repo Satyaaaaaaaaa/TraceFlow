@@ -22,39 +22,15 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
   const [selectedRole, setSelectedRole] = useState('');
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = sessionStorage.getItem("authToken");
-      
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/user`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      
-        const result = await res.json();
-      
-        console.log("FULL RESPONSE:", result);
-      
-        if (res.ok && result.status) {
-          const user = result.data; 
-        
-          setUserName(user.username || "");
-          setFirstName(user.firstName || "");
-          setLastName(user.lastName || "");
-          setAge(user.age?.toString() || "");
-          setEmail(user.email || "");
-          setRole(user.role || "");
-        }
-      
-      } catch (err) {
-        console.error(err);
-      }
-    };
-  
-    fetchUser();
-  }, []);
-
+    if (userInfo) {
+      setUserName(userInfo.username || '');
+      setFirstName(userInfo.firstName || '');
+      setLastName(userInfo.lastName || '');
+      setAge(userInfo.age?.toString() || '');
+      setEmail(userInfo?.email ?? '');
+      setRole(userInfo?.role ?? '');
+    }
+  }, [userInfo]);
 
   const handleOrdersClick = () => {
     navigate('/my-orders');
@@ -67,11 +43,6 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
 
   const handleUpdateProfileClick = () => {
     setShowUpdateProfile(true);
-  };
-
-  const handleSellerDashboardClick = () => {
-    navigate('/seller-dashboard');
-    onClose();
   };
 
   const handleUpdateProfile = async () => {
@@ -234,7 +205,6 @@ const ProfileDrawer = ({ isOpen, onClose, isAuthenticated, userInfo, onLogout })
                 role={role}
                 onOrdersClick={handleOrdersClick}
                 onSettingsClick={handleSettingsClick}
-                onSellerDashboardClick={handleSellerDashboardClick}
                 onChangeRole={handleOpenChangeRole}
                 onDeleteAccount={handleDeleteAccount}
                 onLogout={onLogout}

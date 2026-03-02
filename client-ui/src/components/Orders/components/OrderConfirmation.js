@@ -19,14 +19,16 @@ const OrderConfirmation = () => {
         }
     }, [orderData, cartItems, removeFromCart]);
 
-    const { order, payment } = location.state || {};
-    if (!order) {
-      return (
-        <MDBContainer className="py-5 text-center">
-          <MDBTypography tag="h6" className="text-danger">No order details available.</MDBTypography>
-          <MDBBtn color="dark" onClick={() => navigate('/')}>Back to Home</MDBBtn>
-        </MDBContainer>
-      );
+    if (!cartItems || cartItems.length === 0) {
+        return (
+            <MDBContainer className="py-5 text-center">
+                <MDBTypography tag="h1" className="mb-4">Order Confirmation</MDBTypography>
+                <MDBTypography tag="h6" className="text-danger">Your cart is empty. No order details available.</MDBTypography>
+                <MDBBtn color="dark" onClick={() => navigate('/')} className="mt-4">
+                    Back to Home
+                </MDBBtn>
+            </MDBContainer>
+        );
     }
 
     const handleBackToHome = () => {
