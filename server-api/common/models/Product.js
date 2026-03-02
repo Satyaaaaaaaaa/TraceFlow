@@ -31,17 +31,6 @@ const ProductModel = sequelize.define("Product", {
       allowNull: false,
       defaultValue: productPriceUnits.DOLLAR,
     },
-<<<<<<< HEAD
-    quantity:{
-      type:DataTypes.INTEGER,
-      allowNull:false,
-      defaultValue:1
-    },
-    specifications: {
-      type: DataTypes.JSON, 
-      allowNull: true,
-      defaultValue: {}
-=======
     // blockchainStatus: {
     //     type: DataTypes.BOOLEAN,
     //     allowNull: false,
@@ -52,7 +41,6 @@ const ProductModel = sequelize.define("Product", {
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       unique: true,
->>>>>>> upstream/main
     }
   });
 

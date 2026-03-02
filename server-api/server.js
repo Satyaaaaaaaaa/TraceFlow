@@ -25,6 +25,8 @@ const AssetRoutes = require("./asset/routes")
 const { Payment } = require('./common/models/Payment');
 // const traceflowRoutes = require("./traceflowRouters/routes");
 
+const PincodeRoutes = require("./pincode/routes")
+
 require("./common/models/associations"); // Ensure associations are set up before syncing
 
 app.use(morgan("tiny"));
@@ -52,6 +54,7 @@ sequelize
     app.use("/category", CategoryRoutes);
     app.use("/search", SearchRoutes);
     app.use("/asset", AssetRoutes);
+    app.use("/pincode", PincodeRoutes)
 
     // app.use("/traceflow", traceflowRoutes)
 

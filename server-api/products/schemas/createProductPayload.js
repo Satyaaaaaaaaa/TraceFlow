@@ -51,6 +51,6 @@ module.exports = {
       additionalProperties: true  
     }
   },
-  required: ["name", "description", "price", "categoryIds", "image_uuids", "quantity", "priceUnit", "specifications"],
+  required: ["name", "description", "price", "categoryIds", "image_uuids", "priceUnit", ],
   additionalProperties: false
 };
