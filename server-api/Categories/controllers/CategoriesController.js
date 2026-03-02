@@ -569,7 +569,8 @@ module.exports = {
                 error: error.message
             });
         }
-        
+    },
+    
     updateCategories: async (req, res) => {
     try {
         console.log("Updating categories...");
