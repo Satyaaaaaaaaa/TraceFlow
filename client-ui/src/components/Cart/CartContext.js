@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-const API_URL = process.env.REACT_APP_API_URL;
+
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
@@ -16,14 +16,14 @@ export const CartProvider = ({ children }) => {
     try {
       const token = sessionStorage.getItem("authToken");
       if (!token) {
-        setCartItems([]); 
+        setCartItems([]); // Clear cart if no user is logged in
         return;
       }
 
       // const decoded = jwtDecode(token);
       // const userId = decoded.userId;
 
-      const response = await axios.get(`${API_URL}/cart`, {
+      const response = await axios.get('/cart/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,35 +40,36 @@ export const CartProvider = ({ children }) => {
   };
 
   // Add item to cart both locally and on the backend
-  const addToCart = async (product, quantity = 1) => {
-      try {
-        const token = sessionStorage.getItem('token') || sessionStorage.getItem("authToken");
-        if (!token) {
-          alert('Please log in to add items to the cart.');
-          return;
-        }
-
-        const decoded = jwtDecode(token);
-        const userId = decoded.userId;
-
-        const response = await axios.post(`${API_URL}/cart/add`, {
-          userId,
-          productId: product.id,
-          quantity  
-        }, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.data.status) {
-          await fetchCartItems();
-        } else {
-          alert('Failed to add product to cart.');
-        }
-      } catch (error) {
-        console.error('Error adding product to cart:', error);
-        alert('Please login to add items to cart');
-        throw error; // re-throw so ProductDetails catch block works
+  const addToCart = async (product) => {
+    try {
+      const token = sessionStorage.getItem("authToken");
+      if (!token) {
+        alert('Please log in to add items to the cart.');
+        return;
       }
+
+      const decoded = jwtDecode(token);
+      const userId = decoded.userId;
+
+      const response = await axios.post('/cart/add', {
+        userId,
+        productId: product.id,
+        quantity: 1 // default quantity
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.status) {
+        fetchCartItems(); // Refresh cart items
+        alert('Product added to cart successfully!');
+      } else {
+        alert('Failed to add product to cart.');
+      }
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
   };
 
   // Remove item from cart both locally and on the backend
@@ -78,7 +79,7 @@ export const CartProvider = ({ children }) => {
       //const decoded = jwtDecode(token);
       //const userId = decoded.userId;
 
-      const response = await axios.delete(`${API_URL}/cart/remove`, {
+      const response = await axios.delete(`/cart/remove`, {
         data: {
           cartItemId: productId,
         },
@@ -102,7 +103,7 @@ export const CartProvider = ({ children }) => {
   const updateCartItem = async (cartItemId, quantity) => {
     try {
       const token = sessionStorage.getItem("authToken");
-      const response = await axios.put(`${API_URL}/cart/update`, {
+      const response = await axios.put('/cart/update', {
         cartItemId,
         quantity,
       }, {

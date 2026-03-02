@@ -76,7 +76,7 @@
 .login-form button {
   width: 100%;
   padding: 1.1rem;
-  margin-top: 0.5%;
+  margin-top: 1.5rem;
   border: none;
   border-radius: 10px;
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
@@ -88,14 +88,14 @@
   box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
 }
 
-/*.login-form button:hover {
+.login-form button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
 }
 
 .login-form button:active {
   transform: translateY(0);
-}*/
+}
 
 .error-message {
   padding: 0.875rem;

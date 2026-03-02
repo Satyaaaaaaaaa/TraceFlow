@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import '../styles/ForgotPassword.css';
-const API_URL = process.env.REACT_APP_API_URL;
 
 const ForgetPasswordForm = ({ onLogin }) => {   
     const [step, setStep] = useState(1);
@@ -47,7 +46,7 @@ const ForgetPasswordForm = ({ onLogin }) => {
         }
 
         try {
-            const response = await fetch(`${API_URL}/check-username`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/check-username`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: formData.username }),
@@ -113,7 +112,7 @@ const ForgetPasswordForm = ({ onLogin }) => {
         }
 
         try {
-            const response = await fetch(`${API_URL}/forgot-password`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
