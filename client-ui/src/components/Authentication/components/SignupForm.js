@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 // import ReCAPTCHA from 'react-google-recaptcha';
 // const RECAPTCHA_SITE_KEY = '6LdFmiwqAAAAACToIxlwk54wTzQyJ6usbTPZrH7w'; // Replace with your reCAPTCHA site key
 
-const API_URL = process.env.REACT_APP_API_URL;  
 const SignupForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -103,7 +102,7 @@ const SignupForm = () => {
 
     try {
 
-      const response = await fetch(`${API_URL}/signup`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -405,29 +404,3 @@ const SignupForm = () => {
 };
 
 export default SignupForm;
-
-/* 
-// Pincode — digits only
-const onlyDigits = (e) => {
-  if (NAV_KEYS.includes(e.key)) return;
-
-  if ( !/^\d$/.test(e.key) ) e.preventDefault();
-  
-  if (e.target.value.length === 0 && e.key === '0') {
-    e.preventDefault();
-  }
-
-  if (e.target.value.length >= 6) {
-    e.preventDefault();
-  }
-};
-
-// Phone — digits, +, -, space
-const phoneKeys = (e) => {
-  if (NAV_KEYS.includes(e.key)) return;
-  if (!/^[\d+\- ]$/.test(e.key)) e.preventDefault();
-  if (e.target.value.length >= 10) {
-    e.preventDefault();
-  }
-};
-*/

@@ -74,14 +74,9 @@ const { UserBlockchainStatus } = require("./UserBlockchainStatus");
 const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
 const { Image } = require("./Image")
 const { Payment } = require("./Payment");
-<<<<<<< HEAD
-const { ProductImages }  = require("./ProductImages")
-const { CategoryAttribute } = require('./CategoryAttribute');
-=======
 
 
 
->>>>>>> upstream/main
 const sequelize = require("sequelize");
 
 // Associations
@@ -95,8 +90,8 @@ OrderItem.belongsTo(Order, { foreignKey: 'orderID' });
 Product.hasMany(OrderItem, { foreignKey: 'productID' });
 OrderItem.belongsTo(Product, { foreignKey: 'productID' });
 
-Product.belongsToMany(Category, { through: 'ProductCategory', foreignKey: 'ProductId'});
-Category.belongsToMany(Product, { through: 'ProductCategory', foreignKey: 'CategoryId'});
+Product.belongsToMany(Category, { through: 'ProductCategory'});
+Category.belongsToMany(Product, { through: 'ProductCategory' });
 
 User.belongsToMany(Product, { through: 'UserProduct' });
 Product.belongsToMany(User, { through: 'UserProduct' });
@@ -125,20 +120,9 @@ Image.belongsToMany(Product, {through: "ProductImages", foreignKey: "imageId"});
 Category.hasMany(Category, { as: 'subcategories', foreignKey: 'parentId' });
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
 
-Category.hasMany(CategoryAttribute, { foreignKey: 'categoryId' });
-CategoryAttribute.belongsTo(Category, { foreignKey: 'categoryId' });
-
 //Payment Associations
 Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });
 Payment.belongsTo(Order, { foreignKey: 'orderID' });
 
-<<<<<<< HEAD
-Product.hasMany(ProductImages, { foreignKey: "productId", as: "images", onDelete: "CASCADE"});
-ProductImages.belongsTo(Product, { foreignKey: "productId" });
-
-module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Payment, CategoryAttribute };
-
-=======
 module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Category,Payment, Image };
->>>>>>> upstream/main
 

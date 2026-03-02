@@ -22,20 +22,16 @@ import AddAddress from "./components/Address/AddAddress";
 import SellerOrders from "./components/Pages/Dashboards/SellerDashboard/components/SellerOrders";
 import AddProduct from "./components/Pages/Dashboards/SellerDashboard/components/AddProduct";
 import MyProducts from "./components/Pages/Dashboards/SellerDashboard/components/MyProducts";
-import ForgetPasswordForm from "./components/Authentication/components/ForgotPasswordForm"; // ADDED PATH
-import Payment from "./components/Payment/components/payment";
-import PaymentFailed from "./components/Payment/components/paymentFailed";
-import EditProduct from './components/Pages/Dashboards/SellerDashboard/components/EditProduct';
-import ViewProduct from './components/Pages/Dashboards/SellerDashboard/components/ViewProduct';
 
+import ForgetPasswordForm from "./components/Authentication/components/ForgotPasswordForm"; // ADDED PATH
+//import Product from './components/Products/Product';
 
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); 
+  const [sidebarOpen, setSidebarOpen] = useState(false); // NEW: Sidebar state (starts collapsed)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,34 +49,32 @@ function App() {
 
   const fetchUserRole = async (token) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/user`, {
+      const response = await fetch('/user/', {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (response.ok) {
         const userData = await response.json();
-
         setUserInfo((prev) => ({
           ...prev,
-          ...userData.data,
+          ...userData.data, // Store full user data instead of only role
         }));
+      } else {
+        console.error('Failed to fetch user data');
       }
     } catch (error) {
-      console.error(error);
-    } finally {
-      setUserLoading(false); 
+      console.error('Error fetching user data:', error);
     }
   };
 
   //REFRESHES SESSION WHEN ROLE IS CHANGED 
 
-  /*const refreshUserData = async () => {
+  const refreshUserData = async () => {
     const token = sessionStorage.getItem("authToken");
     if (token) {
       await fetchUserRole(token);
     }
-  };*/
+  };
 
   const handleLogin = (token, user) => {
     sessionStorage.setItem("authToken", token);
@@ -154,14 +148,8 @@ function App() {
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/my-products" element={<MyProducts />} />
 
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/payment-failed" element={<PaymentFailed />} />
-
-            <Route path="/edit-product/:id" element={<EditProduct />} />
-            <Route path="/view-product/:id" element={<ViewProduct />} />
-
             {/*SPECIFIC ROUTES FOR SELLER*/}
-            <Route path="/seller-orders" element={userLoading ?(<div>Loading...</div>) : userInfo?.role === "SELLER" ? (<SellerDashboard />) : (<Navigate to="/" replace />)} />
+            <Route path="/seller-orders" element={userInfo?.role === "SELLER" ? (<SellerOrders />) : (<Navigate to="/" replace />)} />
             <Route 
               path="/add-product" 
               element={

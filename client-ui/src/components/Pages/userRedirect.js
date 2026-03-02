@@ -20,13 +20,13 @@ export default function UserRedirect({ token }) {
 
           // Redirect based on user role
           switch (userRole) {
-            case 'ADMIN':
+            case 'admin':
               navigate('/admin-dashboard');
               break;
-            case 'SELLER':
+            case 'seller':
               navigate('/seller-dashboard');
               break;
-            case 'BUYER':
+            case 'user':
               navigate('/');
               break;
             default:

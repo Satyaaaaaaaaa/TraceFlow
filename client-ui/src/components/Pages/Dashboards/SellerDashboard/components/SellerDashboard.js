@@ -1,78 +1,32 @@
 import React from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Row, ButtonGroup, Button } from 'react-bootstrap';
+import logo from '../../../../Assets/logo.png'; // Your logo import
 import { useNavigate } from 'react-router-dom';
-import { 
-  FaStore, 
-  FaPlusCircle,
-  FaShoppingCart,
-  FaClipboardList
-} from 'react-icons/fa';
-import '../styles/sellerdashboard.css';
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
 
-  const navItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard', 
-      icon: FaStore, 
-      active: true 
-    },
-    { 
-      id: 'add-products', 
-      label: 'Add Products', 
-      icon: FaPlusCircle, 
-      path: '/add-product' 
-    },
-    { 
-      id: 'view-orders', 
-      label: 'View Orders', 
-      icon: FaShoppingCart, 
-      path: '/seller-orders' 
-    },
-    { 
-      id: 'my-products', 
-      label: 'My Products', 
-      icon: FaClipboardList, 
-      path: '/my-products' 
-    }
-  ];
-
   return (
-    <div className="seller-dashboard-page">
-      <Container fluid className="seller-dashboard-container">
-        {/* Header */}
-        <div className="seller-dashboard-header">
-          <div className="header-icon">
-            <FaStore />
-          </div>
-          <h1>Seller Dashboard</h1>
-          <p className="header-subtitle">Manage your store, products, and orders</p>
-        </div>
+    <Container className="dashboard-container text-center">
+      <header className="dashboard-header my-4">
+        <img src={logo} alt="TraceFlow Logo" className="logo mb-3" />
+        <h2 className="header-title">Seller Dashboard</h2>
+      </header>
 
-        {/* Navigation Tabs */}
-        <div className="dashboard-nav-tabs">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              className={`nav-tab ${item.active ? 'active' : ''}`}
-              onClick={() => item.path && navigate(item.path)}
-            >
-              <item.icon className="nav-icon" />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Placeholder content - you can add more sections here later */}
-        <div className="dashboard-content">
-          <p className="text-center text-muted">
-            Select an option from the menu above to get started
-          </p>
-        </div>
-      </Container>
-    </div>
+      <Row className="mb-4 justify-content-center">
+        <ButtonGroup>
+          <Button variant="dark" onClick={() => navigate('/add-product')}>
+            Add Products
+          </Button>
+          <Button onClick={() => navigate('/seller-orders')}>
+            View Orders
+          </Button>
+          <Button variant="secondary" onClick={() => navigate('/my-products')}>
+            View My Products
+          </Button>
+        </ButtonGroup>
+      </Row>
+    </Container>
   );
 };
 
