@@ -7,6 +7,7 @@ import GoogleSignIn from './GoogleSignIn';  // Import GoogleSignIn component
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = process.env.REACT_APP_API_URL;  
 const LoginForm = ({ onLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -48,7 +49,7 @@ const LoginForm = ({ onLogin }) => {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -101,6 +102,20 @@ const LoginForm = ({ onLogin }) => {
             name="username"
             value={formData.username}
             onChange={handleChange}
+            onKeyDown={(e) => {
+                if (
+                  e.key === "Backspace" ||
+                  e.key === "Delete" ||
+                  e.key === "ArrowLeft" ||
+                  e.key === "ArrowRight" ||
+                  e.key === "Tab"
+                ) {
+                return;
+                }
+                if (!/^[a-zA-Z ]$/.test(e.key)) {
+                  e.preventDefault();
+                }
+            }}
             autoComplete="username"
             placeholder=" "
           />

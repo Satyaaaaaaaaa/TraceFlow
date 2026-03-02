@@ -1,18 +1,313 @@
-.admin-dashboard {
-  padding-top: 20px;
-  background-color: #f8f9fa; /* Light background for a cleaner look */
+.admin-dashboard-page {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding: 2rem 0;
 }
 
-.admin-task-card {
-  border: none; /* Remove border for a modern, clean look */
-  background-color: white;
+.admin-dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
-.admin-task-card .fa {
-  color: #007bff; /* Primary color for icons */
+/* Header */
+.admin-dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.admin-welcome-card {
-  background-color: #007bff;
-  color: white;
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  color: #00897b;
+}
+
+.admin-dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.header-subtitle {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Stats Cards */
+.stat-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.stat-card .card-body {
+  padding: 1.5rem;
+}
+
+.stat-header {
+  margin-bottom: 1rem;
+}
+
+.stat-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-icon {
+  font-size: 1.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+/* Users Table Card */
+.users-table-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.users-table-card .card-body {
+  padding: 0;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table-title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.table-title h5 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.create-user-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Table Styles */
+.table-responsive {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.users-table {
+  margin-bottom: 0;
+}
+
+.users-table thead th {
+  border-bottom: 2px solid #e9ecef;
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  background-color: transparent;
+}
+
+.users-table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.users-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.user-email {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Role Badge */
+.role-badge {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  border-radius: 6px;
+}
+
+/* Status Indicator */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.success {
+  background-color: #28a745;
+}
+
+.status-dot.danger {
+  background-color: #dc3545;
+}
+
+.status-dot.warning {
+  background-color: #ffc107;
+}
+
+/* Blockchain Address */
+.blockchain-address {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #00897b;
+  background-color: #e0f2f1;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Sync Button */
+.sync-btn {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.375rem;
+  border: none;
+  background: none;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  color: #495057;
+  transform: scale(1.1);
+}
+
+.edit-btn:hover {
+  color: #007bff;
+}
+
+.delete-btn:hover {
+  color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .stat-card .card-body {
+    padding: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard-page {
+    padding: 1rem 0;
+  }
+
+  .admin-dashboard-container {
+    padding: 0 1rem;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .table-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .create-user-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .users-table {
+    font-size: 0.875rem;
+  }
+
+  .users-table thead th,
+  .users-table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Make table scrollable on mobile */
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .users-table {
+    min-width: 800px;
+  }
 }

@@ -8,7 +8,22 @@ exports.createAddress = async (req, res) => {
     const decoded = jwt.verify(token, jwtSecret);
 
     const { userId } = decoded; // User ID from JWT
-    const { name, phoneNumber, pincode, city, state, locality, buildingName, landmark } = req.body;
+    const { 
+        name, 
+        phoneNumber, 
+        pincode, 
+        branch, 
+        district, 
+        city, 
+        state, 
+        locality, 
+        buildingName, 
+        landmark,
+        isDefault, 
+        addressType, 
+        weekendDelivery, 
+        deliveryInstructions 
+    } = req.body;
 
     try {
         // Ensure the user exists
@@ -26,11 +41,17 @@ exports.createAddress = async (req, res) => {
             name,
             phoneNumber,
             pincode,
+            branch,
+            district,
             city,
             state,
             locality,
             buildingName,
             landmark,
+            isDefault: isDefault ?? false,
+            addressType: addressType ?? 'house',
+            weekendDelivery: weekendDelivery ?? { saturday: null, sunday: null },
+            deliveryInstructions: deliveryInstructions ?? null,
         });
 
         return res.status(201).json({

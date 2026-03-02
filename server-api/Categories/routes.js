@@ -12,4 +12,7 @@ router.post("/seed", CategoriesController.seedCategories);
 router.post("/seed/reset", CategoriesController.resetCategories);
 router.get("/seed/status", CategoriesController.getSeedStatus);
 
+router.get('/:categoryId/attributes', CategoriesController.getCategoryAttributes);
+router.post('/seed-attributes', CategoriesController.seedAttributes); 
+
 module.exports = router;

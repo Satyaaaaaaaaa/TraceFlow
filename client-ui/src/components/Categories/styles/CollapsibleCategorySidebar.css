@@ -1,3 +1,11 @@
+body {
+  padding-left: 8%;
+  transition: padding-left 0.3s ease;
+}
+
+.category-sidebar.collapsed ~ body {
+  padding-left: 20px;
+}
 .category-sidebar {
   width: 280px;
   height: 100vh;

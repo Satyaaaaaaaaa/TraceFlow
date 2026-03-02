@@ -31,10 +31,15 @@ const ProductModel = sequelize.define("Product", {
       allowNull: false,
       defaultValue: productPriceUnits.DOLLAR,
     },
-    blockchainStatus: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
+    quantity:{
+      type:DataTypes.INTEGER,
+      allowNull:false,
+      defaultValue:1
+    },
+    specifications: {
+      type: DataTypes.JSON, 
+      allowNull: true,
+      defaultValue: {}
     }
   });
 
