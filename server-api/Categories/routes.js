@@ -11,5 +11,6 @@ router.get("/tree", CategoriesController.getCategoryTree);
 router.post("/seed", CategoriesController.seedCategories);
 router.post("/seed/reset", CategoriesController.resetCategories);
 router.get("/seed/status", CategoriesController.getSeedStatus);
+router.post("/seed/update", CategoriesController.updateCategories);
 
 module.exports = router;

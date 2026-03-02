@@ -1,10 +1,10 @@
 const { Category } = require("../../common/models/Category");
 
-// Category hierarchy with React Icon names
+// Category hierarchy
 const categoryHierarchy = [
     {
         name: 'Electronics',
-        icon: 'FaTv',
+        icon: 'electronics.svg',
         subcategories: [
             {
                 name: 'Mobile Phones',
@@ -36,7 +36,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Fashion & Clothing',
-        icon: 'FaTshirt',
+        icon: 'clothes.svg',
         subcategories: [
             'Men\'s Clothing', 'Women\'s Clothing', 'Kids\' Clothing',
             'Ethnic Wear', 'Winter Wear', 'Innerwear & Sleepwear'
@@ -44,7 +44,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Footwear',
-        icon: 'FaShoePrints',
+        icon: 'shoes.svg',
         subcategories: [
             'Men\'s Footwear', 'Women\'s Footwear', 'Sports Shoes',
             'Casual Shoes', 'Formal Shoes', 'Slippers & Sandals'
@@ -52,7 +52,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Watches & Accessories',
-        icon: 'FaClock',
+        icon: 'watch.svg',
         subcategories: [
             'Men\'s Watches', 'Women\'s Watches', 'Smart Watches',
             'Sunglasses', 'Wallets & Belts', 'Jewelry'
@@ -60,7 +60,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Beauty & Personal Care',
-        icon: 'FaSprayCan',
+        icon: 'beauty.svg',
         subcategories: [
             'Skincare', 'Haircare', 'Makeup',
             'Fragrances', 'Grooming', 'Personal Hygiene'
@@ -68,7 +68,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Health & Wellness',
-        icon: 'FaHeartbeat',
+        icon: 'heart.svg',
         subcategories: [
             'Vitamins & Supplements', 'Medical Devices', 'Fitness Equipment',
             'Ayurvedic Products', 'Personal Health Care'
@@ -76,7 +76,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Groceries',
-        icon: 'FaShoppingBasket',
+        icon: 'shopping.svg',
         subcategories: [
             'Staples (Rice, Flour, Pulses)', 'Snacks & Beverages',
             'Cooking Oils & Ghee', 'Packaged Foods',
@@ -85,7 +85,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Kitchen & Dining',
-        icon: 'FaUtensils',
+        icon: 'utensil.svg',
         subcategories: [
             'Cookware', 'Dinner Sets', 'Kitchen Storage',
             'Kitchen Tools', 'Drinkware', 'Bakeware'
@@ -93,7 +93,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Furniture',
-        icon: 'FaCouch',
+        icon: 'couch.svg',
         subcategories: [
             'Living Room Furniture', 'Bedroom Furniture',
             'Office Furniture', 'Storage Furniture', 'Outdoor Furniture'
@@ -101,7 +101,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Home Decor',
-        icon: 'FaPaintRoller',
+        icon: 'paint.svg',
         subcategories: [
             'Wall Art', 'Clocks', 'Lamps & Lighting',
             'Curtains & Cushions', 'Vases & Showpieces'
@@ -109,7 +109,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Books & Stationery',
-        icon: 'FaBook',
+        icon: 'book.svg',
         subcategories: [
             'Academic Books', 'Fiction & Non-Fiction',
             'Competitive Exam Books', 'Notebooks & Diaries',
@@ -118,7 +118,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Sports & Fitness',
-        icon: 'FaRunning',
+        icon: 'running.svg',
         subcategories: [
             'Gym Equipment', 'Yoga & Fitness Accessories',
             'Sportswear', 'Outdoor Sports', 'Indoor Games', 'Cycling'
@@ -126,7 +126,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Toys & Games',
-        icon: 'FaGamepad',
+        icon: 'game.svg',
         subcategories: [
             'Soft Toys', 'Educational Toys', 'Action Figures',
             'Board Games', 'Puzzles', 'Remote Control Toys'
@@ -134,7 +134,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Automobile Accessories',
-        icon: 'FaCar',
+        icon: 'car.svg',
         subcategories: [
             'Car Accessories', 'Bike Accessories', 'Car Electronics',
             'Helmets', 'Vehicle Care Products'
@@ -142,7 +142,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Tools & Hardware',
-        icon: 'FaTools',
+        icon: 'tool.svg',
         subcategories: [
             'Power Tools', 'Hand Tools', 'Electrical Tools',
             'Plumbing Tools', 'Safety Equipment'
@@ -150,7 +150,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Pet Supplies',
-        icon: 'FaPaw',
+        icon: 'dog.svg',
         subcategories: [
             'Dog Supplies', 'Cat Supplies', 'Pet Food',
             'Grooming Products', 'Pet Toys', 'Aquatic Supplies'
@@ -158,7 +158,7 @@ const categoryHierarchy = [
     },
     {
         name: 'Baby Care',
-        icon: 'FaBaby',
+        icon: 'baby.svg',
         subcategories: [
             'Diapers & Wipes', 'Baby Food', 'Baby Clothing',
             'Toys & Learning', 'Baby Grooming', 'Baby Gear'
@@ -168,102 +168,119 @@ const categoryHierarchy = [
 
 // Icon mapping for simple subcategories (no icon specified)
 const defaultIcons = {
-    'Tablets': 'FaTabletAlt',
-    'Audio (Headphones, Speakers)': 'FaHeadphones',
-    'Cameras': 'FaCamera',
-    'Smart Wearables': 'FaWatch',
-    'Accessories & Peripherals': 'FaKeyboard',
-    'Men\'s Clothing': 'FaMale',
-    'Women\'s Clothing': 'FaFemale',
-    'Kids\' Clothing': 'FaChild',
-    'Ethnic Wear': 'FaVest',
-    'Winter Wear': 'FaMitten',
-    'Innerwear & Sleepwear': 'FaTshirt',
-    'Men\'s Footwear': 'FaShoePrints',
-    'Women\'s Footwear': 'FaShoePrints',
-    'Sports Shoes': 'FaRunning',
-    'Casual Shoes': 'FaShoePrints',
-    'Formal Shoes': 'FaShoePrints',
-    'Slippers & Sandals': 'FaShoePrints',
-    'Men\'s Watches': 'FaClock',
-    'Women\'s Watches': 'FaClock',
-    'Smart Watches': 'FaClock',
-    'Sunglasses': 'FaGlasses',
-    'Wallets & Belts': 'FaWallet',
-    'Jewelry': 'FaGem',
-    'Skincare': 'FaHandSparkles',
-    'Haircare': 'FaAirFreshener',
-    'Makeup': 'FaMagic',
-    'Fragrances': 'FaSprayCan',
-    'Grooming': 'FaCut',
-    'Personal Hygiene': 'FaPumpSoap',
-    'Vitamins & Supplements': 'FaPills',
-    'Medical Devices': 'FaStethoscope',
-    'Fitness Equipment': 'FaDumbbell',
-    'Ayurvedic Products': 'FaLeaf',
-    'Personal Health Care': 'FaHeart',
-    'Staples (Rice, Flour, Pulses)': 'FaSeedling',
-    'Snacks & Beverages': 'FaCookie',
-    'Cooking Oils & Ghee': 'FaBottleDroplet',
-    'Packaged Foods': 'FaBoxOpen',
-    'Spices & Masalas': 'FaPepperHot',
-    'Organic Products': 'FaLeaf',
-    'Cookware': 'FaUtensils',
-    'Dinner Sets': 'FaPlateWheat',
-    'Kitchen Storage': 'FaJar',
-    'Kitchen Tools': 'FaKitchenSet',
-    'Drinkware': 'FaMugHot',
-    'Bakeware': 'FaCookie',
-    'Living Room Furniture': 'FaCouch',
-    'Bedroom Furniture': 'FaBed',
-    'Office Furniture': 'FaChair',
-    'Storage Furniture': 'FaBoxArchive',
-    'Outdoor Furniture': 'FaUmbrellaBeach',
-    'Wall Art': 'FaPaintBrush',
-    'Clocks': 'FaClock',
-    'Lamps & Lighting': 'FaLightbulb',
-    'Curtains & Cushions': 'FaRug',
-    'Vases & Showpieces': 'FaWineBottle',
-    'Academic Books': 'FaGraduationCap',
-    'Fiction & Non-Fiction': 'FaBookOpen',
-    'Competitive Exam Books': 'FaFileSignature',
-    'Notebooks & Diaries': 'FaBook',
-    'Office Supplies': 'FaPen',
-    'Art Supplies': 'FaPalette',
-    'Gym Equipment': 'FaDumbbell',
-    'Yoga & Fitness Accessories': 'FaSpa',
-    'Sportswear': 'FaTshirt',
-    'Outdoor Sports': 'FaHiking',
-    'Indoor Games': 'FaChess',
-    'Cycling': 'FaBicycle',
-    'Soft Toys': 'FaGhost',
-    'Educational Toys': 'FaBrain',
-    'Action Figures': 'FaRobot',
-    'Board Games': 'FaChessBoard',
-    'Puzzles': 'FaPuzzlePiece',
-    'Remote Control Toys': 'FaGamepad',
-    'Car Accessories': 'FaCar',
-    'Bike Accessories': 'FaMotorcycle',
-    'Car Electronics': 'FaCarBattery',
-    'Helmets': 'FaHardHat',
-    'Vehicle Care Products': 'FaSoap',
-    'Power Tools': 'FaBolt',
-    'Hand Tools': 'FaTools',
-    'Electrical Tools': 'FaPlug',
-    'Plumbing Tools': 'FaFaucet',
-    'Safety Equipment': 'FaHelmetSafety',
-    'Dog Supplies': 'FaDog',
-    'Cat Supplies': 'FaCat',
-    'Pet Food': 'FaBowlFood',
-    'Grooming Products': 'FaScissors',
-    'Pet Toys': 'FaBone',
-    'Aquatic Supplies': 'FaFish',
-    'Diapers & Wipes': 'FaBaby',
-    'Baby Food': 'FaBottleWater',
-    'Baby Clothing': 'FaShirt',
-    'Toys & Learning': 'FaShapes',
-    'Baby Grooming': 'FaBabyCarriage',
-    'Baby Gear': 'FaBaby'
+    'Tablets': 'tablet-alt.svg',
+    'Audio (Headphones, Speakers)': 'headphones.svg',
+    'Cameras': 'camera.svg',
+    'Smart Wearables': 'watch.svg',
+    'Accessories & Peripherals': 'keyboard.svg',
+
+    'Men\'s Clothing': 'male.svg',
+    'Women\'s Clothing': 'female.svg',
+    'Kids\' Clothing': 'child.svg',
+    'Ethnic Wear': 'vest.svg',
+    'Winter Wear': 'mitten.svg',
+    'Innerwear & Sleepwear': 'tshirt.svg',
+
+    'Men\'s Footwear': 'shoe-prints.svg',
+    'Women\'s Footwear': 'shoe-prints.svg',
+    'Sports Shoes': 'running.svg',
+    'Casual Shoes': 'shoe-prints.svg',
+    'Formal Shoes': 'shoe-prints.svg',
+    'Slippers & Sandals': 'shoe-prints.svg',
+
+    'Men\'s Watches': 'clock.svg',
+    'Women\'s Watches': 'clock.svg',
+    'Smart Watches': 'clock.svg',
+
+    'Sunglasses': 'glasses.svg',
+    'Wallets & Belts': 'wallet.svg',
+    'Jewelry': 'gem.svg',
+
+    'Skincare': 'hand-sparkles.svg',
+    'Haircare': 'air-freshener.svg',
+    'Makeup': 'magic.svg',
+    'Fragrances': 'spray-can.svg',
+    'Grooming': 'cut.svg',
+    'Personal Hygiene': 'pump-soap.svg',
+
+    'Vitamins & Supplements': 'pills.svg',
+    'Medical Devices': 'stethoscope.svg',
+    'Fitness Equipment': 'dumbbell.svg',
+    'Ayurvedic Products': 'leaf.svg',
+    'Personal Health Care': 'heart.svg',
+
+    'Staples (Rice, Flour, Pulses)': 'seedling.svg',
+    'Snacks & Beverages': 'cookie.svg',
+    'Cooking Oils & Ghee': 'bottle-droplet.svg',
+    'Packaged Foods': 'box-open.svg',
+    'Spices & Masalas': 'pepper-hot.svg',
+    'Organic Products': 'leaf.svg',
+
+    'Cookware': 'utensils.svg',
+    'Dinner Sets': 'plate-wheat.svg',
+    'Kitchen Storage': 'jar.svg',
+    'Kitchen Tools': 'kitchen-set.svg',
+    'Drinkware': 'mug-hot.svg',
+    'Bakeware': 'cookie.svg',
+
+    'Living Room Furniture': 'couch.svg',
+    'Bedroom Furniture': 'bed.svg',
+    'Office Furniture': 'chair.svg',
+    'Storage Furniture': 'box-archive.svg',
+    'Outdoor Furniture': 'umbrella-beach.svg',
+
+    'Wall Art': 'paint-brush.svg',
+    'Clocks': 'clock.svg',
+    'Lamps & Lighting': 'lightbulb.svg',
+    'Curtains & Cushions': 'rug.svg',
+    'Vases & Showpieces': 'wine-bottle.svg',
+
+    'Academic Books': 'graduation-cap.svg',
+    'Fiction & Non-Fiction': 'book-open.svg',
+    'Competitive Exam Books': 'file-signature.svg',
+    'Notebooks & Diaries': 'book.svg',
+    'Office Supplies': 'pen.svg',
+    'Art Supplies': 'palette.svg',
+
+    'Gym Equipment': 'dumbbell.svg',
+    'Yoga & Fitness Accessories': 'spa.svg',
+    'Sportswear': 'tshirt.svg',
+    'Outdoor Sports': 'hiking.svg',
+    'Indoor Games': 'chess.svg',
+    'Cycling': 'bicycle.svg',
+
+    'Soft Toys': 'ghost.svg',
+    'Educational Toys': 'brain.svg',
+    'Action Figures': 'robot.svg',
+    'Board Games': 'chess-board.svg',
+    'Puzzles': 'puzzle-piece.svg',
+    'Remote Control Toys': 'gamepad.svg',
+
+    'Car Accessories': 'car.svg',
+    'Bike Accessories': 'motorcycle.svg',
+    'Car Electronics': 'car-battery.svg',
+    'Helmets': 'hard-hat.svg',
+    'Vehicle Care Products': 'soap.svg',
+
+    'Power Tools': 'bolt.svg',
+    'Hand Tools': 'tools.svg',
+    'Electrical Tools': 'plug.svg',
+    'Plumbing Tools': 'faucet.svg',
+    'Safety Equipment': 'helmet-safety.svg',
+
+    'Dog Supplies': 'dog.svg',
+    'Cat Supplies': 'cat.svg',
+    'Pet Food': 'bowl-food.svg',
+    'Grooming Products': 'scissors.svg',
+    'Pet Toys': 'bone.svg',
+    'Aquatic Supplies': 'fish.svg',
+
+    'Diapers & Wipes': 'baby.svg',
+    'Baby Food': 'bottle-water.svg',
+    'Baby Clothing': 'shirt.svg',
+    'Toys & Learning': 'shapes.svg',
+    'Baby Grooming': 'baby-carriage.svg',
+    'Baby Gear': 'baby.svg'
 };
 
 // Helper to get icon for a subcategory
@@ -305,6 +322,62 @@ async function createCategoryHierarchy(data, parentId = null) {
     return created;
 }
 
+async function updateHierarchy(data, parentId = null) {
+
+    for (const item of data) {
+
+        let name, icon, subs;
+
+        if (typeof item === "string") {
+            name = item;
+            icon = getIconForSubcategory(name);
+            subs = [];
+        } else {
+            name = item.name;
+            icon = item.icon || getIconForSubcategory(name);
+            subs = item.subcategories || [];
+        }
+
+        // find existing category
+        let category = await Category.findOne({
+            where: { name, parentId }
+        });
+
+        if (category) {
+            // update icon if changed
+            if (category.icon !== icon) {
+                await category.update({ icon });
+                console.log(`🔄 Updated: ${name}`);
+            }
+        } else {
+            category = await Category.create({
+                name,
+                parentId,
+                icon
+            });
+
+            console.log(`Created: ${name}`);
+        }
+
+        updated++;
+
+        if (subs.length > 0) {
+            await updateHierarchy(subs, category.id);
+        }
+    }
+}
+
+//todo->
+const getCategoryIconPath = (iconName) => {
+    if (!iconName) return null;
+
+    // if already absolute path or URL
+    if (iconName.startsWith("http") || iconName.startsWith("/"))
+        return iconName;
+
+    return `uploads/icons/${iconName}`;
+};
+
 module.exports = {
     // Get flat list
     getCategories: async (req, res) => {
@@ -343,7 +416,7 @@ module.exports = {
                 categoryMap[cat.id] = {
                     id: cat.id,
                     name: cat.name,
-                    icon: cat.icon,
+                    icon: getCategoryIconPath(cat.icon),
                     subcategories: []
                 };
             });
@@ -355,7 +428,7 @@ module.exports = {
                     categoryMap[cat.parentId].subcategories.push({
                         id: cat.id,
                         name: cat.name,
-                        icon: cat.icon
+                        icon: getCategoryIconPath(cat.icon)
                     });
                 }
             });
@@ -398,6 +471,8 @@ module.exports = {
     },
 
     // Reset and seed
+    //Cannot truncate a table referenced in a foreign key constraint (`ProductCategory`)',
+    //update if exists and create if missing
     resetCategories: async (req, res) => {
         try {
             console.log('🗑️  Resetting categories...');
@@ -437,5 +512,28 @@ module.exports = {
                 message: error.message
             });
         }
+    },
+    updateCategories: async (req, res) => {
+    try {
+        console.log("Updating categories...");
+
+        let updated = 0;
+
+        await updateHierarchy(categoryHierarchy);
+
+        return res.status(200).json({
+            status: true,
+            message: "Categories updated successfully",
+            processed: updated
+        });
+
+    } catch (error) {
+        console.error("Update error:", error);
+
+        return res.status(500).json({
+            status: false,
+            message: "Failed to update categories"
+        });
     }
+},
 };
