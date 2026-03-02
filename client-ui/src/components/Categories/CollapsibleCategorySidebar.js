@@ -34,6 +34,7 @@ const iconComponents = {
   FaChessBoard, FaPuzzlePiece, FaMotorcycle, FaCarBattery, FaHardHat, FaSoap,
   FaBolt, FaFaucet, FaDog, FaCat, FaBone, FaFish, FaShapes, FaBabyCarriage
 };
+const API_URL =  process.env.REACT_APP_API_URL;
 
 const CollapsibleCategorySidebar = ({ isOpen, onToggle, onCategorySelect }) => {
   const [categories, setCategories] = useState([]);
@@ -56,7 +57,7 @@ const CollapsibleCategorySidebar = ({ isOpen, onToggle, onCategorySelect }) => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/category/tree`);
+      const response = await axios.get(`${API_URL}/category/tree`);
       setCategories(response.data.categories || []);
       
     } catch (err) {

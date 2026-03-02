@@ -1,89 +1,158 @@
-.dashboard-container {
-  background-color: #f8f9fa;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.seller-dashboard-page {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding: 2rem 0;
 }
 
-.dashboard-header {
-  text-align: center;
-  margin-bottom: 2rem; /* Space below the header */
+.seller-dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
-.logo {
-  max-width: 150px; /* Adjust size as needed */
-  margin-bottom: 10px;
-}
-
-.header-title {
-  font-size: 2rem; /* Adjust the font size */
-  color: #28a745; /* Fresh green color */
-  font-weight: bold;
-}
-
-.dashboard-title {
-  font-size: 2.5rem; /* Larger font size for emphasis */
-  color: #28a745; /* Fresh green color */
+/* Header */
+.seller-dashboard-header {
   text-align: center;
   margin-bottom: 2rem;
-  font-weight: bold;
-  position: relative;
-  display: inline-block;
 }
 
-.dashboard-title::before {
-  content: '';
-  position: absolute;
-  bottom: -10px; /* Adjust positioning */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 5px;
-  background-color: #007bff; /* Accent color */
-  border-radius: 2px;
-}
-
-.dashboard-title::after {
-  content: '🌾'; /* Optional icon for a farming theme */
-  position: absolute;
-  top: -10px; /* Adjust positioning */
-  right: 10px;
-  font-size: 2rem;
-}
-
-.dashboard-form {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-input,
-.dashboard-select,
-.dashboard-file {
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+  border-radius: 20px;
   margin-bottom: 1rem;
+  font-size: 2.5rem;
+  color: #00897b;
 }
 
-.dashboard-button {
-  background-color: #28a745;
+.seller-dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.header-subtitle {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Navigation Tabs */
+.dashboard-nav-tabs {
+  display: flex;
+  gap: 0;
+  background-color: white;
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: transparent;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.dashboard-button:hover {
-  background-color: #218838;
+.nav-tab:hover {
+  background-color: #f8f9fa;
+  color: #495057;
 }
 
-.alert-info {
-  background-color: #e3f2fd;
-  border-color: #bbdefb;
-  color: #0d47a1;
+.nav-tab.active {
+  background-color: #00897b;
+  color: white;
 }
 
-/* Ensure the dropdown menu appears below the dropdown toggle */
-.dropdown-menu {
-  position: absolute;
-  top: 100%; /* Position it below the toggle */
-  left: 0;
-  margin-top: 0.125rem; /* Optional: Adjust space between toggle and menu */
+.nav-tab.active:hover {
+  background-color: #00796b;
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .seller-dashboard-page {
+    padding: 1rem 0;
+  }
+
+  .seller-dashboard-container {
+    padding: 0 1rem;
+  }
+
+  .seller-dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .dashboard-nav-tabs {
+    padding: 0.25rem;
+  }
+
+  .nav-tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .nav-tab span {
+    font-size: 0.75rem;
+  }
+
+  .nav-icon {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-nav-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-tab {
+    min-width: 100px;
+  }
+
+  .dashboard-content {
+    padding: 2rem 1rem;
+  }
 }

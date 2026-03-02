@@ -19,7 +19,7 @@ const CategoryModel = sequelize.define("Category", {
       key: 'id'
     }
   },
-  icon: {  // ← Make sure this field exists!
+  icon: {  
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: 'FaBox'

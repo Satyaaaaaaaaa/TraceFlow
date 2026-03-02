@@ -1,7 +1,7 @@
 const UserModel = require("../../common/models/User");
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
-
+const { findUserBCStatus } = require("../../common/models/UserBlockchainStatus");
 
 module.exports = {
     getUser: (req, res) => {
@@ -55,7 +55,7 @@ module.exports = {
             .then((user) => {
                 return res.status(200).json({
                     status: true,
-                    data: user.toJSON
+                    data: user.toJSON()
                 });
             })
             .catch((error) => {
@@ -118,6 +118,38 @@ module.exports = {
                     error: error.message
                 });
             });
+    },
+
+    getUserBlockchainStatus: async (req, res) => {
+        try {
+            const authHeader = req.headers.authorization;
+            const token = authHeader.split(" ")[1];
+            const decoded = jwt.verify(token, jwtSecret);
+            const { userId } = decoded;
+        
+            const userBC = await findUserBCStatus({ userId });
+        
+            if (!userBC) {
+                return res.status(404).json({
+                    status: false,
+                    blockchainStatus: false,
+                    message: "User blockchain status not found"
+                });
+            }
+        
+            return res.status(200).json({
+                status: true,
+                data: {
+                    userId: userBC.userId,
+                    blockchainStatus: userBC.blockchainStatus
+                }
+            });
+        } catch (error) {
+            return res.status(400).json({
+                status: false,
+                error: error.message
+            });
+        }
     },
 
     // FUNCTION FOR ANY USER TO CHANGE ROLE THEMSELVES

@@ -22,14 +22,14 @@ router.get(
 
 router.get(
     "/:id",
-    //isAuthenticatedMiddleware.check,
+    //isAuthenticatedMiddleware.check, DEV PURPOSES ONLY
     ProductController.getProduct
 )
 
 // New route to get products by the authenticated user
 router.get(
     "/user/products",
-    isAuthenticatedMiddleware.check,
+    //isAuthenticatedMiddleware.check, DEV PURPOSES ONLY
     ProductController.getProductsByUserId
 )
 router.post(
@@ -43,7 +43,7 @@ router.post(
 router.patch(
     "/:id",
     isAuthenticatedMiddleware.check,
-    CheckPermissionMiddleware.has(roles.ADMIN),
+    //CheckPermissionMiddleware.has(roles.ADMIN),
     SchemaValidationMiddleware.verify(updateProductPayload),
     ProductController.updateProduct
 )
@@ -51,9 +51,10 @@ router.patch(
 router.delete(
     "/:id",
     isAuthenticatedMiddleware.check,
-    CheckPermissionMiddleware.has(roles.ADMIN),
+    //CheckPermissionMiddleware.has(roles.ADMIN),
     ProductController.deleteProduct
 )
+
 router.post(
     "/sync-blockchain/:id",
     [isAuthenticatedMiddleware.check],

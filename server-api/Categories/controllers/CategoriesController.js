@@ -513,6 +513,63 @@ module.exports = {
             });
         }
     },
+    
+    getCategoryAttributes: async (req, res) => {
+        const { categoryId } = req.params;
+    
+        try {
+            const { CategoryAttribute } = require('../../common/models/CategoryAttribute');
+            const { Category } = require('../../common/models/Category');
+        
+            // First try the exact category
+            let attributes = await CategoryAttribute.findAll({
+                where: { categoryId },
+                order: [['displayOrder', 'ASC']],
+                attributes: ['id', 'attributeName', 'attributeType', 'predefinedValues', 'isRequired']
+            });
+        
+            // If no attributes found, walk up to parent category
+            if (attributes.length === 0) {
+                const category = await Category.findByPk(categoryId);
+                
+                if (category && category.parentId) {
+                    attributes = await CategoryAttribute.findAll({
+                        where: { categoryId: category.parentId },
+                        order: [['displayOrder', 'ASC']],
+                        attributes: ['id', 'attributeName', 'attributeType', 'predefinedValues', 'isRequired']
+                    });
+                }
+            }
+        
+            return res.status(200).json({
+                status: true,
+                data: attributes
+            });
+        } catch (error) {
+            console.error('Error fetching category attributes:', error);
+            return res.status(500).json({
+                status: false,
+                error: error.message
+            });
+        }
+    },
+
+    seedAttributes: async (req, res) => {
+        try {
+            const { seedCategoryAttributes } = require('../SeedAttributes');
+            const result = await seedCategoryAttributes();
+            return res.status(200).json({
+                status: true,
+                message: 'Attributes seeded successfully',
+                created: result.created
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                error: error.message
+            });
+        }
+        
     updateCategories: async (req, res) => {
     try {
         console.log("Updating categories...");

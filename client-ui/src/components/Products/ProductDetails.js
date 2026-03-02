@@ -1,235 +1,269 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getProductDetails } from '../../services/productServices'; // Use the updated service
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Spinner, Alert, Button } from 'react-bootstrap';
+import { FaShoppingCart, FaHeart, FaStar, FaCheckCircle, FaArrowLeft, FaClock, FaUser, FaLink } from 'react-icons/fa';
+import axios from 'axios';
+import { CartContext } from '../Cart/CartContext';
+import './styles/ProductDetails.css';
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const ProductDetails = () => {
-    const { id } = useParams();
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const { productID, id } = useParams();
+  const actualId = productID || id;
+  const navigate = useNavigate();
+  const { addToCart } = useContext(CartContext);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                const response = await getProductDetails(id);
-                setProduct(response.data);
-                setError('');
-            } catch (err) {
-                setError('Failed to fetch product details.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+  const [product, setProduct]       = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState('');
+  const [quantity, setQuantity]     = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [cartSuccess, setCartSuccess] = useState(false);
 
-        fetchProduct();
-    }, [id]);
+  const fetchProduct = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/product/${actualId}`);
+      if (response.data.status) {
+        setProduct(response.data.data || response.data);
+      } else {
+        setError('Product not found');
+      }
+    } catch (err) {
+      console.error('Error fetching product:', err);
+      setError('Failed to load product');
+    } finally {
+      setLoading(false);
+    }
+  }, [actualId]);
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
-    if (!product) return <div>Product not found.</div>;
+  useEffect(() => { fetchProduct(); }, [fetchProduct]);
 
+  const handleAddToCart = async () => {
+      try {
+        await addToCart(product, quantity); 
+        alert(`Added ${product.name} to cart!`);
+      } catch (err) {
+        alert('Please login to add items to cart');
+      }
+  };
+
+  const handleBuyNow = async () => {
+    try {
+      await addToCart(product, quantity);
+      navigate('/cart');
+    } catch (err) {
+      alert('Please login to continue');
+    }
+  };
+
+  if (loading) {
     return (
-        <div className="product-details-container">
-            <h1>{product.name}</h1>
-            <img src={`http://localhost:3001/${product.image}`} alt={product.name} style={{maxWidth: '400px'}} />
-            <p>{product.description}</p>
-            <p>Price: ${product.price}</p>
-            
-            <hr />
-
-            <h3>Product Traceability History</h3>
-            {product.traceabilityHistory && product.traceabilityHistory.length > 0 ? (
-                <ul className="traceability-list">
-                    {product.traceabilityHistory.map((entry, index) => (
-                        <li key={index} className="traceability-item">
-                            <div className="timestamp">
-                                {new Date(entry.timestamp.seconds * 1000).toLocaleString()}
-                            </div>
-                            <div className="action">
-                                <strong>Action:</strong> {entry.value.history.slice(-1)[0].action}
-                            </div>
-                            <div className="actor">
-                                <strong>By:</strong> {entry.value.history.slice(-1)[0].actor}
-                            </div>
-                            <div className="tx-id">
-                                <strong>Transaction ID:</strong> <span>{entry.txId.substring(0, 20)}...</span>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No traceability history available for this product.</p>
-            )}
-        </div>
+      <div className="npd-loading">
+        <Spinner animation="border" />
+        <p>Loading product…</p>
+      </div>
     );
+  }
+
+  if (error || !product) {
+    return (
+      <Container className="py-5">
+        <Alert variant="danger">{error || 'Product not found'}</Alert>
+        <Button variant="dark" onClick={() => navigate('/')}>
+          <FaArrowLeft className="me-2" /> Back to Home
+        </Button>
+      </Container>
+    );
+  }
+
+  const images      = product.ProductImages?.map(img => img.imageUrl) || (product.image ? [product.image] : []);
+  const isSynced    = product.ProductBlockchainStatus?.blockchainStatus;
+  const mainImgSrc  = `${API_URL}${images[selectedImage] || product.image || ''}`;
+  const fallback    = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3C/svg%3E';
+
+  return (
+    <div className="npd-page">
+
+      {/* Top bar */}
+      <div className="npd-topbar">
+        <button className="npd-back-btn" onClick={() => navigate(-1)}>
+          <FaArrowLeft /> <span>Back</span>
+        </button>
+        {isSynced && (
+          <span className="npd-verified-pill">
+            <FaCheckCircle /> Blockchain Verified
+          </span>
+        )}
+      </div>
+
+      {/* Main layout */}
+      <div className="npd-body">
+
+        {/* ── LEFT: Gallery ── */}
+        <div className="npd-gallery">
+          {images.length > 1 && (
+            <div className="npd-thumbs">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  className={`npd-thumb ${selectedImage === idx ? 'active' : ''}`}
+                  onClick={() => setSelectedImage(idx)}
+                >
+                  <img src={`${API_URL}${img}`} alt="" onError={e => { e.target.src = fallback; }} />
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="npd-main-wrap">
+            <img
+              className="npd-main-img"
+              src={mainImgSrc}
+              alt={product.name}
+              onError={e => { e.target.src = fallback; }}
+            />
+            {isSynced && (
+              <div className="npd-img-badge">
+                <FaCheckCircle /> Verified
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── RIGHT: Info ── */}
+        <div className="npd-info">
+
+          {/* Category tags */}
+          {product.Categories?.length > 0 && (
+            <div className="npd-tags">
+              {product.Categories.map(cat => (
+                <span key={cat.id} className="npd-tag">{cat.name}</span>
+              ))}
+            </div>
+          )}
+
+          <h1 className="npd-title">{product.name}</h1>
+
+          {/* Stars */}
+          <div className="npd-stars">
+            {[1,2,3,4,5].map(n => (
+              <FaStar key={n} className={n <= 4 ? 'star-on' : 'star-off'} />
+            ))}
+            <span className="npd-star-label">4.0 / 5</span>
+          </div>
+
+          {/* Price */}
+          <div className="npd-price">
+            <span className="npd-price-amount">₹{parseFloat(product.price).toFixed(2)}</span>
+            <span className="npd-price-unit">{product.priceUnit || 'INR'}</span>
+          </div>
+
+          {/* Description */}
+          <p className="npd-desc">{product.description}</p>
+
+          <div className="npd-divider" />
+
+          {/* Specifications */}
+          {product.specifications && Object.keys(product.specifications).length > 0 && (
+            <div className="npd-specs">
+              <p className="npd-label">Specifications</p>
+              {Object.entries(product.specifications).map(([key, val]) =>
+                val && val !== '_custom_' ? (
+                  <div key={key} className="npd-spec-row">
+                    <span className="npd-spec-key">{key}</span>
+                    <span className="npd-spec-val">{val}</span>
+                  </div>
+                ) : null
+              )}
+            </div>
+          )}
+
+          {/* Quantity */}
+          <div className="npd-qty-section">
+            <p className="npd-label">Quantity</p>
+            <div className="npd-qty-row">
+              <div className="npd-qty-ctrl">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>−</button>
+                <input
+                  type="number"
+                  value={quantity}
+                  min="1"
+                  max={product.quantity || 100}
+                  onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                />
+                <button onClick={() => setQuantity(Math.min(product.quantity || 100, quantity + 1))}>+</button>
+              </div>
+              <span className="npd-avail">{product.quantity || 0} available</span>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="npd-actions">
+            <button
+              className={`npd-btn-addcart ${cartSuccess ? 'success' : ''}`}
+              onClick={handleAddToCart}
+            >
+              {cartSuccess
+                ? <><FaCheckCircle className="me-2" />Added!</>
+                : <><FaShoppingCart className="me-2" />Add to Bag</>
+              }
+            </button>
+            <button className="npd-btn-buynow" onClick={handleBuyNow}>
+              Buy Now
+            </button>
+            <button
+              className={`npd-btn-wish ${wishlisted ? 'on' : ''}`}
+              onClick={() => setWishlisted(v => !v)}
+            >
+              <FaHeart />
+            </button>
+          </div>
+
+          {/* Trust strip */}
+          <div className="npd-trust">
+            <span>✦ Free Shipping on orders over ₹999</span>
+            <span>✦ 30-Day Returns</span>
+            <span>✦ Secure Checkout</span>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Blockchain Traceability */}
+      {product.traceabilityHistory?.length > 0 && (
+        <div className="npd-trace">
+          <Container>
+            <div className="npd-trace-head">
+              <FaCheckCircle className="npd-trace-icon" />
+              <div>
+                <h3>Product Traceability History</h3>
+                <p>This product's journey is recorded on the blockchain for complete transparency.</p>
+              </div>
+            </div>
+            <div className="npd-timeline">
+              {product.traceabilityHistory.map((entry, i) => (
+                <div key={i} className="npd-tl-item">
+                  <div className="npd-tl-dot" />
+                  <div className="npd-tl-body">
+                    <div className="npd-tl-action">
+                      {entry.value.history.slice(-1)[0].action}
+                    </div>
+                    <div className="npd-tl-meta">
+                      <span><FaClock className="npd-mi" />{new Date(entry.timestamp.seconds * 1000).toLocaleString()}</span>
+                      <span><FaUser className="npd-mi" />{entry.value.history.slice(-1)[0].actor}</span>
+                      <span><FaLink className="npd-mi" /><code>{entry.txId.substring(0, 20)}…</code></span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ProductDetails;
-
-
-
-
-
-// // src/components/ProductDetails/ProductDetails.js
-// import React, { useEffect, useState, useContext } from 'react';
-// import { useParams } from 'react-router-dom';
-// import axios from 'axios';
-// import { CartContext } from '../Cart/CartContext'; // Import your CartContext
-// import './styles/ProductDetails.css';
-
-// const ProductDetails = () => {
-//   const { productId } = useParams();
-//   const { cartItems, addToCart, updateCartItem } = useContext(CartContext); // Destructure cartItems from CartContext
-//   const [product, setProduct] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [reviews, setReviews] = useState([]);
-//   const [newReview, setNewReview] = useState('');
-//   const [rating, setRating] = useState(0);
-//   const [quantity, setQuantity] = useState(1); // New state for quantity
-
-//   useEffect(() => {
-//     const fetchProductDetails = async () => {
-//       const token = sessionStorage.getItem('authToken');
-//       try {
-//         const response = await axios.get(`/product/${productId}`, {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         });
-//         setProduct(response.data.data);
-//         setReviews(response.data.data.reviews || []);
-//         setLoading(false);
-//       } catch (err) {
-//         setError('Failed to fetch product details');
-//         setLoading(false);
-//       }
-//     };
-//     fetchProductDetails();
-//   }, [productId]);
-
-//   const handleAddReview = async () => {
-//     const token = sessionStorage.getItem('authToken');
-//     try {
-//       const response = await axios.post(`/product/${productId}/reviews`, {
-//         review: newReview,
-//         rating,
-//       }, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       });
-//       setReviews([...reviews, response.data]);
-//       setNewReview('');
-//       setRating(0);
-//     } catch (err) {
-//       console.error('Failed to add review:', err);
-//     }
-//   };
-
-//   const handleAddToCart = async () => {
-//     if (product) {
-//       // Check if the product is already in the cart
-//       const existingCartItem = cartItems.find((item) => item.id === product.id);
-//       if (existingCartItem) {
-//         // If it exists, update the quantity
-//         await updateCartItem(existingCartItem.id, existingCartItem.quantity + quantity);
-//       } else {
-//         // If it doesn't exist, add to cart
-//         await addToCart({ ...product, quantity }); // This function already handles the backend
-//       }
-//       console.log(`Added ${quantity} of ${product.name} to cart`);
-//     }
-//   };
-
-//   const handleQuantityChange = (change) => {
-//     setQuantity((prev) => Math.max(1, prev + change)); // Ensure quantity doesn't go below 1
-//   };
-
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   if (error) {
-//     return <div>{error}</div>;
-//   }
-
-//   const imageUrl = `http://localhost:3002/${product.image}`;
-
-//   return (
-//     <div className="product-details">
-//       <div className="product-details-container">
-//         <div className="product-image-large">
-//           <img src={imageUrl} alt={product.name} className="product-image-large" />
-//         </div>
-//         <div className="product-info">
-//           <h2>{product.name}</h2>
-//           <div className="rating">
-//             {[...Array(5)].map((_, index) => (
-//               <span
-//                 key={index}
-//                 className={index < product.rating ? 'star filled' : 'star'}
-//                 onClick={() => setRating(index + 1)}
-//               >
-//                 ★
-//               </span>
-//             ))}
-//             <span>{product.rating} ({reviews.length} reviews)</span>
-//           </div>
-//           <p>{product.description}</p>
-//           <div className="product-price-container">
-//             <span>Price: {product.price} {product.priceUnit.toUpperCase()}</span>
-//           </div>
-          
-//           {/* Quantity Change Buttons */}
-//           <div className="quantity-controls">
-//             <button onClick={() => handleQuantityChange(-1)}>-</button>
-//             <span>{quantity}</span>
-//             <button onClick={() => handleQuantityChange(1)}>+</button>
-//           </div>
-//           <button className="add-to-cart-btn" onClick={handleAddToCart}>
-//             Add to Cart
-//           </button>
-
-//           <div className="review-form">
-//             <textarea
-//               value={newReview}
-//               onChange={(e) => setNewReview(e.target.value)}
-//               placeholder="Write your review here"
-//               rows="3"
-//             />
-//             <div className="review-rating">
-//               <span>Rate the product: </span>
-//               {[...Array(5)].map((_, index) => (
-//                 <span
-//                   key={index}
-//                   className={index < rating ? 'star filled' : 'star'}
-//                   onClick={() => setRating(index + 1)}
-//                 >
-//                   ★
-//                 </span>
-//               ))}
-//             </div>
-//             <button onClick={handleAddReview}>Submit Review</button>
-//           </div>
-//           <div className="reviews">
-//             {reviews.map((review, index) => (
-//               <div key={index} className="review">
-//                 <div className="review-rating">
-//                   {[...Array(5)].map((_, i) => (
-//                     <span key={i} className={i < review.rating ? 'star filled' : 'star'}>★</span>
-//                   ))}
-//                 </div>
-//                 <p>{review.text}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ProductDetails;

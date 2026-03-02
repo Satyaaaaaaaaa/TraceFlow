@@ -23,13 +23,117 @@ const ProductService = require("../services/ProductService")
 module.exports = {
     
     createProduct: async (req, res) => {
+        const { name, description, price, images, categoryIds, quantity } = req.body;
 
+        if (!images || !Array.isArray(images) || images.length === 0) {
+            return res.status(400).json({
+                status: false,
+                error: "At least one image is required"
+            });
+        }
+
+        if (quantity < 1 || quantity > 100) {
+            return res.status(400).json({
+                status: false,
+                error: "Quantity must be between 1 and 100"
+            });
+        }
+
+        
+        let finalCategoryIds = categoryIds;
+        if (!finalCategoryIds || finalCategoryIds.length === 0) finalCategoryIds = [1];
+        
+        const priceUnit = req.body.priceUnit || "inr";
+        
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, jwtSecret);
+        const { userId } = decoded; // User ID from JWT
+        
+        
+        
         try {
-            const result = await ProductService.createProductService(
-                req.body,
-                req.user
+            //Check user
+            const user = await findUser({ id: userId });
+            if (!user) {
+                console.log('User not found!');
+                throw new Error("User not found!");
+            } 
+            
+            const userBC = await findUserBCStatus({ userId });
+            
+            if (!userBC || !userBC.blockchainStatus) {
+                throw new Error("User not synced with blockchain! Please sync");
+            }
+            
+            //Create Product in DB first
+            const product = await createProduct({ 
+                name, 
+                description, 
+                price,
+                image: images[0],
+                priceUnit,
+                blockchainStatus: false,
+                quantity
+            });
+            
+            await ProductImages.bulkCreate(
+                images.map((imagePath, index) => ({
+                    productId: product.id,
+                    imageUrl: imagePath,
+                    position: index
+                }))
             );
 
+            await createProductBCStatus(product.id);
+
+            // Associate the product with the user via the join table 'UserProduct'
+            // const user = await findUser({ id: userId });
+            await user.addProduct(product);
+            
+            //Associate with the product categories
+            const categories = await findAllCategories({ id: finalCategoryIds });
+            await product.addCategories(categories);
+            
+
+            //Sync with blockchain.
+            try{
+                const prodInfoBc = await createProductWithTraceability(product.id, name, user.username);
+                // If Fabric succeeds, update status to true
+                await product.update({ blockchainStatus: false }); //set to false for dev purposes
+                await updateProductBCStatus(
+                    { productId: product.id },
+                    { blockchainStatus: true }
+                );
+
+                console.log(`Product ${prodInfoBc.productId}, ${prodInfoBc.productName} Owner: ${prodInfoBc.ownerId} synced to blockchain.`);
+
+                // Sync product to search index (DO NOT block request)
+                try {
+                    await searchClient
+                        .index("products")
+                        .addDocuments([mapProductToSearch(product)]);
+                    } catch (searchError) {
+                    console.error(
+                        `Search sync failed for product ${product.id}:`,
+                        searchError.message
+                    );
+                }
+
+                console.log(`Product added to search client`)
+                
+                
+            }catch (fabricError) {
+                // The product remains in DB with blockchainStatus: false
+                console.error("Fabric Error Details:", fabricError.message);
+                console.error(`Blockchain sync failed for product ${product.id}. Will retry later.`);
+            }         
+            
+            // Return the product (Status will be true or false depending on Fabric success)
+            const finalProduct = await findProduct({id : product.id});
+            const productBC = await findProductBCStatus({ productId: product.id });
+
+            
             return res.status(201).json({
                 status: true,
                 message: result.message,
@@ -69,7 +173,7 @@ module.exports = {
                     },
                     {
                     model: ProductBlockchainStatus,
-                    where: { blockchainStatus: true }
+                    where: { blockchainStatus: false }
                     },
                     {
                     //Possible to modularize
@@ -199,11 +303,16 @@ module.exports = {
                 });
             }
 
-            const data = formatProductImages(product.toJSON(), req);
+            const categories = await product.getCategories({
+                attributes: ['id', 'name', 'parentId', 'icon']
+            });
+
+            const productData = product.toJSON();
+            productData.Categories = categories; // Add categories to response
 
             return res.status(200).json({
                 status: true,
-                data
+                data: productData
             });
 
         } catch (error) {
@@ -217,36 +326,140 @@ module.exports = {
     updateProduct: async (req, res) => {
         const { id } = req.params;
         const payload = req.body;
-
+    
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, jwtSecret);
+        const { userId } = decoded;
+    
         if (!Object.keys(payload).length) {
             return res.status(400).json({
                 status: false,
                 error: "Body is empty, hence cannot update the product."
             });
         }
+    
         try {
+            const product = await findProduct({ id });
+            if (!product) {
+                return res.status(404).json({
+                    status: false,
+                    error: "Product not found!"
+                });
+            }
+        
+            // Check ownership
+            const user = await findUser({ id: userId });
+            const userProducts = await user.getProducts({ where: { id } });
+            if (userProducts.length === 0) {
+                return res.status(403).json({
+                    status: false,
+                    error: "You are not authorized to edit this product."
+                });
+            }
+        
+            // Handle category update
+            if (payload.categoryIds !== undefined) {
+                if (Array.isArray(payload.categoryIds)) {
+                    if (payload.categoryIds.length > 0) {
+                        const categories = await findAllCategories({ id: payload.categoryIds });
+                        await product.setCategories(categories);
+                    } else {
+                        // Clear all categories if empty array
+                        await product.setCategories([]);
+                    }
+                }
+                delete payload.categoryIds;
+            }
+        
+            // Handle images update
+            if (payload.images && Array.isArray(payload.images)) {
+                payload.image = payload.images[0]; // Set primary image
+                
+                // Replace product images
+                await ProductImages.destroy({ where: { productId: id } });
+                await ProductImages.bulkCreate(
+                    payload.images.map((imagePath, index) => ({
+                        productId: id,
+                        imageUrl: imagePath,
+                        position: index
+                    }))
+                );
+                delete payload.images;
+            }
+        
+            // Update product
             await updateProduct({ id }, payload);
+        
+            // Sync to Meilisearch
+            try {
+                const updatedForSearch = await findProduct({ id });
+                await searchClient
+                    .index("products")
+                    .addDocuments([mapProductToSearch(updatedForSearch)]);
+            } catch (searchError) {
+                console.error(`Search sync failed for product ${id}:`, searchError.message);
+            }
+        
             const updatedProduct = await findProduct({ id });
             return res.status(200).json({
                 status: true,
+                message: "Product updated successfully",
                 data: updatedProduct.toJSON()
             });
+        
         } catch (error) {
+            console.error('Update product error:', error);
             return res.status(400).json({
                 status: false,
                 error: error.message
             });
         }
     },
-
+    
     deleteProduct: async (req, res) => {
         const { id } = req.params;
+    
+        // Extract userId from JWT
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, jwtSecret);
+        const { userId } = decoded;
+    
         try {
+            // Check product exists
+            const product = await findProduct({ id });
+            if (!product) {
+                return res.status(404).json({
+                    status: false,
+                    error: "Product not found!"
+                });
+            }
+        
+            // Check ownership
+            const user = await findUser({ id: userId });
+            const userProducts = await user.getProducts({ where: { id } });
+            if (userProducts.length === 0) {
+                return res.status(403).json({
+                    status: false,
+                    error: "You are not authorized to delete this product."
+                });
+            }
+        
+            // Remove from Meilisearch
+            try {
+                await searchClient.index("products").deleteDocument(id);
+            } catch (searchError) {
+                console.error(`Search delete failed for product ${id}:`, searchError.message);
+            }
+        
             await deleteProduct({ id });
+        
             return res.status(200).json({
                 status: true,
-                data: "Product deleted successfully!"
+                message: "Product deleted successfully!"
             });
+        
         } catch (error) {
             return res.status(400).json({
                 status: false,
