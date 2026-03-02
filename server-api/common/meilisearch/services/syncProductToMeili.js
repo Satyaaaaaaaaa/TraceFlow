@@ -1,6 +1,6 @@
 require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
 
-const client = require("../meiliConfig");
+const client = require("../meili");
 
 const { Product } = require("../../models/Product");
 const { Category } = require("../../models/Category");
@@ -18,7 +18,7 @@ async function syncProductsToMeili() {
       }
     ]
   });
-
+  //todo: fix this
   const docs = products.map(p => ({
     id: p.id,
     name: p.name,

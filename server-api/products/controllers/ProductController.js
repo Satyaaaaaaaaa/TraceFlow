@@ -3,7 +3,7 @@ const { findProductBCStatus, createProductBCStatus, updateProductBCStatus, Produ
 const { findUserBCStatus } = require("../../common/models/UserBlockchainStatus")
 const { findUser } = require("../../common/models/User");
 const { Category, findAllCategories } = require("../../common/models/Category");
-const { ProductImages } = require("../../common/models/ProductImages");
+const { Image } = require("../../common/models/associations");
 
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
@@ -11,14 +11,17 @@ const jwtSecret = process.env.JWT_SECRET;
 const searchClient = require("../../common/meilisearch/meili");
 const mapProductToSearch = require("../../common/meilisearch/mapper/productSearchMapper");
 
+const { formatProductImages } = require("../../common/utils/formatProductImages")
+
 
 const { createProductWithTraceability, getFullProductDetails } = require('../../services/productService');
 
 const { Op } = require("sequelize");
 
+const ProductService = require("../services/ProductService")
+
 module.exports = {
     
-    //todo: create different function for creating product , bloackchain and different function for handling http
     createProduct: async (req, res) => {
         const { name, description, price, images, categoryIds, quantity } = req.body;
 
@@ -133,8 +136,8 @@ module.exports = {
             
             return res.status(201).json({
                 status: true,
-                message: productBC.blockchainStatus ? "Product created and synced" : "Product created, sync pending",
-                data: finalProduct.toJSON()
+                message: result.message,
+                data: result.data
             });
 
         } catch (error) {
@@ -163,22 +166,35 @@ module.exports = {
             const products = await findAllProducts({}, {
                 include: [
                     {
-                        model: Category,
-                        ...(categoryId && { where: { id: categoryId } }),
-                        required: !!categoryId,
-                        through: { attributes: [] }
+                    model: Category,
+                    ...(categoryId && { where: { id: categoryId } }),
+                    required: !!categoryId,
+                    through: { attributes: [] }
                     },
                     {
-                        model: ProductBlockchainStatus,
-                        where: { blockchainStatus: false } //set to false for dev purposes
+                    model: ProductBlockchainStatus,
+                    where: { blockchainStatus: false }
+                    },
+                    {
+                    //Possible to modularize
+                    model: Image,
+                    as: "Images",
+                    where: { position: 0 },   // primary image
+                    required: false,
+                    attributes: ["id", "uuid", "position", "extension"],
+                    through: { attributes: [] }
                     }
                 ],
                 distinct: true
             });
 
+            const data = products.map(p =>
+                formatProductImages(p.toJSON(), req)
+            );
+
             return res.status(200).json({
                 status: true,
-                data: products.map((product) => product.toJSON())
+                data
             });
         } catch (error) {
             return res.status(400).json({
@@ -257,8 +273,29 @@ module.exports = {
 
     getProduct: async (req, res) => {
         const { id } = req.params;
+
         try {
-            const product = await findProduct({ id });
+            const product = await findProduct(
+                { id },
+                {
+                    include: [
+                        {
+                            model: ProductBlockchainStatus,
+                            where: { blockchainStatus: true }
+                        },
+                        {
+                            model: Image,
+                            as: "Images",
+                            required: false,
+                            attributes: ["id", "uuid", "position", "extension"],
+                            through: { attributes: [] }, // hide join table
+                            order: [["position", "ASC"]]
+                        }
+                    ]
+                }
+            );
+
+
             if (!product) {
                 return res.status(404).json({
                     status: false,
@@ -277,6 +314,7 @@ module.exports = {
                 status: true,
                 data: productData
             });
+
         } catch (error) {
             return res.status(400).json({
                 status: false,
@@ -448,20 +486,23 @@ module.exports = {
             const products = await user.getProducts({
                 include: [
                     {
-                        model: Category,
-                        through: { attributes: [] }, // Exclude join table
-                        attributes: ['id', 'name', 'parentId', 'icon']
+                        model: Image,
+                        as: "Images",
+                        required: false
                     },
                     {
-                        model: ProductBlockchainStatus,
-                        attributes: ['blockchainStatus']
+                        model: Category
                     }
                 ]
             });
 
+            const data = products.map(p =>
+                formatProductImages(p.toJSON(), req)
+            );
+
             return res.status(200).json({
                 status: true,
-                data: products.map((product) => product.toJSON())
+                data
             });
         } catch (error) {
             return res.status(400).json({

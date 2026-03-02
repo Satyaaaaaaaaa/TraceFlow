@@ -1,5 +1,5 @@
 const { productPriceUnits }  = require("../../config");
-const DataTypes = require('sequelize');
+const DataTypes = require("sequelize");
 
 module.exports = {
   type: "object",
@@ -14,12 +14,18 @@ module.exports = {
       minLength: 5,
       maxLength: 255
     },
-    images: {
+    // images: {
+    //   type: "array",
+    //   minItems: 1,
+    //   items: {
+    //     type: "string",
+    //   }
+    // },
+    image_uuids: {
       type: "array",
-      minItems: 1,
       items: {
         type: "string",
-      }
+      },
     },
     price: {
       type: "number",
@@ -45,6 +51,6 @@ module.exports = {
       additionalProperties: true  
     }
   },
-  required: ["name", "description", "images", "price", "categoryIds","quantity"],
-  additionalProperties: false,
+  required: ["name", "description", "price", "categoryIds", "image_uuids", "quantity", "priceUnit", "specifications"],
+  additionalProperties: false
 };

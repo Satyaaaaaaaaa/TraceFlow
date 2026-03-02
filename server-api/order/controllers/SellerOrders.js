@@ -1,4 +1,4 @@
-const { Order, OrderItem, Product, User } = require('../../common/models/associations');
+const { Order, OrderItem, Product, User, Image } = require('../../common/models/associations');
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -47,11 +47,15 @@ const getOrders = async (req, res) => {
             where: { userID },
             include: [{
                 model: OrderItem,
+                attributes: ['quantity'],
                 include: [{
                     model: Product,
-                    attributes: ['id', 'name', 'image', 'price']
-                }],
-                attributes: ['quantity']
+                    attributes: ['id', 'name', 'price'],
+                    include: [{
+                        model: Image,
+                        attributes: ['image'] 
+                    }]
+                }]
             }]
         });
 

@@ -13,8 +13,13 @@ async function createProductWithTraceability(productId, productName, ownerId) {
     let gateway;
     try {
 
-        //Temporary line to fail blockchain.
-        //throw new Error('Failed blockchain haha');
+        //Temporary line to skip blockchain.
+        const SKIP_BLOCKCHAIN = true; // toggle this later
+
+        if (SKIP_BLOCKCHAIN) {
+            console.log("Successfully skipped blockchain enrollment");
+            return { success: true };
+        }
 
         // 2. Connect to the Fabric network
         const { gateway: gw, contract } = await getContract(ownerId);

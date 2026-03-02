@@ -2,6 +2,8 @@ const { Address, User } = require('../../common/models/associations');
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
+//todo: no ADDRESS validation, glitch -> anyone can view Anyone's adress ADDDRESS, no  create ADRESS payload
+
 exports.createAddress = async (req, res) => {
     const authHeader = req.headers.authorization;
     const token = authHeader.split(" ")[1];
