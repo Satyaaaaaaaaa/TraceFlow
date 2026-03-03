@@ -121,5 +121,5 @@ Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
 Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });
 Payment.belongsTo(Order, { foreignKey: 'orderID' });
 
-module.exports = { User, Order, Product, OrderItem, Cart, CartItem, Address, Category, Payment, Image };
+module.exports = { User,UserBlockchainStatus, Order, Product, OrderItem, Cart, CartItem, Address, Category, Payment, Image };
 

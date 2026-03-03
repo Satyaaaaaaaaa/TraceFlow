@@ -159,7 +159,7 @@ module.exports = {
     syncUserToBlockchain: async (req, res) => {
         try {
             // 1. Extract the userId from the authenticated request
-            const userId = req.user.userId;
+            const userId = req.user.id;
 
             // 2. Fetch the user from the database
             const user = await User.findByPk(userId);
