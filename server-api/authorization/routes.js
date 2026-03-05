@@ -13,6 +13,10 @@ const loginPayload = require("./schemas/loginPayload");
 // SCHEMA FOR FORGOT PASSWORD
 const forgotPasswordPayload = require("./schemas/forgotPasswordPayload");
 const checkUsernamePayload = require("./schemas/checkUsernamePayload");
+const IsAuthenticatedMiddleware = require("../common/middlewares/IsAuthenticatedMiddleware");
+
+const otpLimiter = require("./middleware/rateLimit");
+
 
 router.post(
   "/signup",
@@ -33,11 +37,24 @@ router.post(
   AuthorizationController.checkUsername
 );
 
-//Added Route for Forgot Password
+//Route for Forgot Password
 router.post(
   "/forgot-password",
-  [SchemaValidationMiddleware.verify(forgotPasswordPayload)],
-  AuthorizationController.forgotPassword
+  otpLimiter, 
+  AuthorizationController.requestResetOtp
+);
+
+// VERIFY OTP
+router.post(
+  "/verify-reset-otp",
+  AuthorizationController.verifyResetOtp
+);
+
+
+// RESET PASSWORD
+router.post(
+  "/reset-password",
+  AuthorizationController.resetPassword
 );
 
 module.exports = router;
