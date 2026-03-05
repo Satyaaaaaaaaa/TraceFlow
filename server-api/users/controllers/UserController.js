@@ -1,6 +1,7 @@
 const { User, UserBlockchainStatus } = require("../../common/models/associations")
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
+const { Sequelize } = require("sequelize");
 
 
 module.exports = {
@@ -9,7 +10,18 @@ module.exports = {
             const userId = req.user.id;
 
             const user = await User.findByPk(userId, {
-                include: [UserBlockchainStatus]
+                attributes: {
+                    include: [
+                        [Sequelize.col("UserBlockchainStatus.blockchainStatus"), "blockchainStatus"]
+                    ]
+                },
+                include: [
+                    {
+                        model: UserBlockchainStatus,
+                        attributes: []
+                    }
+                ],
+                raw: true
             });
 
             if (!user) {
