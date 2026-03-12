@@ -1,4 +1,4 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
 
 const client = require("../meili");
 
@@ -7,7 +7,6 @@ const { Category } = require("../../models/Category");
 
 require("../../models/associations");
 
-const mapProductToSearch = require("../mapper/productSearchMapper");
 
 async function syncProductsToMeili() {
   const products = await Product.findAll({

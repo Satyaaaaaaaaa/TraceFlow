@@ -49,7 +49,8 @@ app.use(cors());
 // in the database. It creates models as tables that do not exist in the DB.
 // It also creates the tables if they do not exist.
 sequelize
-  .sync({ alter : true })
+  //.sync({ alter : true })
+  .sync()
   .then(() => {
     console.log("Sequelize Initialized!");
 
@@ -71,6 +72,8 @@ sequelize
     app.listen(PORT, ADDRESS, async () => {
       console.log("Server Listening on PORT:", port);
       
+      //todo:CREATE A NEW MODULE FOR THIS- 
+
       // Auto-seed categories if empty (NEW)
       setTimeout(async () => {
         try {
