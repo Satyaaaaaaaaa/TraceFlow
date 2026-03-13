@@ -40,7 +40,7 @@ router.post(
 //Route for Forgot Password
 router.post(
   "/forgot-password",
-  otpLimiter, 
+  //otpLimiter, 
   AuthorizationController.requestResetOtp
 );
 
