@@ -134,7 +134,7 @@ exports.viewCart = async (req, res) => {
                         {
                             model: Image,
                             //as: "Images",
-                            attributes: ["id", "uuid", "position"],
+                            attributes: ["id", "uuid", "position", "extension"],
                             required: false
                         }
                         ]

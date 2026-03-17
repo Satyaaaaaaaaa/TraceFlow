@@ -1,42 +1,48 @@
-const UserModel = require("../../common/models/User");
+const { User, UserBlockchainStatus } = require("../../common/models/associations")
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
+const { Sequelize } = require("sequelize");
 
 
 module.exports = {
-    getUser: (req, res) => {
+    getUser: async (req, res) => {
+        try {
+            const userId = req.user.id;
 
-        const authHeader = req.headers.authorization;
-            console.log(authHeader)
-            const token = authHeader.split(" ")[1];
-            const decoded = jwt.verify(token, jwtSecret);  
-            // var userId = decoded.userId
-            // console.log(userId)
-        
-            const { userId } = decoded;
-            console.log(userId)
-
-        UserModel.findUser({ id: userId })
-            .then((user) => {
-                if (!user) {
-                    return res.status(404).json({
-                        status: false,
-                        error: 'User not found!'
-                    });
-                }
-                return res.status(200).json({
-                    status: true,
-                    data: user.toJSON()
-                });
-            })
-            .catch((error) => {
-                return res.status(400).json({
-                    status: false,
-                    error: error.message
-                });
+            const user = await User.findByPk(userId, {
+                attributes: {
+                    include: [
+                        [Sequelize.col("UserBlockchainStatus.blockchainStatus"), "blockchainStatus"]
+                    ]
+                },
+                include: [
+                    {
+                        model: UserBlockchainStatus,
+                        attributes: []
+                    }
+                ],
+                raw: true
             });
-    },
 
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    error: "User not found"
+                });
+            }
+
+            return res.status(200).json({
+                status: true,
+                data: user
+            });
+
+        } catch (error) {
+            return res.status(400).json({
+                status: false,
+                error: error.message
+            });
+        }
+    },
     updateUser: (req, res) => {
         const {
             user: { userId },

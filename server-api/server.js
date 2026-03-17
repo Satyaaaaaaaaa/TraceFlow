@@ -49,7 +49,7 @@ app.use(cors());
 // in the database. It creates models as tables that do not exist in the DB.
 // It also creates the tables if they do not exist.
 sequelize
-  .sync()
+  .sync({ alter : true })
   .then(() => {
     console.log("Sequelize Initialized!");
 

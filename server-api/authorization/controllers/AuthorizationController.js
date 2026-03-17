@@ -11,6 +11,16 @@ const AuthService = require("../services/AuthService")
 
 const jwtSecret = process.env.JWT_SECRET
 
+const bcrypt = require("bcrypt");
+
+const {
+  createResetOTP,
+  verifyResetOTP,
+  clearOTP
+} = require("../services/OtpService.js");
+
+const  { emailQueue }   = require("../queue/emailQueue.js");
+
 //todo jwt sign with username, usrId and role aswell
 // const generateAccessToken = (username, userId) => {
 //     return jwt.sign({ 
@@ -159,7 +169,7 @@ module.exports = {
     syncUserToBlockchain: async (req, res) => {
         try {
             // 1. Extract the userId from the authenticated request
-            const userId = req.user.userId;
+            const userId = req.user.id;
 
             // 2. Fetch the user from the database
             const user = await User.findByPk(userId);
@@ -228,58 +238,121 @@ module.exports = {
     },
     
     //HANDLES FORGOT PASSWORD REQUEST
-    forgotPassword: async (req, res) => {
+    requestResetOtp: async (req, res) => {
+
         try {
-            const { username, otp, newPassword, newConfirmPassword } = req.body;
 
-            // Hardcoded OTP verification
-            const HARDCODED_OTP = '123456';
-            
-            if (otp !== HARDCODED_OTP) {
-                return res.status(400).json({
-                    status: false,
-                    error: 'Invalid OTP'
-                });
-            }
+            //Recieve email from client
+            const { email } = req.body;
 
-            // Check if passwords match
-            if (newPassword !== newConfirmPassword) {
-                return res.status(400).json({
-                    status: false,
-                    error: 'Passwords do not match'
-                });
-            }
-
-            // Find user
-            const user = await User.findOne({ where: { username: username } });
+            const user = await User.findOne({ where: { email } });
 
             if (!user) {
                 return res.status(404).json({
                     status: false,
-                    error: 'User not found'
+                    message: "User not found"
                 });
             }
 
-            // Encrypt new password
-            const encryptedPassword = encryptPassword(newPassword);
+            //generate OTP and hashed otp(hashed otp set to redis) and returen the normal otp
+            const otp = await createResetOTP(email);
 
-            // Update password in database
-            await User.update(
-                { password: encryptedPassword },
-                { where: { username: username } }
+            //Add to queue to avoid overloading the emailier(ex - nodemailer) and send the otp via mail
+            await emailQueue.add("sendOtp", {
+                email,
+                otp
+            });
+
+            console.log("otp", otp)
+
+            res.json({
+                status: true,
+                message: "OTP sent"
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+                status: false,
+                error: error.message
+            });
+
+        }
+    },
+
+    verifyResetOtp: async (req, res) => {
+
+        try {
+
+            //Get email and otp(from gmail) from client
+            const { email, otp } = req.body;
+
+            if (!email || !otp) {
+                return res.status(400).json({
+                    status: false,
+                    error: "Email and OTP are required"
+                });
+            }
+
+            //verify from redis
+            await verifyResetOTP(email, otp);
+
+            //clear OTP and generate the resetTokent(using email) to avoiding otp reuse attacks.
+            await clearOTP(email);
+
+            const resetToken = jwt.sign(
+                { email },
+                process.env.JWT_SECRET,
+                { expiresIn: "10m" }
             );
 
             return res.status(200).json({
                 status: true,
-                message: 'Password reset successful'
+                message: "OTP verified successfully",
+                resetToken
             });
 
         } catch (error) {
-            console.error('Password reset error:', error);
-            return res.status(500).json({
+
+            return res.status(400).json({
                 status: false,
-                error: 'Server error'
+                error: error.message
             });
+
         }
-    }
+    },
+
+    resetPassword: async (req, res) => {
+
+        try {
+
+            //Take resetToken and new password from frontend
+            const { resetToken, newPassword } = req.body;
+
+            //extract email  from reset token
+            const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+
+            //hash the password from the tokenservice
+            const hashedPassword = TokenService.encryptPassword(newPassword);
+
+            //updtae the databse
+            await User.update(
+                { password: hashedPassword },
+                { where: { email: decoded.email } }
+            );
+
+            return res.json({
+                status: true,
+                message: "Password reset successful"
+            });
+
+        } catch (error) {
+
+            return res.status(400).json({
+                status: false,
+                error: "Invalid or expired reset token"
+            });
+
+        }
+    },
 };
