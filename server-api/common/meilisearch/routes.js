@@ -5,4 +5,8 @@ router.get("/",
     SearchController.searchProducts
 );
 
+router.get("/suggestions",
+    SearchController.suggestProducts
+);
+
 module.exports = router;
