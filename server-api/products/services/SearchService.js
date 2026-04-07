@@ -1,5 +1,5 @@
-const searchClient = require("../../common/meilisearch/meili");
-const mapProductToSearch = require("../../common/meilisearch/mapper/productSearchMapper");
+const searchClient = require("../../infrastructure/meilisearch/meili");
+const mapProductToSearch = require("../../infrastructure/meilisearch/mapper/productSearchMapper");
 
 async function indexProduct(product) {
   await searchClient

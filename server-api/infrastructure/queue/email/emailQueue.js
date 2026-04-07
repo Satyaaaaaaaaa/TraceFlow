@@ -1,5 +1,5 @@
 const { Queue } = require("bullmq");
-const redis = require("../config/redis");
+const redis = require("../../cache/redis/redis");
 
 const EMAIL_QUEUE_NAME = "emailQueue";
 

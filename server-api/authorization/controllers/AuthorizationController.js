@@ -19,7 +19,7 @@ const {
   clearOTP
 } = require("../services/OtpService.js");
 
-const  { emailQueue }   = require("../queue/emailQueue.js");
+const  { emailQueue }   = require("../../infrastructure/queue/email/emailQueue.js");
 
 //todo jwt sign with username, usrId and role aswell
 // const generateAccessToken = (username, userId) => {
@@ -281,10 +281,7 @@ module.exports = {
     },
 
     verifyResetOtp: async (req, res) => {
-
         try {
-
-            //Get email and otp(from gmail) from client
             const { email, otp } = req.body;
 
             if (!email || !otp) {
@@ -294,11 +291,10 @@ module.exports = {
                 });
             }
 
-            //verify from redis
             await verifyResetOTP(email, otp);
 
-            //clear OTP and generate the resetTokent(using email) to avoiding otp reuse attacks.
-            await clearOTP(email);
+            //(already done inside service)
+            // await clearOTP(email);
 
             const resetToken = jwt.sign(
                 { email },
@@ -313,12 +309,12 @@ module.exports = {
             });
 
         } catch (error) {
+            console.error("VERIFY OTP ERROR:", error); // 🔥 add this
 
             return res.status(400).json({
                 status: false,
                 error: error.message
             });
-
         }
     },
 

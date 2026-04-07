@@ -24,7 +24,7 @@ const OrderRoutes = require("./order/routes");
 const CartRoutes = require("./cart/routes");
 //const { Cart } = require("./common/models/Cart");
 const CategoryRoutes  = require("./Categories/routes") //server-api/Categories/routes.js
-const SearchRoutes = require("./common/meilisearch/routes")
+const SearchRoutes = require("./infrastructure/meilisearch/routes")
 const AssetRoutes = require("./asset/routes")
 // const traceflowRoutes = require("./traceflowRouters/routes");
 

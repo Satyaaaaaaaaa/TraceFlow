@@ -1,7 +1,6 @@
-// workers/email.worker.js
 import { Worker } from "bullmq";
 import nodemailer from "nodemailer";
-import redis from "../config/redis.js";
+import redis from "../../cache/redis/redis";
 
 // const transporter = nodemailer.createTransport({
 //     service: "gmail",

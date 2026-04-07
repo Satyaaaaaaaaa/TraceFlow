@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const redis = require("../config/redis");
+const  cacheService  = require("../../infrastructure/cache/redis/cacheService");
 const { generateOTP } = require("../utils/otp");
 
 // Move to .env later
@@ -23,8 +23,8 @@ async function createResetOTP(email) {
     const otpKey = `otp:reset:${email}`;
     const attemptKey = `otp:attempts:${email}`;
 
-    await redis.set(otpKey, hashedOtp, "EX", OTP_EXPIRY);
-    await redis.set(attemptKey, 0, "EX", OTP_EXPIRY);
+    await cacheService.set(otpKey, hashedOtp, OTP_EXPIRY);
+    await cacheService.set(attemptKey, 0, OTP_EXPIRY);
 
     return otp;
 }
@@ -32,51 +32,37 @@ async function createResetOTP(email) {
 
 // VERIFY OTP
 async function verifyResetOTP(email, otp) {
-
-    //structure the keys
-    //otp:reset:abc@gmail.com -> [hashedOtp] 600seconds
-    //otp:attempts:abc@gmail.com -> [0] 600seconds
     const otpKey = `otp:reset:${email}`;
     const attemptKey = `otp:attempts:${email}`;
 
-    //extract [hashedOtp] from the key structred
-    const hashedOtp = await redis.get(otpKey);
+    const hashedOtp = await cacheService.get(otpKey);
 
-    //if expired
     if (!hashedOtp) {
         throw new Error("OTP expired");
     }
 
-    //extract the number of attempts
-    const attempts = await redis.get(attemptKey);
+    const attempts = (await cacheService.get(attemptKey)) || 0;
 
-    //if attempts
     if (attempts >= MAX_ATTEMPTS) {
         throw new Error("Too many attempts");
     }
 
-    //Match the otps
     const valid = await bcrypt.compare(otp, hashedOtp);
 
     if (!valid) {
-        await redis.incr(attemptKey);
+        await cacheService.set(attemptKey, attempts + 1, 600);
         throw new Error("Invalid OTP");
     }
+
+    // ✅ success → clear everything
+    await cacheService.del(otpKey);
+    await cacheService.del(attemptKey);
 
     return true;
 }
 
 
-// CLEAR OTP
-async function clearOTP(email) {
-
-    await redis.del(`otp:reset:${email}`);
-    await redis.del(`otp:attempts:${email}`);
-}
-
-
 module.exports = {
     createResetOTP,
-    verifyResetOTP,
-    clearOTP
+    verifyResetOTP
 };
