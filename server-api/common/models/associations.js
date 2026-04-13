@@ -75,6 +75,7 @@ const { ProductBlockchainStatus } = require("./ProductBlockchainStatus");
 const { Image } = require("./Image")
 const { Payment } = require("./Payment");
 const sequelize = require("sequelize");
+const { Review } = require("./Review")
 
 // Associations
 User.hasMany(Order, { foreignKey: 'userID' });
@@ -121,5 +122,11 @@ Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
 Order.hasMany(Payment, { foreignKey: 'orderID', onDelete: 'CASCADE' });
 Payment.belongsTo(Order, { foreignKey: 'orderID' });
 
-module.exports = { User,UserBlockchainStatus, Order, Product, OrderItem, Cart, CartItem, Address, Category, Payment, Image };
+User.hasMany(Review, { foreignKey: "userId" });
+Review.belongsTo(User, { foreignKey: "userId" });
+
+Product.hasMany(Review, { foreignKey: "productId" });
+Review.belongsTo(Product, { foreignKey: "productId" });
+
+module.exports = { User,UserBlockchainStatus, Order, Product, OrderItem, Cart, CartItem, Address, Category, Payment, Image, Review };
 

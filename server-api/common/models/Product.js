@@ -41,8 +41,19 @@ const ProductModel = sequelize.define("Product", {
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       unique: true,
+    },
+    averageRating: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0
+    },
+
+    totalReviews: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
     }
-  });
+    });
 
 module.exports = {
   createProduct: (product) => {

@@ -27,10 +27,14 @@ module.exports = {
 
     createOrder: async (req, res) => {
         const authHeader = req.headers.authorization;
-        if (!authHeader) return res.status(401).json({ message: "Authorization header missing" });
+
+        if (!authHeader) {
+            return res.status(401).json({ message: "Authorization header missing" });
+        }
 
         const token = authHeader.split(" ")[1];
         let decoded;
+
         try {
             decoded = jwt.verify(token, jwtSecret);
         } catch (err) {
@@ -38,133 +42,125 @@ module.exports = {
         }
 
         const userID = decoded.userId;
-        //console.log("User ID:", userID);
-        //console.log("Request Body:", req.body);
+        const { products, addressID } = req.body;
 
-        const { products, addressID, usersID } = req.body;
-
-        if (!products || !addressID || !userID || !Array.isArray(products) || products.length === 0) {
+        // ✅ Validation
+        if (!products || !Array.isArray(products) || products.length === 0 || !addressID) {
             return res.status(400).json({
-                status:false, 
-                message: "Invalid or missing 'products' array or 'usersID' or 'addressID'" });
+                status: false,
+                message: "Invalid or missing products or addressID"
+            });
         }
-        //if (!totalAmount || !status || !addressID) {
-            //return res.status(400).json({ message: "Missing one of: totalAmount, status, addressID" });
-        //}
-        const transaction = await sequelize.transaction();
-        try {
 
-            // ✅ 1. VALIDATE ADDRESS BELONGS TO USER
+        const transaction = await sequelize.transaction();
+
+        try {
+            // ✅ 1. Validate address
             const address = await Address.findOne({
                 where: { id: addressID, userID },
                 transaction
             });
 
             if (!address) {
-                throw new Error('Address not found or does not belong to user');
+                throw new Error("Address not found or does not belong to user");
             }
 
-            // ✅ 2. FETCH PRODUCTS FROM DATABASE
+            // ✅ 2. Fetch products
             const productIDs = products.map(p => p.productID);
+
             const dbProducts = await Product.findAll({
                 where: { id: productIDs },
                 transaction
             });
 
-            // ✅ 3. VALIDATE ALL PRODUCTS EXIST
             if (dbProducts.length !== productIDs.length) {
-                throw new Error('One or more products not found');
+                throw new Error("One or more products not found");
             }
 
-            // ✅ 4. BUILD ORDER ITEMS DATA WITH PRICES FROM DATABASE
+            // ✅ 3. Calculate total + prepare order items
             let totalAmount = 0;
-            let orderItemsData = [];
+            const orderItemsData = [];
 
             for (const item of products) {
                 const product = dbProducts.find(p => p.id === item.productID);
-                if (!product) { 
-                    throw new Error(`Product with ID ${item.productID} not found`); 
+
+                if (!product) {
+                    throw new Error(`Product ${item.productID} not found`);
                 }
+
                 const itemTotal = parseFloat(product.price) * item.quantity;
                 totalAmount += itemTotal;
-                
+
                 orderItemsData.push({
                     productID: item.productID,
                     quantity: item.quantity,
+                    price: product.price,   // ✅ important
                     priceUnit: "INR"
-                }); 
+                });
             }
 
-            // ✅ 5. CREATE ORDER NUMBER
-            const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            // ✅ 4. Create order number
+            const orderNumber = `ORD-${Date.now()}-${Math.random()
+                .toString(36)
+                .substr(2, 6)
+                .toUpperCase()}`;
 
-            // ✅ 6. CREATE ORDER
-            const order  = await Order.create({ 
+            // ✅ 5. Create order
+            const order = await Order.create({
                 orderNumber,
-                userID, 
-                totalAmount, 
-                addressID, 
-                status: "Pending" 
+                userID,
+                totalAmount,
+                addressID,
+                status: "Pending"
             }, { transaction });
 
-            const orderID = order.id;
-
-            // ✅ 7. CREATE ORDER ITEMS
+            // ✅ 6. Create order items
             await Promise.all(
                 orderItemsData.map(item =>
                     OrderItem.create({
-                        orderID,
+                        orderID: order.id,
                         ...item
                     }, { transaction })
                 )
             );
-            
-            // ✅ 8. CREATE INITIAL PAYMENT RECORD
-            const payment = await Payment.create({
-                orderID: order.id,
-                amount: totalAmount,
-                currency: 'INR',
-                status: 'Pending',
-                paymentProvider: 'Google Pay' //FOR TESTING PURPOSES WILL CHANGE LATER ACCORDINGLY  
-            }, { transaction });
 
-            // ✅ 9. CLEAR CART
-            const cart = await Cart.findOne({ 
+            // ✅ 7. Clear cart
+            const cart = await Cart.findOne({
                 where: { userId: userID },
-                transaction 
+                transaction
             });
 
             if (cart) {
-                await CartItem.destroy({ 
+                await CartItem.destroy({
                     where: { cartID: cart.id },
-                    transaction 
+                    transaction
                 });
             }
 
-            // ✅ 10. COMMIT TRANSACTION
+            // ✅ 8. Commit transaction
             await transaction.commit();
-            
+
             return res.status(201).json({
                 status: true,
-                message: "Order created successfully. Please complete payment.",
+                message: "Order created successfully",
                 order: {
                     id: order.id,
                     orderNumber: order.orderNumber,
                     totalAmount: order.totalAmount,
                     status: order.status
                 },
-                orderItems: orderItems,
-                paymentID: payment.id,  
-                nextStep: 'INITIATE_PAYMENT'
+                orderItems: orderItemsData
             });
-            
+
         } catch (error) {
-            console.error("Order creation failed:", error);
             await transaction.rollback();
+
+            console.error("Order creation failed:", error);
+
             return res.status(400).json({
-                message: "An error occurred while creating an order",
-                errorMessage: error.message,
-                stack: error.stack
+                status: false,
+                message: "Order creation failed",
+                error: error.message
             });
         }
     },
