@@ -6,8 +6,17 @@ const isAuthenticatedMiddleware = require("../common/middlewares/IsAuthenticated
 router.post(
     "/", 
     isAuthenticatedMiddleware.check,
-    ReviewController.addOrUpdateReview);
+    ReviewController.addOrUpdateReview
+);
 
-router.get("/:productId", ReviewController.getReviews);
+router.get("/:productId", 
+    ReviewController.getReviews
+);
+
+router.get(
+    "/:productId/can-review",
+    isAuthenticatedMiddleware.check,
+    ReviewController.canReview
+);
 
 module.exports = router;

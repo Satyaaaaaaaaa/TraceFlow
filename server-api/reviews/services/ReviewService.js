@@ -4,26 +4,32 @@ async function addOrUpdateReview(
 ) {
   const { Review, Product, OrderItem, Order } = models;
 
-  // ✅ 1. Validate purchase
-  const hasBought = await Order.findOne({
-    where: {
-      userID: userId,
-      status: "Delivered"
-    },
-    include: [
-      {
-        model: OrderItem,
-        required: true,
-        where: { productID: productId }
-      }
-    ]
-  });
+  //1. Validate purchase
+  // const hasBought = await Order.findOne({
+  //   where: {
+  //     userID: userId,
+  //     status: "Delivered"
+  //   },
+  //   include: [
+  //     {
+  //       model: OrderItem,
+  //       required: true,
+  //       where: { productID: productId }
+  //     }
+  //   ]
+  // });
+
+  const hasBought = await hasUserPurchasedProduct(
+    userId,
+    productId,
+    models
+  );
 
   if (!hasBought) {
     throw new Error("You can only review purchased products");
   }
 
-  // ✅ 2. Get product
+  //2. Get product
   const product = await Product.findByPk(productId);
   if (!product) throw new Error("Product not found");
 
@@ -31,9 +37,7 @@ async function addOrUpdateReview(
     where: { userId, productId }
   });
 
-  // =========================
-  // 🔥 UPDATE REVIEW
-  // =========================
+  // UPDATE REVIEW
   if (existing) {
     const oldRating = existing.rating;
 
@@ -51,7 +55,7 @@ async function addOrUpdateReview(
     let newAvg =
       (product.averageRating * total - oldRating + rating) / total;
 
-    // ✅ Safety
+    //Safety
     if (!isFinite(newAvg)) {
       throw new Error("Invalid average calculation");
     }
@@ -63,9 +67,7 @@ async function addOrUpdateReview(
     });
 
   } 
-  // =========================
-  // 🔥 CREATE REVIEW
-  // =========================
+  //CREATE REVIEW
   else {
     await Review.create({
       userId,
@@ -82,7 +84,7 @@ async function addOrUpdateReview(
         ? rating
         : (product.averageRating * total + rating) / newTotal;
 
-    // ✅ Safety
+    //Safety
     if (!isFinite(newAvg)) {
       throw new Error("Invalid average calculation");
     }
@@ -110,7 +112,28 @@ async function getReviews(productId, query, models) {
   });
 }
 
+async function hasUserPurchasedProduct(userId, productId, models) {
+  const { Order, OrderItem } = models;
+
+  const order = await Order.findOne({
+    where: {
+      userID: userId,
+      status: "Delivered"
+    },
+    include: [
+      {
+        model: OrderItem,
+        required: true,
+        where: { productID: productId }
+      }
+    ]
+  });
+
+  return !!order; // returns true/false
+}
+
 module.exports = {
   addOrUpdateReview,
-  getReviews
+  getReviews,
+  hasUserPurchasedProduct
 };

@@ -33,7 +33,30 @@ async function getReviews(req, res) {
   }
 }
 
+async function canReview(req, res) {
+  try {
+    const { productId } = req.params;
+    const userId = req.user.id;
+
+    const hasBought = await ReviewService.hasUserPurchasedProduct(
+      userId,
+      productId,
+      models
+    );
+
+    return res.json({
+      canReview: hasBought
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      error: err.message
+    });
+  }
+}
+
 module.exports = {
   addOrUpdateReview,
-  getReviews
+  getReviews,
+  canReview
 };
