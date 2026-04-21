@@ -100,6 +100,7 @@ async function addOrUpdateReview(
   return { success: true };
 }
 
+//yet to implement the frontend of this
 async function getReviews(productId, query, models) {
   const { Review } = models;
   const { page = 1, limit = 10 } = query;

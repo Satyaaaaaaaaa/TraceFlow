@@ -1,11 +1,12 @@
 const OrderController = require('./controllers/OrderController');
 const SellerOrders = require('./controllers/SellerOrders');
+const isAuthenticatedMiddleware = require("../common/middlewares/IsAuthenticatedMiddleware")
 
 const router = require('express').Router();
 
 router.get(
     "/",
-    // isAuthenticatedMiddleware.check,
+    isAuthenticatedMiddleware.check,
     OrderController.getOrders
 )
 

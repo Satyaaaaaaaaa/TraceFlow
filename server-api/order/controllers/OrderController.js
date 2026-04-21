@@ -8,6 +8,9 @@ const { Op } = require("sequelize");
 
 const { formatProductImages } = require("../../common/utils/formatProductImages");
 
+const OrderService = require("../services/OrderService");
+const models = require("../../common/models/associations");
+
 module.exports = {
     // createOrderItem: async (req, res) => {
     //     const { productID, quantity, price, orderID } = req.body;
@@ -317,50 +320,17 @@ module.exports = {
     },
 
     getOrders: async (req, res) => {
-        const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({
-                status: false,
-                message: "Authorization header missing or malformed"
-            });
-        }
-
-        const token = authHeader.split(" ")[1];
-
-        let decoded;
-        try {
-            decoded = jwt.verify(token, jwtSecret);
-        } catch (err) {
-            return res.status(401).json({
-                status: false,
-                message: "Invalid or expired token"
-            });
-        }
-
-        const userID = decoded.userId;
-        console.log("User ID:", userID);
+        const userID = req.user.id;
 
         try {
-            const orders = await Order.findAll({
-                where: { userID },
-                include: [
-                    {
-                        model: OrderItem,
-                        attributes: ['quantity'],
-                        include: [{
-                            model: Product,
-                            attributes: ['id', 'name', 'image', 'price']
-                        }]
-                    }
-                ]
-            });
-        
+            const orders = await OrderService.getOrdersByUser(userID, models);
+
             return res.status(200).json({
                 status: true,
-                data: orders.map(order => order.toJSON())
+                data: orders
             });
-        
+
         } catch (error) {
             return res.status(400).json({
                 status: false,
@@ -547,5 +517,7 @@ getOrder: async (req, res) => {
         });
     }
 }
+
+
 
 };
